@@ -1,0 +1,1872 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="Khutbah Translator">
+    <meta name="application-name" content="Khutbah Translator">
+    <meta name="theme-color" content="#1e5936">
+    <title>Khutbah Live Translator - For Muslims Worldwide</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Inter:wght@400;600;700&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-green: #1e5936;
+            --secondary-green: #2a7f4e;
+            --gold: #d4af37;
+            --light-gold: #f4e4c1;
+            --cream: #faf8f3;
+            --dark-text: #1a1a1a;
+            --font-size: 16px;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #1e5936 0%, #2a7f4e 50%, #3a9960 100%);
+            min-height: 100vh;
+            position: relative;
+            overflow-y: auto;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                repeating-linear-gradient(45deg, transparent, transparent 35px, rgba(212, 175, 55, 0.05) 35px, rgba(212, 175, 55, 0.05) 70px),
+                repeating-linear-gradient(-45deg, transparent, transparent 35px, rgba(212, 175, 55, 0.03) 35px, rgba(212, 175, 55, 0.03) 70px);
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 8px;
+            position: relative;
+            z-index: 2;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary-green), var(--secondary-green));
+            color: white;
+            padding: clamp(4px, 0.5vw, 6px);
+            text-align: center;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+            position: relative;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+
+        .header::before {
+            content: '☪';
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            font-size: clamp(15px, 3vw, 25px);
+            opacity: 0.06;
+            transform: rotate(-15deg);
+        }
+
+        .header::after {
+            content: '☪';
+            position: absolute;
+            bottom: -8px;
+            left: -8px;
+            font-size: clamp(15px, 3vw, 25px);
+            opacity: 0.06;
+            transform: rotate(15deg);
+        }
+
+        .header h1 {
+            font-family: 'Amiri', serif;
+            font-size: clamp(11px, 2vw, 14px);
+            font-weight: 700;
+            margin: 0;
+            text-shadow: 0.5px 0.5px 1px rgba(0, 0, 0, 0.2);
+            line-height: 1.1;
+        }
+
+        .header p {
+            font-size: clamp(7px, 0.8vw, 9px);
+            opacity: 0.8;
+            font-style: italic;
+            display: none;
+        }
+
+        .nav-tabs {
+            display: flex;
+            background: var(--cream);
+            border-radius: 0;
+            overflow-x: auto;
+            overflow-y: hidden;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            flex-shrink: 0;
+            gap: 0;
+        }
+
+        .nav-tab {
+            flex: 1;
+            min-width: 100px;
+            padding: clamp(10px, 2vw, 15px) clamp(8px, 1.5vw, 15px);
+            background: none;
+            border: none;
+            font-size: clamp(12px, 2vw, 14px);
+            font-weight: 600;
+            color: var(--primary-green);
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            white-space: nowrap;
+        }
+
+        .nav-tab:hover {
+            background: rgba(30, 89, 54, 0.1);
+        }
+
+        .nav-tab.active {
+            background: var(--primary-green);
+            color: white;
+        }
+
+        .content-area {
+            background: white;
+            border-radius: 0 0 15px 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .tab-content {
+            display: none;
+            padding: clamp(12px, 2vw, 20px);
+            height: 100%;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .tab-content.active {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .controls {
+            padding: clamp(6px, 1vw, 10px);
+            background: linear-gradient(to bottom, var(--cream), white);
+            border-bottom: 2px solid var(--light-gold);
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            gap: clamp(6px, 1vw, 10px);
+            max-height: 16vh;
+            overflow-y: auto;
+        }
+
+        .lang-row {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            gap: clamp(10px, 2vw, 15px);
+            align-items: end;
+            margin: 0;
+        }
+
+        .lang-group {
+            display: flex;
+            flex-direction: column;
+            gap: clamp(5px, 1vw, 8px);
+        }
+
+        .lang-label {
+            font-size: clamp(9px, 1.5vw, 11px);
+            font-weight: 600;
+            color: var(--primary-green);
+            display: flex;
+            align-items: center;
+            gap: 3px;
+        }
+
+        .lang-label::before {
+            content: '◈';
+            color: var(--gold);
+        }
+
+        .lang-select {
+            height: clamp(28px, 4vw, 36px);
+            padding: 0 clamp(8px, 1.5vw, 10px);
+            border: 2px solid var(--light-gold);
+            border-radius: 6px;
+            font-size: clamp(10px, 1.5vw, 12px);
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: white;
+        }
+
+        .lang-select:focus {
+            outline: none;
+            border-color: var(--gold);
+            box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.2);
+        }
+
+        .mic-button-container {
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+        }
+
+        .status {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: clamp(6px, 1vw, 8px) clamp(8px, 1.5vw, 12px);
+            background: linear-gradient(90deg, rgba(212, 175, 55, 0.1), rgba(212, 175, 55, 0.05));
+            border-radius: 6px;
+            border: 1px solid var(--light-gold);
+            font-size: clamp(10px, 1.5vw, 12px);
+            gap: 6px;
+            flex-shrink: 0;
+            margin: 0;
+        }
+
+        .status-info {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: #999;
+            border-radius: 50%;
+            transition: all 0.3s;
+            flex-shrink: 0;
+        }
+
+        .status-dot.active {
+            background: var(--gold);
+            animation: pulse 2s infinite;
+        }
+
+        .translated-text-wrapper {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+            gap: clamp(8px, 1vw, 12px);
+        }
+
+        .translated-text-label {
+            font-size: clamp(12px, 2vw, 14px);
+            font-weight: 600;
+            color: var(--primary-green);
+            flex-shrink: 0;
+        }
+
+        #translatedText {
+            flex: 1;
+            overflow-y: auto;
+            border: 2px solid var(--light-gold);
+            border-radius: 8px;
+            padding: clamp(8px, 1.5vw, 12px);
+            background: white;
+            display: flex;
+            flex-direction: column;
+            gap: clamp(6px, 1vw, 10px);
+            min-height: 0;
+        }
+
+        @keyframes pulse {
+            0%, 100% { 
+                opacity: 1;
+                transform: scale(1);
+            }
+            50% { 
+                opacity: 0.7;
+                transform: scale(1.3);
+            }
+        }
+
+        .status-text {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--primary-green);
+        }
+
+        .mic-control {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .mic-button {
+            width: clamp(40px, 8vw, 50px);
+            height: clamp(40px, 8vw, 50px);
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            font-size: clamp(18px, 3vw, 24px);
+            transition: all 0.3s;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+            flex-shrink: 0;
+        }
+        }
+
+        .mic-button.start {
+            background: linear-gradient(135deg, var(--primary-green), var(--secondary-green));
+        }
+
+        .mic-button.start:hover {
+            transform: scale(1.1);
+            box-shadow: 0 8px 20px rgba(30, 89, 54, 0.4);
+        }
+
+        .mic-button.stop {
+            background: linear-gradient(135deg, #dc2626, #ef4444);
+        }
+
+        .mic-button.stop:hover {
+            transform: scale(1.1);
+            box-shadow: 0 8px 20px rgba(220, 38, 38, 0.4);
+        }
+
+        .mic-button:active {
+            transform: scale(0.95);
+        }
+
+        .audio-visualizer {
+            height: clamp(40px, 8vw, 60px);
+            background: var(--cream);
+            border-radius: 10px;
+            margin: clamp(10px, 2vw, 15px) 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 3px;
+            padding: 10px;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+
+        .audio-bar {
+            width: 4px;
+            height: 10px;
+            background: var(--primary-green);
+            border-radius: 2px;
+            transition: height 0.1s;
+        }
+
+        .translation-area {
+            padding: clamp(12px, 2vw, 20px);
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+        }
+
+        .translation-panel {
+            flex: 1;
+            border: 2px solid var(--light-gold);
+            border-radius: 15px;
+            padding: clamp(10px, 2vw, 15px);
+            background: linear-gradient(to bottom, white, var(--cream));
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+        }
+
+        .panel-controls {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            display: flex;
+            gap: 10px;
+            z-index: 10;
+        }
+
+        .font-size-control {
+            display: flex;
+            align-items: center;
+            background: white;
+            border-radius: 20px;
+            padding: 5px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .font-btn {
+            width: clamp(24px, 5vw, 30px);
+            height: clamp(24px, 5vw, 30px);
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-size: clamp(14px, 3vw, 18px);
+            color: var(--primary-green);
+            transition: all 0.3s;
+        }
+
+        .font-btn:hover {
+            background: var(--light-gold);
+            border-radius: 50%;
+        }
+
+        .font-size-value {
+            width: 40px;
+            text-align: center;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--primary-green);
+        }
+
+        .donation-section {
+            background: linear-gradient(135deg, rgba(212, 175, 55, 0.15), rgba(212, 175, 55, 0.05));
+            padding: clamp(20px, 4vw, 30px);
+            border-radius: 20px;
+            border: 3px solid var(--gold);
+            margin-top: clamp(15px, 2vw, 30px);
+            text-align: center;
+        }
+
+        .donation-title {
+            font-family: 'Amiri', serif;
+            font-size: clamp(20px, 5vw, 28px);
+            color: var(--primary-green);
+            margin-bottom: clamp(10px, 2vw, 15px);
+        }
+
+        .donation-subtitle {
+            color: #666;
+            font-size: clamp(12px, 2vw, 14px);
+            margin-bottom: clamp(15px, 2vw, 25px);
+        }
+
+        .button-group {
+            display: flex;
+            gap: clamp(8px, 2vw, 12px);
+            flex-wrap: wrap;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .btn {
+            padding: clamp(6px, 1vw, 8px) clamp(10px, 2vw, 14px);
+            background: linear-gradient(135deg, var(--primary-green), var(--secondary-green));
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: clamp(9px, 1.2vw, 11px);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            white-space: nowrap;
+            flex: 1;
+            min-width: clamp(60px, 15vw, 90px);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn.secondary {
+            background: linear-gradient(135deg, var(--light-gold), var(--gold));
+            color: var(--dark-text);
+        }
+
+        .btn.secondary:hover {
+            box-shadow: 0 6px 20px rgba(212, 175, 55, 0.3);
+        }
+
+        .btn.danger {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+        }
+
+        .btn.small {
+            padding: clamp(8px, 1.5vw, 10px) clamp(10px, 2vw, 15px);
+            font-size: clamp(11px, 1.5vw, 12px);
+            min-width: auto;
+        }
+            font-style: italic;
+        }
+
+        .donation-methods {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .donation-method {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            border: 2px solid var(--light-gold);
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            color: var(--primary-green);
+            display: block;
+        }
+
+        .donation-method:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(212, 175, 55, 0.3);
+            border-color: var(--gold);
+        }
+
+        .donation-method-icon {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .donation-method-name {
+            font-weight: 600;
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+
+        .donation-method-info {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .panel-header {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--primary-green);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--light-gold);
+        }
+
+        .text-content {
+            height: calc(100% - 80px);
+            overflow-y: auto;
+            font-size: var(--font-size);
+            line-height: 1.8;
+            color: var(--dark-text);
+            padding-right: 10px;
+            scroll-behavior: smooth;
+        }
+
+        .text-content::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .text-content::-webkit-scrollbar-track {
+            background: var(--cream);
+            border-radius: 4px;
+        }
+
+        .text-content::-webkit-scrollbar-thumb {
+            background: var(--gold);
+            border-radius: 4px;
+        }
+
+        .sentence {
+            margin-bottom: 20px;
+            padding: 10px;
+            background: rgba(244, 228, 193, 0.2);
+            border-radius: 8px;
+            border-left: 3px solid var(--gold);
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .sentence:last-child {
+            background: rgba(212, 175, 55, 0.15);
+        }
+
+        .rtl {
+            direction: rtl;
+            text-align: right;
+            font-family: 'Amiri', serif;
+            border-left: none;
+            border-right: 3px solid var(--gold);
+        }
+
+        .empty {
+            color: #999;
+            font-style: italic;
+            text-align: center;
+            margin-top: 50px;
+        }
+
+        .actions {
+            padding: clamp(12px, 2vw, 20px);
+            display: flex;
+            gap: clamp(8px, 2vw, 15px);
+            justify-content: center;
+            flex-wrap: wrap;
+            flex-shrink: 0;
+        }
+
+        .btn {
+            padding: clamp(10px, 2vw, 12px) clamp(12px, 3vw, 24px);
+            font-size: clamp(12px, 2vw, 15px);
+            font-weight: 600;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            white-space: nowrap;
+            flex: 1;
+            min-width: 80px;
+            justify-content: center;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-green), var(--secondary-green));
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(30, 89, 54, 0.3);
+        }
+
+        .btn-secondary {
+            background: var(--gold);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #c49f30;
+            transform: translateY(-2px);
+        }
+
+        .settings-content {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .setting-group {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: var(--cream);
+            border-radius: 10px;
+            border: 1px solid var(--light-gold);
+        }
+
+        .setting-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--primary-green);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .about-content {
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .about-content h2 {
+            font-family: 'Amiri', serif;
+            font-size: 32px;
+            color: var(--primary-green);
+            margin-bottom: 20px;
+        }
+
+        .about-content p {
+            font-size: 16px;
+            line-height: 1.8;
+            color: #555;
+            margin-bottom: 20px;
+        }
+
+        .developer-info {
+            margin-top: 30px;
+            padding: 25px;
+            background: linear-gradient(135deg, var(--cream), white);
+            border-radius: 15px;
+            border: 2px solid var(--light-gold);
+        }
+
+        .developer-info h3 {
+            font-size: 20px;
+            color: var(--primary-green);
+            margin-bottom: 15px;
+        }
+
+        .bismillah {
+            font-family: 'Amiri', serif;
+            font-size: 24px;
+            color: var(--gold);
+            margin: 20px 0;
+        }
+
+        .visitor-info {
+            padding: 15px 20px;
+            text-align: center;
+            background: linear-gradient(90deg, rgba(212, 175, 55, 0.05), rgba(212, 175, 55, 0.1));
+            border-top: 1px solid var(--light-gold);
+        }
+
+        .visitor-info img {
+            display: inline-block;
+            vertical-align: middle;
+        }
+
+        .loader {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1000;
+        }
+
+        .loader.active {
+            display: block;
+        }
+
+        .loader-circle {
+            width: 60px;
+            height: 60px;
+            border: 5px solid var(--cream);
+            border-top: 5px solid var(--gold);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 1024px) {
+            .lang-row {
+                grid-template-columns: 1fr auto 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .app-container {
+                padding: 8px;
+                gap: 6px;
+            }
+
+            .header {
+                padding: clamp(10px, 3vw, 15px);
+                border-radius: 10px 10px 0 0;
+            }
+
+            .header h1 {
+                font-size: clamp(18px, 5vw, 24px);
+                margin-bottom: clamp(4px, 1vw, 6px);
+            }
+
+            .header p {
+                font-size: clamp(11px, 2.5vw, 14px);
+            }
+
+            .nav-tab {
+                font-size: clamp(11px, 2vw, 12px);
+                min-width: 90px;
+                padding: clamp(8px, 1.5vw, 12px) clamp(6px, 1vw, 10px);
+            }
+
+            .content-area {
+                border-radius: 0 0 10px 10px;
+            }
+
+            .lang-row {
+                grid-template-columns: 1fr auto 1fr;
+                gap: clamp(8px, 1.5vw, 12px);
+            }
+
+            .controls {
+                padding: clamp(10px, 1.5vw, 15px);
+                gap: clamp(8px, 1.5vw, 12px);
+            }
+
+            .lang-select {
+                height: clamp(38px, 7vw, 42px);
+                font-size: clamp(12px, 1.8vw, 14px);
+            }
+
+            .status {
+                padding: clamp(8px, 1.5vw, 10px) clamp(10px, 1.5vw, 15px);
+                font-size: clamp(11px, 1.8vw, 12px);
+                gap: 8px;
+            }
+
+            .status-text {
+                font-size: clamp(11px, 1.8vw, 12px);
+            }
+
+            .mic-button {
+                width: clamp(50px, 12vw, 65px);
+                height: clamp(50px, 12vw, 65px);
+                font-size: clamp(22px, 4.5vw, 28px);
+            }
+
+            .audio-visualizer {
+                height: clamp(35px, 7vw, 50px);
+                margin: clamp(8px, 1.5vw, 12px) 0;
+            }
+
+            .translation-area {
+                padding: clamp(10px, 1.5vw, 15px);
+            }
+
+            .translation-panel {
+                padding: clamp(8px, 1.5vw, 12px);
+            }
+
+            .panel-header {
+                font-size: clamp(13px, 2vw, 16px);
+            }
+
+            #translatedText {
+                padding: clamp(8px, 1.5vw, 12px);
+                gap: clamp(6px, 1vw, 10px);
+            }
+
+            .sentence {
+                font-size: clamp(13px, 2vw, 16px);
+                line-height: 1.4;
+            }
+
+            .actions {
+                padding: clamp(10px, 1.5vw, 15px);
+                gap: clamp(6px, 1.5vw, 10px);
+            }
+
+            .btn {
+                min-width: 70px;
+                padding: clamp(8px, 1.5vw, 10px) clamp(10px, 2vw, 16px);
+                font-size: clamp(11px, 1.8vw, 13px);
+                flex: 1;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .app-container {
+                padding: 6px;
+                gap: 4px;
+            }
+
+            .header {
+                padding: clamp(8px, 2vw, 12px);
+                border-radius: 8px 8px 0 0;
+            }
+
+            .header h1 {
+                font-size: clamp(16px, 4.5vw, 20px);
+                margin-bottom: 3px;
+            }
+
+            .header p {
+                font-size: clamp(10px, 2vw, 12px);
+            }
+
+            .nav-tabs {
+                overflow-x: auto;
+            }
+
+            .nav-tab {
+                font-size: clamp(10px, 2vw, 11px);
+                min-width: 70px;
+                padding: clamp(7px, 1.2vw, 10px) clamp(5px, 1vw, 8px);
+            }
+
+            .lang-row {
+                grid-template-columns: 1fr auto 1fr;
+                gap: 6px;
+            }
+
+            .lang-label {
+                font-size: clamp(10px, 1.8vw, 11px);
+            }
+
+            .lang-select {
+                height: clamp(35px, 6vw, 40px);
+                font-size: clamp(11px, 1.6vw, 12px);
+                padding: 0 clamp(8px, 1.5vw, 10px);
+            }
+
+            .controls {
+                padding: clamp(8px, 1.2vw, 12px);
+                gap: 6px;
+            }
+
+            .status {
+                padding: clamp(6px, 1.2vw, 8px) clamp(8px, 1.2vw, 10px);
+                font-size: clamp(10px, 1.6vw, 11px);
+            }
+
+            .status-dot {
+                width: 10px;
+                height: 10px;
+            }
+
+            .status-text {
+                font-size: clamp(10px, 1.6vw, 11px);
+            }
+
+            .mic-button {
+                width: clamp(45px, 10vw, 55px);
+                height: clamp(45px, 10vw, 55px);
+                font-size: clamp(20px, 4vw, 24px);
+            }
+
+            .audio-visualizer {
+                height: clamp(30px, 6vw, 40px);
+                margin: 6px 0;
+                gap: 2px;
+            }
+
+            .audio-bar {
+                width: 3px;
+            }
+
+            .translation-area {
+                padding: clamp(8px, 1.2vw, 10px);
+            }
+
+            .translation-panel {
+                padding: clamp(6px, 1.2vw, 8px);
+            }
+
+            .panel-header {
+                font-size: clamp(12px, 1.8vw, 14px);
+            }
+
+            .panel-controls {
+                top: 5px;
+                right: 5px;
+            }
+
+            .font-btn {
+                width: clamp(20px, 4vw, 24px);
+                height: clamp(20px, 4vw, 24px);
+                font-size: clamp(12px, 2.5vw, 14px);
+            }
+
+            .font-size-value {
+                font-size: 10px;
+            }
+
+            #translatedText {
+                padding: clamp(6px, 1.2vw, 8px);
+                gap: 5px;
+            }
+
+            .sentence {
+                font-size: clamp(12px, 1.8vw, 14px);
+                line-height: 1.3;
+            }
+
+            .empty {
+                font-size: clamp(11px, 1.6vw, 12px);
+            }
+
+            .actions {
+                padding: clamp(8px, 1.2vw, 10px);
+                gap: 4px;
+            }
+
+            .btn {
+                min-width: 60px;
+                padding: clamp(6px, 1vw, 8px) clamp(8px, 1.5vw, 12px);
+                font-size: clamp(10px, 1.6vw, 11px);
+                flex: 1;
+            }
+
+            .btn span:first-child {
+                font-size: clamp(14px, 2.5vw, 16px);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="loader" id="loader">
+        <div class="loader-circle"></div>
+    </div>
+
+    <div class="app-container">
+        <div class="header">
+            <h1>مترجم الخطبة الحي</h1>
+            <h1>Khutbah Live Translator</h1>
+            <p>Bridging hearts across languages in the House of Allah</p>
+        </div>
+
+        <div class="nav-tabs">
+            <button class="nav-tab active" onclick="switchTab('translator')">Translator</button>
+            <button class="nav-tab" onclick="switchTab('settings')">Settings</button>
+            <button class="nav-tab" onclick="switchTab('about')">About</button>
+            <button class="nav-tab" onclick="switchTab('contact')">Contact</button>
+        </div>
+
+        <div class="content-area">
+            <!-- Translator Tab -->
+            <div class="tab-content active" id="translatorTab">
+                <div class="controls">
+                    <div class="lang-row">
+                        <div class="lang-group">
+                            <label class="lang-label">Source Language</label>
+                            <select class="lang-select" id="inputLang">
+                                <option value="ar-SA">Arabic (Saudi)</option>
+                                <option value="ar-EG">Arabic (Egyptian)</option>
+                                <option value="ar-AE">Arabic (UAE)</option>
+                                <option value="ar-MA">Arabic (Moroccan)</option>
+                                <option value="en-US">English</option>
+                                <option value="ur-PK">Urdu</option>
+                                <option value="id-ID">Indonesian</option>
+                                <option value="ms-MY">Malay</option>
+                                <option value="tr-TR">Turkish</option>
+                                <option value="fa-IR">Farsi/Persian</option>
+                                <option value="bn-BD">Bengali</option>
+                                <option value="ps-AF">Pashto</option>
+                                <option value="so-SO">Somali</option>
+                                <option value="ha-NG">Hausa</option>
+                                <option value="sw-KE">Swahili</option>
+                                <option value="fr-FR">French</option>
+                                <option value="de-DE">German</option>
+                                <option value="es-ES">Spanish</option>
+                                <option value="ru-RU">Russian</option>
+                                <option value="zh-CN">Chinese (Mandarin)</option>
+                                <option value="hi-IN">Hindi</option>
+                            </select>
+                        </div>
+
+                        <div class="mic-button-container">
+                            <button class="mic-button start" id="startBtn" onclick="toggleListening()">🎤</button>
+                        </div>
+
+                        <div class="lang-group">
+                            <label class="lang-label">Translation Language</label>
+                            <select class="lang-select" id="outputLang">
+                                <option value="en">English</option>
+                                <option value="ar">Arabic</option>
+                                <option value="ur">Urdu</option>
+                                <option value="id">Indonesian</option>
+                                <option value="ms">Malay</option>
+                                <option value="tr">Turkish</option>
+                                <option value="fa">Farsi/Persian</option>
+                                <option value="bn">Bengali</option>
+                                <option value="ps">Pashto</option>
+                                <option value="so">Somali</option>
+                                <option value="ha">Hausa</option>
+                                <option value="sw">Swahili</option>
+                                <option value="fr">French</option>
+                                <option value="de">German</option>
+                                <option value="es">Spanish</option>
+                                <option value="ru">Russian</option>
+                                <option value="zh">Chinese</option>
+                                <option value="hi">Hindi</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="audio-visualizer" id="audioVisualizer">
+                        <div class="audio-bar"></div>
+                        <div class="audio-bar"></div>
+                        <div class="audio-bar"></div>
+                        <div class="audio-bar"></div>
+                        <div class="audio-bar"></div>
+                        <div class="audio-bar"></div>
+                        <div class="audio-bar"></div>
+                        <div class="audio-bar"></div>
+                        <div class="audio-bar"></div>
+                        <div class="audio-bar"></div>
+                    </div>
+
+                    <div class="status">
+                        <div class="status-info">
+                            <div class="status-dot" id="statusDot"></div>
+                            <span class="status-text" id="statusText">Click microphone to start</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="translation-area">
+                    <div class="translation-panel">
+                        <div class="panel-controls">
+                            <div class="font-size-control">
+                                <button class="font-btn" onclick="changeFontSize(-2)">−</button>
+                                <span class="font-size-value" id="fontSizeValue">16px</span>
+                                <button class="font-btn" onclick="changeFontSize(2)">+</button>
+                            </div>
+                        </div>
+                        <div class="panel-header">Live Translation</div>
+                        <div class="text-content" id="translatedText">
+                            <div class="empty">Click the microphone button to start listening...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="actions">
+                    <button class="btn btn-secondary" onclick="clearTranscript()">
+                        <span>🗑️</span>
+                        Clear
+                    </button>
+                    <button class="btn btn-secondary" onclick="saveTranscript()">
+                        <span>💾</span>
+                        Save Transcript
+                    </button>
+                    <button class="btn btn-secondary" id="recordBtn" onclick="toggleRecording()">
+                        <span>⏺️</span>
+                        <span id="recordText">Record Audio</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Settings Tab -->
+            <div class="tab-content" id="settingsTab">
+                <div class="settings-content">
+                    <div class="setting-group">
+                        <div class="setting-title">⚙️ Translation Settings</div>
+                        <label style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                            <input type="checkbox" id="instantTranslate" checked>
+                            <span>Instant translation (translate as you speak)</span>
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 10px;">
+                            <input type="checkbox" id="autoDetectDialects" checked>
+                            <span>Auto-detect regional dialects</span>
+                        </label>
+                    </div>
+
+                    <div class="setting-group">
+                        <div class="setting-title">🎨 Display Settings</div>
+                        <label style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                            <input type="checkbox" id="autoScroll" checked>
+                            <span>Auto-scroll to latest translation</span>
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 10px;">
+                            <input type="checkbox" id="highlightLatest" checked>
+                            <span>Highlight latest translation</span>
+                        </label>
+                    </div>
+
+                    <div class="setting-group">
+                        <div class="setting-title">🎙️ Microphone Sensitivity</div>
+                        <label style="display: block; margin-bottom: 10px;">
+                            <span>Volume Threshold: <span id="thresholdValue">15</span></span>
+                            <input type="range" id="volumeThreshold" min="5" max="50" value="15" 
+                                   style="width: 100%; margin-top: 10px;" 
+                                   oninput="updateThreshold(this.value)">
+                        </label>
+                        <p style="font-size: 12px; color: #666; margin-top: 10px;">
+                            Lower values = more sensitive (picks up quieter voices)<br>
+                            Higher values = less sensitive (ignores background noise)
+                        </p>
+                    </div>
+
+                    <div class="setting-group">
+                        <button class="btn btn-primary" onclick="saveSettings()">Save Settings</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- About Tab -->
+            <div class="tab-content" id="aboutTab">
+                <div class="about-content">
+                    <div class="bismillah">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</div>
+                    <h2>About Khutbah Live Translator</h2>
+                    
+                    <div class="developer-info">
+                        <h3>Developer's Story</h3>
+                        <p>
+                            My name is <strong>Khaled Diab</strong>, an Arab Muslim developer. This application was born from a moment of profound realization during a Jumu'ah prayer in Dubai.
+                        </p>
+                        <p>
+                            I was moved when a Muslim brother shared with me that he couldn't understand a single word of what the Sheikh was saying during the khutbah. Despite being in the same congregation, praising the same Allah, the language barrier prevented him from receiving the spiritual guidance being shared.
+                        </p>
+                        <p>
+                            This encounter inspired me to create this tool - a bridge for Muslims worldwide to understand the beautiful messages delivered in our mosques, regardless of the language they speak. It's my humble contribution to unite the Ummah and ensure that no Muslim feels excluded from understanding the word of Allah and the teachings of our Prophet ﷺ.
+                        </p>
+                        <p style="margin-top: 20px; font-style: italic; color: var(--primary-green);">
+                            "وَمَا أَرْسَلْنَاكَ إِلَّا رَحْمَةً لِّلْعَالَمِينَ"<br>
+                            "And We have not sent you, [O Muhammad], except as a mercy to the worlds."<br>
+                            - Quran 21:107
+                        </p>
+                    </div>
+
+                    <p style="margin-top: 30px; font-size: 14px; color: #777;">
+                        May Allah accept this work and make it beneficial for all Muslims. Ameen.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Contact Tab -->
+            <div class="tab-content" id="contactTab">
+                <div class="contact-content" style="max-width: 700px; margin: 0 auto; padding: 30px;">
+                    <h2 style="font-family: 'Amiri', serif; font-size: 32px; color: var(--primary-green); text-align: center; margin-bottom: 30px;">
+                        Contact Developer
+                    </h2>
+                    
+                    <div style="background: var(--cream); padding: 30px; border-radius: 15px; border: 2px solid var(--light-gold); margin-bottom: 30px;">
+                        <h3 style="font-size: 24px; color: var(--primary-green); margin-bottom: 20px; text-align: center;">
+                            Khaled Diab
+                        </h3>
+                        
+                        <div style="display: grid; gap: 20px;">
+                            <!-- Email -->
+                            <div style="display: flex; align-items: center; gap: 15px; padding: 15px; background: white; border-radius: 10px;">
+                                <span style="font-size: 24px;">📧</span>
+                                <div>
+                                    <div style="font-size: 12px; color: #666; margin-bottom: 5px;">Email</div>
+                                    <a href="mailto:khaleddiab@example.com" style="color: var(--primary-green); text-decoration: none; font-weight: 600;">
+                                        khaleddiab@example.com
+                                    </a>
+                                </div>
+                            </div>
+                            
+                            <!-- WhatsApp -->
+                            <div style="display: flex; align-items: center; gap: 15px; padding: 15px; background: white; border-radius: 10px;">
+                                <span style="font-size: 24px;">💬</span>
+                                <div>
+                                    <div style="font-size: 12px; color: #666; margin-bottom: 5px;">WhatsApp</div>
+                                    <a href="https://wa.me/201227822099" style="color: var(--primary-green); text-decoration: none; font-weight: 600;">
+                                        +20 122 782 2099
+                                    </a>
+                                </div>
+                            </div>
+                            
+                            <!-- LinkedIn -->
+                            <div style="display: flex; align-items: center; gap: 15px; padding: 15px; background: white; border-radius: 10px;">
+                                <span style="font-size: 24px;">💼</span>
+                                <div>
+                                    <div style="font-size: 12px; color: #666; margin-bottom: 5px;">LinkedIn</div>
+                                    <a href="https://linkedin.com/in/khaleddiab" style="color: var(--primary-green); text-decoration: none; font-weight: 600;">
+                                        linkedin.com/in/khaleddiab
+                                    </a>
+                                </div>
+                            </div>
+                            
+                            <!-- GitHub -->
+                            <div style="display: flex; align-items: center; gap: 15px; padding: 15px; background: white; border-radius: 10px;">
+                                <span style="font-size: 24px;">🔧</span>
+                                <div>
+                                    <div style="font-size: 12px; color: #666; margin-bottom: 5px;">GitHub</div>
+                                    <a href="https://github.com/khaleddiab" style="color: var(--primary-green); text-decoration: none; font-weight: 600;">
+                                        github.com/khaleddiab
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Donation Section -->
+                    <div class="donation-section">
+                        <div class="donation-title">💚 Support This Project</div>
+                        <div class="donation-subtitle">
+                            "The example of those who spend their wealth in the way of Allah is like a seed which grows seven spikes"<br>
+                            - Quran 2:261
+                        </div>
+                        
+                        <div class="donation-methods">
+                            <!-- Bitcoin -->
+                            <div class="donation-method" onclick="toggleBitcoinAddress()">
+                                <div class="donation-method-icon">₿</div>
+                                <div class="donation-method-name">Bitcoin</div>
+                                <div class="donation-method-info">Cryptocurrency</div>
+                            </div>
+                            
+                            <!-- WhatsApp for Other Methods -->
+                            <a href="https://wa.me/201227822099?text=السلام%20عليكم%2C%20I%20would%20like%20to%20support%20the%20Khutbah%20Translator%20project" class="donation-method" target="_blank">
+                                <div class="donation-method-icon">💬</div>
+                                <div class="donation-method-name">WhatsApp</div>
+                                <div class="donation-method-info">Contact for PayPal, Bank Transfer & More</div>
+                            </a>
+                        </div>
+                        
+                        <!-- Bitcoin Address Display -->
+                        <div id="bitcoin-address-display" style="display: none; margin-top: 20px; padding: 20px; background: white; border-radius: 10px; border: 2px solid var(--gold);">
+                            <div style="font-weight: 600; color: var(--primary-green); margin-bottom: 10px; text-align: center;">Bitcoin Address</div>
+                            <div style="word-break: break-all; font-family: monospace; font-size: 14px; padding: 15px; background: var(--cream); border-radius: 8px; margin-bottom: 15px; text-align: center;">
+                                12idhuWL6T9nun9UFYz9fFwway8uLeqd3t
+                            </div>
+                            <button onclick="copyBitcoinAddress()" class="btn btn-secondary" style="width: 100%; margin-top: 10px;">
+                                📋 Copy Address
+                            </button>
+                        </div>
+                        
+                        <p style="margin-top: 20px; font-size: 14px; color: #666;">
+                            Your support helps maintain and improve this free service for the Muslim community worldwide.<br>
+                            May Allah reward you abundantly for your generosity. 
+                        </p>
+                    </div>
+                    
+                    <!-- Feedback Section -->
+                    <div style="background: linear-gradient(135deg, rgba(212, 175, 55, 0.1), rgba(212, 175, 55, 0.05)); padding: 30px; border-radius: 15px; border: 2px solid var(--light-gold); margin-top: 30px;">
+                        <h3 style="font-size: 20px; color: var(--primary-green); margin-bottom: 20px; text-align: center;">
+                            Send Feedback
+                        </h3>
+                        
+                        <div style="display: grid; gap: 15px;">
+                            <input type="text" id="feedbackName" placeholder="Your Name" 
+                                style="padding: 12px; border: 2px solid var(--light-gold); border-radius: 8px; font-size: 15px;">
+                            
+                            <input type="email" id="feedbackEmail" placeholder="Your Email" 
+                                style="padding: 12px; border: 2px solid var(--light-gold); border-radius: 8px; font-size: 15px;">
+                            
+                            <select id="feedbackType" 
+                                style="padding: 12px; border: 2px solid var(--light-gold); border-radius: 8px; font-size: 15px; background: white;">
+                                <option value="">Select Feedback Type</option>
+                                <option value="bug">Bug Report</option>
+                                <option value="feature">Feature Request</option>
+                                <option value="translation">Translation Issue</option>
+                                <option value="general">General Feedback</option>
+                                <option value="collaboration">Collaboration</option>
+                            </select>
+                            
+                            <textarea id="feedbackMessage" placeholder="Your message..." rows="5"
+                                style="padding: 12px; border: 2px solid var(--light-gold); border-radius: 8px; font-size: 15px; resize: vertical;">
+                            </textarea>
+                            
+                            <button onclick="sendFeedback()" class="btn btn-primary" style="width: 100%;">
+                                Send Message
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div style="text-align: center; margin-top: 30px; padding: 20px; background: white; border-radius: 10px;">
+                        <p style="color: #666; margin-bottom: 10px;">
+                            "The believers are but brothers"<br>
+                            - Quran 49:10
+                        </p>
+                        <p style="font-size: 14px; color: #999;">
+                            Feel free to reach out with any suggestions, bug reports, or if you'd like to contribute to making this app better for the Muslim community worldwide.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Visitor Counter -->
+        <div class="visitor-info">
+            <img src="https://hitscounter.dev/api/hit?url=https%3A%2F%2Fkhalecl.github.io%2Fkhaledcv%2Fjumuah.html&label=Visitor+worldwide&icon=graph-up&color=%23198754&message=&style=flat&tz=ROK" alt="Visitor Counter">
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let recognition;
+        let isListening = false;
+        let isRecording = false;
+        let mediaRecorder;
+        let audioChunks = [];
+        let translations = [];
+        let currentFontSize = 16;
+        let audioContext;
+        let analyser;
+        let microphone;
+        let volumeThreshold = 15;
+        let settings = {
+            instantTranslate: true,
+            autoDetectDialects: true,
+            autoScroll: true,
+            highlightLatest: true,
+            volumeThreshold: 15
+        };
+
+        // Load settings
+        function loadSettings() {
+            const saved = localStorage.getItem('khutbahSettings');
+            if (saved) {
+                settings = JSON.parse(saved);
+                applySettings();
+            }
+        }
+
+        function applySettings() {
+            document.getElementById('instantTranslate').checked = settings.instantTranslate;
+            document.getElementById('autoDetectDialects').checked = settings.autoDetectDialects;
+            document.getElementById('autoScroll').checked = settings.autoScroll;
+            document.getElementById('highlightLatest').checked = settings.highlightLatest;
+            document.getElementById('volumeThreshold').value = settings.volumeThreshold;
+            document.getElementById('thresholdValue').textContent = settings.volumeThreshold;
+            volumeThreshold = settings.volumeThreshold;
+        }
+
+        function saveSettings() {
+            settings.instantTranslate = document.getElementById('instantTranslate').checked;
+            settings.autoDetectDialects = document.getElementById('autoDetectDialects').checked;
+            settings.autoScroll = document.getElementById('autoScroll').checked;
+            settings.highlightLatest = document.getElementById('highlightLatest').checked;
+            settings.volumeThreshold = volumeThreshold;
+            
+            localStorage.setItem('khutbahSettings', JSON.stringify(settings));
+            alert('Settings saved successfully!');
+        }
+
+        function updateThreshold(value) {
+            volumeThreshold = parseInt(value);
+            document.getElementById('thresholdValue').textContent = value;
+        }
+
+        // Tab switching
+        function switchTab(tabName) {
+            document.querySelectorAll('.nav-tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            document.getElementById(tabName + 'Tab').classList.add('active');
+        }
+
+        // Font size control
+        function changeFontSize(change) {
+            currentFontSize = Math.max(12, Math.min(32, currentFontSize + change));
+            document.documentElement.style.setProperty('--font-size', currentFontSize + 'px');
+            document.getElementById('fontSizeValue').textContent = currentFontSize + 'px';
+        }
+
+        // Toggle listening
+        async function toggleListening() {
+            if (!isListening) {
+                await startListening();
+            } else {
+                stopListening();
+            }
+        }
+
+        // Start listening
+        async function startListening() {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            
+            if (!SpeechRecognition) {
+                alert('Speech recognition not supported. Please use Chrome, Edge, or Safari.');
+                return;
+            }
+
+            try {
+                // Request microphone with enhanced audio constraints
+                const stream = await navigator.mediaDevices.getUserMedia({ 
+                    audio: {
+                        echoCancellation: true,
+                        noiseSuppression: true,
+                        autoGainControl: true,
+                        sampleRate: 48000,
+                        channelCount: 1
+                    } 
+                });
+
+                // Setup audio visualization
+                setupAudioVisualization(stream);
+                
+                // Setup media recorder
+                setupMediaRecorder(stream);
+
+                // Initialize speech recognition
+                recognition = new SpeechRecognition();
+                recognition.continuous = true;
+                recognition.interimResults = true;
+                recognition.maxAlternatives = 1;
+                recognition.lang = document.getElementById('inputLang').value;
+
+                let currentTranscript = '';
+                let silenceTimer;
+
+                recognition.onstart = () => {
+                    console.log('Speech recognition started');
+                    isListening = true;
+                    updateUI(true);
+                };
+
+                recognition.onresult = (event) => {
+                    clearTimeout(silenceTimer);
+                    
+                    let interim = '';
+                    let final = '';
+                    
+                    for (let i = event.resultIndex; i < event.results.length; i++) {
+                        if (event.results[i].isFinal) {
+                            final += event.results[i][0].transcript + ' ';
+                        } else {
+                            interim = event.results[i][0].transcript;
+                        }
+                    }
+                    
+                    if (final) {
+                        currentTranscript += final;
+                    }
+                    
+                    const fullText = currentTranscript + interim;
+                    
+                    if (settings.instantTranslate && final && currentTranscript.trim()) {
+                        translateText(currentTranscript.trim());
+                        currentTranscript = '';
+                    } else if (!settings.instantTranslate && fullText.trim()) {
+                        silenceTimer = setTimeout(() => {
+                            if (currentTranscript.trim()) {
+                                translateText(currentTranscript.trim());
+                                currentTranscript = '';
+                            }
+                        }, 1500);
+                    }
+                };
+
+                recognition.onerror = (event) => {
+                    console.error('Speech recognition error:', event.error);
+                    if (event.error === 'no-speech') {
+                        setTimeout(() => {
+                            if (isListening) {
+                                recognition.start();
+                            }
+                        }, 1000);
+                    }
+                };
+
+                recognition.onend = () => {
+                    if (currentTranscript.trim()) {
+                        translateText(currentTranscript.trim());
+                        currentTranscript = '';
+                    }
+                    
+                    if (isListening) {
+                        setTimeout(() => {
+                            if (isListening) {
+                                recognition.start();
+                            }
+                        }, 100);
+                    }
+                };
+
+                recognition.start();
+
+            } catch (error) {
+                console.error('Microphone access error:', error);
+                alert('Please allow microphone access to use the translator.');
+            }
+        }
+
+        // Stop listening
+        function stopListening() {
+            if (recognition) {
+                isListening = false;
+                recognition.stop();
+                
+                if (audioContext) {
+                    audioContext.close();
+                    audioContext = null;
+                }
+                
+                updateUI(false);
+            }
+        }
+
+        // Setup audio visualization
+        function setupAudioVisualization(stream) {
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            analyser = audioContext.createAnalyser();
+            microphone = audioContext.createMediaStreamSource(stream);
+            microphone.connect(analyser);
+            analyser.fftSize = 256;
+            
+            const dataArray = new Uint8Array(analyser.frequencyBinCount);
+            const bars = document.querySelectorAll('.audio-bar');
+            
+            function visualize() {
+                if (!isListening) return;
+                
+                analyser.getByteFrequencyData(dataArray);
+                const average = dataArray.reduce((a, b) => a + b) / dataArray.length;
+                
+                // Update status dot based on volume
+                const statusDot = document.getElementById('statusDot');
+                if (average > volumeThreshold) {
+                    statusDot.style.boxShadow = `0 0 ${Math.min(average / 3, 20)}px var(--gold)`;
+                } else {
+                    statusDot.style.boxShadow = 'none';
+                }
+                
+                // Animate bars
+                bars.forEach((bar, index) => {
+                    const value = dataArray[index * 8] || 0;
+                    const height = Math.max(10, (value / 255) * 40);
+                    bar.style.height = height + 'px';
+                    bar.style.background = average > volumeThreshold ? 'var(--gold)' : 'var(--primary-green)';
+                });
+                
+                requestAnimationFrame(visualize);
+            }
+            
+            visualize();
+        }
+
+        // Setup media recorder
+        function setupMediaRecorder(stream) {
+            mediaRecorder = new MediaRecorder(stream);
+            
+            mediaRecorder.ondataavailable = (event) => {
+                audioChunks.push(event.data);
+            };
+
+            mediaRecorder.onstop = () => {
+                const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                const url = URL.createObjectURL(audioBlob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `khutbah-${new Date().toISOString().slice(0, 10)}.webm`;
+                a.click();
+                audioChunks = [];
+            };
+        }
+
+        // Update UI
+        function updateUI(listening) {
+            const startBtn = document.getElementById('startBtn');
+            const statusDot = document.getElementById('statusDot');
+            const statusText = document.getElementById('statusText');
+            
+            if (listening) {
+                startBtn.classList.remove('start');
+                startBtn.classList.add('stop');
+                startBtn.textContent = '⏹️';
+                statusDot.classList.add('active');
+                statusText.textContent = '🎤 Listening...';
+            } else {
+                startBtn.classList.remove('stop');
+                startBtn.classList.add('start');
+                startBtn.textContent = '🎤';
+                statusDot.classList.remove('active');
+                statusText.textContent = 'Click microphone to start';
+            }
+        }
+
+        // Translate text
+        async function translateText(text) {
+            if (!text || !text.trim()) return;
+            
+            const recentText = translations[translations.length - 1];
+            if (recentText && recentText.originalText === text.trim()) {
+                return;
+            }
+
+            const sourceLang = document.getElementById('inputLang').value.split('-')[0];
+            const targetLang = document.getElementById('outputLang').value;
+
+            if (sourceLang === targetLang) {
+                addTranslation(text, text);
+                return;
+            }
+
+            try {
+                document.getElementById('loader').classList.add('active');
+                
+                const response = await fetch(
+                    `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${sourceLang}|${targetLang}`
+                );
+                
+                const data = await response.json();
+                
+                if (data.responseStatus === 200 && data.responseData) {
+                    addTranslation(text, data.responseData.translatedText);
+                } else {
+                    addTranslation(text, text);
+                }
+            } catch (error) {
+                console.error('Translation error:', error);
+                addTranslation(text, text);
+            } finally {
+                document.getElementById('loader').classList.remove('active');
+            }
+        }
+
+        // Add translation
+        function addTranslation(originalText, translatedText) {
+            const isDuplicate = translations.some(t => 
+                t.originalText === originalText.trim() && 
+                t.text === translatedText.trim()
+            );
+            
+            if (!isDuplicate) {
+                translations.push({
+                    originalText: originalText.trim(),
+                    text: translatedText.trim(),
+                    timestamp: new Date().toLocaleTimeString()
+                });
+                
+                displayTranslations();
+            }
+        }
+
+        // Display translations
+        function displayTranslations() {
+            const container = document.getElementById('translatedText');
+            const targetLang = document.getElementById('outputLang').value;
+            const isRTL = ['ar', 'ur', 'fa', 'ps'].includes(targetLang);
+            
+            if (translations.length === 0) {
+                container.innerHTML = '<div class="empty">Click the microphone button to start listening...</div>';
+                return;
+            }
+            
+            container.innerHTML = translations.map((t, i) => {
+                const isLatest = i === translations.length - 1;
+                return `
+                    <div class="sentence ${isRTL ? 'rtl' : ''} ${isLatest && settings.highlightLatest ? 'latest' : ''}">
+                        ${t.text}
+                    </div>
+                `;
+            }).join('');
+            
+            if (settings.autoScroll) {
+                container.scrollTop = container.scrollHeight;
+            }
+        }
+
+        // Clear transcript
+        function clearTranscript() {
+            if (confirm('Clear all translations?')) {
+                translations = [];
+                displayTranslations();
+            }
+        }
+
+        // Save transcript
+        function saveTranscript() {
+            if (translations.length === 0) {
+                alert('No translations to save');
+                return;
+            }
+            
+            const content = translations.map(t => `[${t.timestamp}] ${t.text}`).join('\n\n');
+            const blob = new Blob([content], { type: 'text/plain; charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `khutbah-transcript-${new Date().toISOString().slice(0, 10)}.txt`;
+            a.click();
+        }
+
+        // Toggle recording
+        function toggleRecording() {
+            if (!mediaRecorder) {
+                alert('Please start listening first');
+                return;
+            }
+            
+            if (!isRecording) {
+                mediaRecorder.start();
+                isRecording = true;
+                document.getElementById('recordText').textContent = 'Stop Recording';
+                document.getElementById('recordBtn').style.background = 'linear-gradient(135deg, #dc2626, #ef4444)';
+            } else {
+                mediaRecorder.stop();
+                isRecording = false;
+                document.getElementById('recordText').textContent = 'Record Audio';
+                document.getElementById('recordBtn').style.background = '';
+            }
+        }
+
+        // Toggle Bitcoin Address Display
+        function toggleBitcoinAddress() {
+            const display = document.getElementById('bitcoin-address-display');
+            if (display.style.display === 'none') {
+                display.style.display = 'block';
+            } else {
+                display.style.display = 'none';
+            }
+        }
+
+        // Copy Bitcoin Address
+        function copyBitcoinAddress() {
+            const address = '12idhuWL6T9nun9UFYz9fFwway8uLeqd3t';
+            navigator.clipboard.writeText(address).then(() => {
+                alert('Bitcoin address copied to clipboard!');
+            }).catch(err => {
+                console.error('Failed to copy:', err);
+                alert('Failed to copy address. Please copy manually.');
+            });
+        }
+
+        // Send Feedback
+        function sendFeedback() {
+            const name = document.getElementById('feedbackName').value;
+            const email = document.getElementById('feedbackEmail').value;
+            const type = document.getElementById('feedbackType').value;
+            const message = document.getElementById('feedbackMessage').value;
+            
+            if (!name || !email || !type || !message) {
+                alert('Please fill in all fields');
+                return;
+            }
+            
+            // Create WhatsApp message
+            const whatsappMessage = `*Khutbah Translator Feedback*%0A%0AName: ${encodeURIComponent(name)}%0AEmail: ${encodeURIComponent(email)}%0AType: ${encodeURIComponent(type)}%0A%0AMessage:%0A${encodeURIComponent(message)}`;
+            
+            // Open WhatsApp with pre-filled message
+            window.open(`https://wa.me/1234567890?text=${whatsappMessage}`, '_blank');
+            
+            // Clear form
+            document.getElementById('feedbackName').value = '';
+            document.getElementById('feedbackEmail').value = '';
+            document.getElementById('feedbackType').value = '';
+            document.getElementById('feedbackMessage').value = '';
+        }
+
+        // Language change handler
+        document.getElementById('inputLang').addEventListener('change', () => {
+            if (recognition && isListening) {
+                recognition.lang = document.getElementById('inputLang').value;
+                recognition.stop();
+                setTimeout(() => recognition.start(), 100);
+            }
+        });
+
+        document.getElementById('outputLang').addEventListener('change', () => {
+            displayTranslations();
+        });
+
+        // Initialize on load
+        window.addEventListener('load', () => {
+            loadSettings();
+            console.log('Khutbah Translator initialized');
+        });
+
+        // Handle visibility change
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden && isListening) {
+                console.log('Page hidden but still listening...');
+            }
+        });
+    </script>
+</body>
+</html>

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-title" content="Khutbah Translator">
@@ -16,6 +16,7 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
         }
 
         :root {
@@ -32,8 +33,10 @@
             font-family: 'Inter', sans-serif;
             background: linear-gradient(135deg, #1e5936 0%, #2a7f4e 50%, #3a9960 100%);
             min-height: 100vh;
+            min-height: -webkit-fill-available;
             position: relative;
             overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
         }
 
         body::before {
@@ -57,7 +60,8 @@
             padding: 8px;
             position: relative;
             z-index: 2;
-            height: 100vh;
+            min-height: 100vh;
+            min-height: -webkit-fill-available;
             display: flex;
             flex-direction: column;
             gap: 8px;
@@ -66,12 +70,13 @@
         .header {
             background: linear-gradient(135deg, var(--primary-green), var(--secondary-green));
             color: white;
-            padding: clamp(4px, 0.5vw, 6px);
+            padding: clamp(8px, 1.5vw, 12px);
             text-align: center;
             box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
             position: relative;
             overflow: hidden;
             flex-shrink: 0;
+            border-radius: 10px 10px 0 0;
         }
 
         .header::before {
@@ -96,18 +101,18 @@
 
         .header h1 {
             font-family: 'Amiri', serif;
-            font-size: clamp(11px, 2vw, 14px);
+            font-size: clamp(14px, 3vw, 18px);
             font-weight: 700;
             margin: 0;
             text-shadow: 0.5px 0.5px 1px rgba(0, 0, 0, 0.2);
-            line-height: 1.1;
+            line-height: 1.2;
         }
 
         .header p {
-            font-size: clamp(7px, 0.8vw, 9px);
+            font-size: clamp(9px, 1.5vw, 11px);
             opacity: 0.8;
             font-style: italic;
-            display: none;
+            margin-top: 4px;
         }
 
         .nav-tabs {
@@ -119,21 +124,23 @@
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
             flex-shrink: 0;
             gap: 0;
+            -webkit-overflow-scrolling: touch;
         }
 
         .nav-tab {
             flex: 1;
-            min-width: 100px;
+            min-width: 80px;
             padding: clamp(10px, 2vw, 15px) clamp(8px, 1.5vw, 15px);
             background: none;
             border: none;
-            font-size: clamp(12px, 2vw, 14px);
+            font-size: clamp(11px, 2vw, 14px);
             font-weight: 600;
             color: var(--primary-green);
             cursor: pointer;
             transition: all 0.3s;
             position: relative;
             white-space: nowrap;
+            touch-action: manipulation;
         }
 
         .nav-tab:hover {
@@ -153,6 +160,7 @@
             display: flex;
             flex-direction: column;
             overflow: hidden;
+            min-height: 0;
         }
 
         .tab-content {
@@ -161,6 +169,7 @@
             height: 100%;
             overflow-y: auto;
             flex: 1;
+            -webkit-overflow-scrolling: touch;
         }
 
         .tab-content.active {
@@ -169,21 +178,19 @@
         }
 
         .controls {
-            padding: clamp(6px, 1vw, 10px);
+            padding: clamp(8px, 1.5vw, 12px);
             background: linear-gradient(to bottom, var(--cream), white);
             border-bottom: 2px solid var(--light-gold);
             flex-shrink: 0;
             display: flex;
             flex-direction: column;
-            gap: clamp(6px, 1vw, 10px);
-            max-height: 16vh;
-            overflow-y: auto;
+            gap: clamp(8px, 1.5vw, 12px);
         }
 
         .lang-row {
             display: grid;
             grid-template-columns: 1fr auto 1fr;
-            gap: clamp(10px, 2vw, 15px);
+            gap: clamp(8px, 2vw, 15px);
             align-items: end;
             margin: 0;
         }
@@ -191,11 +198,11 @@
         .lang-group {
             display: flex;
             flex-direction: column;
-            gap: clamp(5px, 1vw, 8px);
+            gap: clamp(4px, 1vw, 6px);
         }
 
         .lang-label {
-            font-size: clamp(9px, 1.5vw, 11px);
+            font-size: clamp(10px, 1.8vw, 12px);
             font-weight: 600;
             color: var(--primary-green);
             display: flex;
@@ -209,21 +216,39 @@
         }
 
         .lang-select {
-            height: clamp(28px, 4vw, 36px);
-            padding: 0 clamp(8px, 1.5vw, 10px);
+            height: clamp(40px, 6vw, 44px);
+            padding: 0 clamp(10px, 2vw, 12px);
             border: 2px solid var(--light-gold);
-            border-radius: 6px;
-            font-size: clamp(10px, 1.5vw, 12px);
+            border-radius: 8px;
+            font-size: clamp(12px, 2vw, 14px);
             font-weight: 500;
             cursor: pointer;
             transition: all 0.3s;
             background: white;
+            -webkit-appearance: none;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%231e5936' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            padding-right: 30px;
         }
 
         .lang-select:focus {
             outline: none;
             border-color: var(--gold);
             box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.2);
+        }
+
+        .lang-select optgroup {
+            font-weight: 700;
+            color: var(--primary-green);
+            background: var(--cream);
+        }
+
+        .lang-select option {
+            font-weight: 400;
+            color: var(--dark-text);
+            padding: 8px;
         }
 
         .mic-button-container {
@@ -236,12 +261,12 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: clamp(6px, 1vw, 8px) clamp(8px, 1.5vw, 12px);
+            padding: clamp(8px, 1.5vw, 10px) clamp(10px, 2vw, 14px);
             background: linear-gradient(90deg, rgba(212, 175, 55, 0.1), rgba(212, 175, 55, 0.05));
-            border-radius: 6px;
+            border-radius: 8px;
             border: 1px solid var(--light-gold);
-            font-size: clamp(10px, 1.5vw, 12px);
-            gap: 6px;
+            font-size: clamp(11px, 1.8vw, 13px);
+            gap: 8px;
             flex-shrink: 0;
             margin: 0;
         }
@@ -249,12 +274,12 @@
         .status-info {
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 8px;
         }
 
         .status-dot {
-            width: 8px;
-            height: 8px;
+            width: 10px;
+            height: 10px;
             background: #999;
             border-radius: 50%;
             transition: all 0.3s;
@@ -264,34 +289,6 @@
         .status-dot.active {
             background: var(--gold);
             animation: pulse 2s infinite;
-        }
-
-        .translated-text-wrapper {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            min-height: 0;
-            gap: clamp(8px, 1vw, 12px);
-        }
-
-        .translated-text-label {
-            font-size: clamp(12px, 2vw, 14px);
-            font-weight: 600;
-            color: var(--primary-green);
-            flex-shrink: 0;
-        }
-
-        #translatedText {
-            flex: 1;
-            overflow-y: auto;
-            border: 2px solid var(--light-gold);
-            border-radius: 8px;
-            padding: clamp(8px, 1.5vw, 12px);
-            background: white;
-            display: flex;
-            flex-direction: column;
-            gap: clamp(6px, 1vw, 10px);
-            min-height: 0;
         }
 
         @keyframes pulse {
@@ -306,77 +303,72 @@
         }
 
         .status-text {
-            font-size: 14px;
+            font-size: clamp(11px, 1.8vw, 13px);
             font-weight: 600;
             color: var(--primary-green);
         }
 
-        .mic-control {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            margin: 20px 0;
-        }
-
         .mic-button {
-            width: clamp(40px, 8vw, 50px);
-            height: clamp(40px, 8vw, 50px);
+            width: clamp(55px, 12vw, 65px);
+            height: clamp(55px, 12vw, 65px);
             border-radius: 50%;
             border: none;
             cursor: pointer;
-            font-size: clamp(18px, 3vw, 24px);
+            font-size: clamp(24px, 5vw, 28px);
             transition: all 0.3s;
-            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
             flex-shrink: 0;
-        }
+            touch-action: manipulation;
+            -webkit-user-select: none;
+            user-select: none;
         }
 
         .mic-button.start {
             background: linear-gradient(135deg, var(--primary-green), var(--secondary-green));
         }
 
-        .mic-button.start:hover {
+        .mic-button.start:hover, .mic-button.start:active {
             transform: scale(1.1);
-            box-shadow: 0 8px 20px rgba(30, 89, 54, 0.4);
+            box-shadow: 0 8px 25px rgba(30, 89, 54, 0.4);
         }
 
         .mic-button.stop {
             background: linear-gradient(135deg, #dc2626, #ef4444);
+            animation: recording-pulse 1.5s infinite;
         }
 
-        .mic-button.stop:hover {
+        @keyframes recording-pulse {
+            0%, 100% { box-shadow: 0 4px 15px rgba(220, 38, 38, 0.4); }
+            50% { box-shadow: 0 4px 30px rgba(220, 38, 38, 0.7); }
+        }
+
+        .mic-button.stop:hover, .mic-button.stop:active {
             transform: scale(1.1);
-            box-shadow: 0 8px 20px rgba(220, 38, 38, 0.4);
-        }
-
-        .mic-button:active {
-            transform: scale(0.95);
         }
 
         .audio-visualizer {
-            height: clamp(40px, 8vw, 60px);
+            height: clamp(40px, 8vw, 55px);
             background: var(--cream);
             border-radius: 10px;
-            margin: clamp(10px, 2vw, 15px) 0;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 3px;
+            gap: 4px;
             padding: 10px;
             overflow: hidden;
             flex-shrink: 0;
         }
 
         .audio-bar {
-            width: 4px;
+            width: 5px;
             height: 10px;
             background: var(--primary-green);
-            border-radius: 2px;
-            transition: height 0.1s;
+            border-radius: 3px;
+            transition: height 0.1s ease-out;
         }
 
         .translation-area {
-            padding: clamp(12px, 2vw, 20px);
+            padding: clamp(10px, 2vw, 15px);
             flex: 1;
             display: flex;
             flex-direction: column;
@@ -386,7 +378,7 @@
         .translation-panel {
             flex: 1;
             border: 2px solid var(--light-gold);
-            border-radius: 15px;
+            border-radius: 12px;
             padding: clamp(10px, 2vw, 15px);
             background: linear-gradient(to bottom, white, var(--cream));
             position: relative;
@@ -397,10 +389,10 @@
 
         .panel-controls {
             position: absolute;
-            top: 10px;
-            right: 10px;
+            top: 8px;
+            right: 8px;
             display: flex;
-            gap: 10px;
+            gap: 8px;
             z-index: 10;
         }
 
@@ -409,22 +401,23 @@
             align-items: center;
             background: white;
             border-radius: 20px;
-            padding: 5px;
+            padding: 4px;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         }
 
         .font-btn {
-            width: clamp(24px, 5vw, 30px);
-            height: clamp(24px, 5vw, 30px);
+            width: clamp(28px, 6vw, 32px);
+            height: clamp(28px, 6vw, 32px);
             border: none;
             background: none;
             cursor: pointer;
-            font-size: clamp(14px, 3vw, 18px);
+            font-size: clamp(16px, 3vw, 18px);
             color: var(--primary-green);
             transition: all 0.3s;
+            touch-action: manipulation;
         }
 
-        .font-btn:hover {
+        .font-btn:hover, .font-btn:active {
             background: var(--light-gold);
             border-radius: 50%;
         }
@@ -432,169 +425,57 @@
         .font-size-value {
             width: 40px;
             text-align: center;
-            font-size: 12px;
+            font-size: 11px;
             font-weight: 600;
             color: var(--primary-green);
-        }
-
-        .donation-section {
-            background: linear-gradient(135deg, rgba(212, 175, 55, 0.15), rgba(212, 175, 55, 0.05));
-            padding: clamp(20px, 4vw, 30px);
-            border-radius: 20px;
-            border: 3px solid var(--gold);
-            margin-top: clamp(15px, 2vw, 30px);
-            text-align: center;
-        }
-
-        .donation-title {
-            font-family: 'Amiri', serif;
-            font-size: clamp(20px, 5vw, 28px);
-            color: var(--primary-green);
-            margin-bottom: clamp(10px, 2vw, 15px);
-        }
-
-        .donation-subtitle {
-            color: #666;
-            font-size: clamp(12px, 2vw, 14px);
-            margin-bottom: clamp(15px, 2vw, 25px);
-        }
-
-        .button-group {
-            display: flex;
-            gap: clamp(8px, 2vw, 12px);
-            flex-wrap: wrap;
-            justify-content: center;
-            flex-shrink: 0;
-        }
-
-        .btn {
-            padding: clamp(6px, 1vw, 8px) clamp(10px, 2vw, 14px);
-            background: linear-gradient(135deg, var(--primary-green), var(--secondary-green));
-            color: white;
-            border: none;
-            border-radius: 6px;
-            font-size: clamp(9px, 1.2vw, 11px);
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            white-space: nowrap;
-            flex: 1;
-            min-width: clamp(60px, 15vw, 90px);
-        }
-
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
-        }
-
-        .btn:active {
-            transform: translateY(0);
-        }
-
-        .btn.secondary {
-            background: linear-gradient(135deg, var(--light-gold), var(--gold));
-            color: var(--dark-text);
-        }
-
-        .btn.secondary:hover {
-            box-shadow: 0 6px 20px rgba(212, 175, 55, 0.3);
-        }
-
-        .btn.danger {
-            background: linear-gradient(135deg, #ef4444, #dc2626);
-        }
-
-        .btn.small {
-            padding: clamp(8px, 1.5vw, 10px) clamp(10px, 2vw, 15px);
-            font-size: clamp(11px, 1.5vw, 12px);
-            min-width: auto;
-        }
-            font-style: italic;
-        }
-
-        .donation-methods {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-
-        .donation-method {
-            background: white;
-            padding: 20px;
-            border-radius: 15px;
-            border: 2px solid var(--light-gold);
-            cursor: pointer;
-            transition: all 0.3s;
-            text-decoration: none;
-            color: var(--primary-green);
-            display: block;
-        }
-
-        .donation-method:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 25px rgba(212, 175, 55, 0.3);
-            border-color: var(--gold);
-        }
-
-        .donation-method-icon {
-            font-size: 32px;
-            margin-bottom: 10px;
-        }
-
-        .donation-method-name {
-            font-weight: 600;
-            font-size: 16px;
-            margin-bottom: 5px;
-        }
-
-        .donation-method-info {
-            font-size: 12px;
-            color: #666;
         }
 
         .panel-header {
-            font-size: 12px;
+            font-size: clamp(12px, 2vw, 14px);
             font-weight: 700;
             color: var(--primary-green);
             text-transform: uppercase;
             letter-spacing: 1px;
-            margin-bottom: 15px;
-            padding-bottom: 10px;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
             border-bottom: 2px solid var(--light-gold);
+            flex-shrink: 0;
         }
 
         .text-content {
-            height: calc(100% - 80px);
+            flex: 1;
             overflow-y: auto;
             font-size: var(--font-size);
             line-height: 1.8;
             color: var(--dark-text);
-            padding-right: 10px;
+            padding-right: 8px;
             scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+            min-height: 150px;
         }
 
         .text-content::-webkit-scrollbar {
-            width: 8px;
+            width: 6px;
         }
 
         .text-content::-webkit-scrollbar-track {
             background: var(--cream);
-            border-radius: 4px;
+            border-radius: 3px;
         }
 
         .text-content::-webkit-scrollbar-thumb {
             background: var(--gold);
-            border-radius: 4px;
+            border-radius: 3px;
         }
 
         .sentence {
-            margin-bottom: 20px;
-            padding: 10px;
+            margin-bottom: 15px;
+            padding: 12px;
             background: rgba(244, 228, 193, 0.2);
             border-radius: 8px;
-            border-left: 3px solid var(--gold);
+            border-left: 4px solid var(--gold);
             animation: fadeIn 0.5s ease;
+            font-size: var(--font-size);
         }
 
         @keyframes fadeIn {
@@ -617,28 +498,29 @@
             text-align: right;
             font-family: 'Amiri', serif;
             border-left: none;
-            border-right: 3px solid var(--gold);
+            border-right: 4px solid var(--gold);
         }
 
         .empty {
             color: #999;
             font-style: italic;
             text-align: center;
-            margin-top: 50px;
+            margin-top: 40px;
+            font-size: clamp(13px, 2vw, 15px);
         }
 
         .actions {
-            padding: clamp(12px, 2vw, 20px);
+            padding: clamp(10px, 2vw, 15px);
             display: flex;
-            gap: clamp(8px, 2vw, 15px);
+            gap: clamp(8px, 2vw, 12px);
             justify-content: center;
             flex-wrap: wrap;
             flex-shrink: 0;
         }
 
         .btn {
-            padding: clamp(10px, 2vw, 12px) clamp(12px, 3vw, 24px);
-            font-size: clamp(12px, 2vw, 15px);
+            padding: clamp(10px, 2vw, 12px) clamp(14px, 3vw, 20px);
+            font-size: clamp(12px, 2vw, 14px);
             font-weight: 600;
             border: none;
             border-radius: 10px;
@@ -649,8 +531,10 @@
             gap: 8px;
             white-space: nowrap;
             flex: 1;
-            min-width: 80px;
+            min-width: 100px;
+            max-width: 180px;
             justify-content: center;
+            touch-action: manipulation;
         }
 
         .btn-primary {
@@ -658,7 +542,7 @@
             color: white;
         }
 
-        .btn-primary:hover {
+        .btn-primary:hover, .btn-primary:active {
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(30, 89, 54, 0.3);
         }
@@ -668,26 +552,234 @@
             color: white;
         }
 
-        .btn-secondary:hover {
+        .btn-secondary:hover, .btn-secondary:active {
             background: #c49f30;
             transform: translateY(-2px);
         }
 
+        /* Tutorial Overlay Styles */
+        .tutorial-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .tutorial-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .tutorial-card {
+            background: white;
+            border-radius: 20px;
+            max-width: 450px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+            animation: slideUp 0.4s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .tutorial-header {
+            background: linear-gradient(135deg, var(--primary-green), var(--secondary-green));
+            color: white;
+            padding: 25px;
+            text-align: center;
+            border-radius: 20px 20px 0 0;
+        }
+
+        .tutorial-header h2 {
+            font-family: 'Amiri', serif;
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+
+        .tutorial-header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .tutorial-steps {
+            padding: 25px;
+        }
+
+        .tutorial-step {
+            display: none;
+        }
+
+        .tutorial-step.active {
+            display: block;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .step-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, var(--light-gold), var(--gold));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+            margin: 0 auto 20px;
+        }
+
+        .step-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--primary-green);
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .step-description {
+            font-size: 15px;
+            color: #555;
+            text-align: center;
+            line-height: 1.7;
+            margin-bottom: 20px;
+        }
+
+        .step-tip {
+            background: rgba(212, 175, 55, 0.1);
+            border-left: 4px solid var(--gold);
+            padding: 12px 15px;
+            border-radius: 0 8px 8px 0;
+            font-size: 13px;
+            color: #666;
+        }
+
+        .step-tip strong {
+            color: var(--primary-green);
+        }
+
+        .tutorial-progress {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin: 20px 0;
+        }
+
+        .progress-dot {
+            width: 10px;
+            height: 10px;
+            background: #ddd;
+            border-radius: 50%;
+            transition: all 0.3s;
+        }
+
+        .progress-dot.active {
+            background: var(--gold);
+            transform: scale(1.2);
+        }
+
+        .progress-dot.completed {
+            background: var(--primary-green);
+        }
+
+        .tutorial-nav {
+            display: flex;
+            gap: 12px;
+            padding: 20px 25px 25px;
+            border-top: 1px solid #eee;
+        }
+
+        .tutorial-btn {
+            flex: 1;
+            padding: 14px 20px;
+            border: none;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .tutorial-btn.skip {
+            background: #f0f0f0;
+            color: #666;
+        }
+
+        .tutorial-btn.skip:hover {
+            background: #e0e0e0;
+        }
+
+        .tutorial-btn.next {
+            background: linear-gradient(135deg, var(--primary-green), var(--secondary-green));
+            color: white;
+        }
+
+        .tutorial-btn.next:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(30, 89, 54, 0.3);
+        }
+
+        .tutorial-btn.finish {
+            background: linear-gradient(135deg, var(--gold), #c49f30);
+            color: white;
+        }
+
+        /* Help Button */
+        .help-btn {
+            position: fixed;
+            bottom: 80px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, var(--gold), #c49f30);
+            border: none;
+            border-radius: 50%;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(212, 175, 55, 0.4);
+            z-index: 1000;
+            transition: all 0.3s;
+            touch-action: manipulation;
+        }
+
+        .help-btn:hover, .help-btn:active {
+            transform: scale(1.1);
+        }
+
+        /* Settings & About styles */
         .settings-content {
             max-width: 600px;
             margin: 0 auto;
         }
 
         .setting-group {
-            margin-bottom: 30px;
+            margin-bottom: 25px;
             padding: 20px;
             background: var(--cream);
-            border-radius: 10px;
+            border-radius: 12px;
             border: 1px solid var(--light-gold);
         }
 
         .setting-title {
-            font-size: 18px;
+            font-size: 16px;
             font-weight: 600;
             color: var(--primary-green);
             margin-bottom: 15px;
@@ -696,29 +788,44 @@
             gap: 10px;
         }
 
+        .setting-label {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .setting-label input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            accent-color: var(--primary-green);
+        }
+
         .about-content {
             max-width: 700px;
             margin: 0 auto;
-            padding: 30px;
+            padding: 20px;
             text-align: center;
         }
 
         .about-content h2 {
             font-family: 'Amiri', serif;
-            font-size: 32px;
+            font-size: 28px;
             color: var(--primary-green);
             margin-bottom: 20px;
         }
 
         .about-content p {
-            font-size: 16px;
+            font-size: 15px;
             line-height: 1.8;
             color: #555;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
 
         .developer-info {
-            margin-top: 30px;
+            margin-top: 25px;
             padding: 25px;
             background: linear-gradient(135deg, var(--cream), white);
             border-radius: 15px;
@@ -733,16 +840,182 @@
 
         .bismillah {
             font-family: 'Amiri', serif;
-            font-size: 24px;
+            font-size: 22px;
             color: var(--gold);
-            margin: 20px 0;
+            margin: 15px 0;
+        }
+
+        /* Contact styles */
+        .contact-content {
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .contact-content h2 {
+            font-family: 'Amiri', serif;
+            font-size: 28px;
+            color: var(--primary-green);
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .contact-card {
+            background: var(--cream);
+            padding: 25px;
+            border-radius: 15px;
+            border: 2px solid var(--light-gold);
+            margin-bottom: 25px;
+        }
+
+        .contact-card h3 {
+            font-size: 22px;
+            color: var(--primary-green);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            background: white;
+            border-radius: 10px;
+            margin-bottom: 12px;
+        }
+
+        .contact-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .contact-icon {
+            font-size: 24px;
+        }
+
+        .contact-details {
+            flex: 1;
+        }
+
+        .contact-label {
+            font-size: 11px;
+            color: #666;
+            margin-bottom: 3px;
+        }
+
+        .contact-link {
+            color: var(--primary-green);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+            word-break: break-all;
+        }
+
+        .donation-section {
+            background: linear-gradient(135deg, rgba(212, 175, 55, 0.15), rgba(212, 175, 55, 0.05));
+            padding: 25px;
+            border-radius: 15px;
+            border: 2px solid var(--gold);
+            margin-top: 25px;
+            text-align: center;
+        }
+
+        .donation-title {
+            font-family: 'Amiri', serif;
+            font-size: 24px;
+            color: var(--primary-green);
+            margin-bottom: 10px;
+        }
+
+        .donation-subtitle {
+            color: #666;
+            font-size: 13px;
+            margin-bottom: 20px;
+            font-style: italic;
+        }
+
+        .donation-methods {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .donation-method {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            border: 2px solid var(--light-gold);
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            color: var(--primary-green);
+            display: block;
+        }
+
+        .donation-method:hover, .donation-method:active {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(212, 175, 55, 0.3);
+            border-color: var(--gold);
+        }
+
+        .donation-method-icon {
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+
+        .donation-method-name {
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 3px;
+        }
+
+        .donation-method-info {
+            font-size: 11px;
+            color: #666;
+        }
+
+        .feedback-section {
+            background: linear-gradient(135deg, rgba(212, 175, 55, 0.1), rgba(212, 175, 55, 0.05));
+            padding: 25px;
+            border-radius: 15px;
+            border: 2px solid var(--light-gold);
+            margin-top: 25px;
+        }
+
+        .feedback-section h3 {
+            font-size: 18px;
+            color: var(--primary-green);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .feedback-input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid var(--light-gold);
+            border-radius: 8px;
+            font-size: 14px;
+            margin-bottom: 12px;
+            font-family: inherit;
+        }
+
+        .feedback-input:focus {
+            outline: none;
+            border-color: var(--gold);
+        }
+
+        textarea.feedback-input {
+            resize: vertical;
+            min-height: 100px;
         }
 
         .visitor-info {
-            padding: 15px 20px;
+            padding: 12px 20px;
             text-align: center;
             background: linear-gradient(90deg, rgba(212, 175, 55, 0.05), rgba(212, 175, 55, 0.1));
             border-top: 1px solid var(--light-gold);
+            flex-shrink: 0;
         }
 
         .visitor-info img {
@@ -764,10 +1037,10 @@
         }
 
         .loader-circle {
-            width: 60px;
-            height: 60px;
-            border: 5px solid var(--cream);
-            border-top: 5px solid var(--gold);
+            width: 50px;
+            height: 50px;
+            border: 4px solid var(--cream);
+            border-top: 4px solid var(--gold);
             border-radius: 50%;
             animation: spin 1s linear infinite;
         }
@@ -777,116 +1050,79 @@
             100% { transform: rotate(360deg); }
         }
 
-        @media (max-width: 1024px) {
-            .lang-row {
-                grid-template-columns: 1fr auto 1fr;
+        /* Android-specific fixes */
+        @supports (-webkit-touch-callout: none) {
+            .app-container {
+                min-height: -webkit-fill-available;
             }
         }
 
+        /* Mobile responsiveness */
         @media (max-width: 768px) {
             .app-container {
-                padding: 8px;
+                padding: 6px;
                 gap: 6px;
             }
 
             .header {
-                padding: clamp(10px, 3vw, 15px);
-                border-radius: 10px 10px 0 0;
+                padding: clamp(10px, 2vw, 15px);
             }
 
             .header h1 {
-                font-size: clamp(18px, 5vw, 24px);
-                margin-bottom: clamp(4px, 1vw, 6px);
-            }
-
-            .header p {
-                font-size: clamp(11px, 2.5vw, 14px);
+                font-size: clamp(16px, 4vw, 20px);
             }
 
             .nav-tab {
-                font-size: clamp(11px, 2vw, 12px);
-                min-width: 90px;
-                padding: clamp(8px, 1.5vw, 12px) clamp(6px, 1vw, 10px);
-            }
-
-            .content-area {
-                border-radius: 0 0 10px 10px;
+                font-size: clamp(11px, 2.5vw, 13px);
+                min-width: 70px;
+                padding: clamp(10px, 2vw, 12px) clamp(8px, 1.5vw, 12px);
             }
 
             .lang-row {
-                grid-template-columns: 1fr auto 1fr;
-                gap: clamp(8px, 1.5vw, 12px);
-            }
-
-            .controls {
-                padding: clamp(10px, 1.5vw, 15px);
-                gap: clamp(8px, 1.5vw, 12px);
-            }
-
-            .lang-select {
-                height: clamp(38px, 7vw, 42px);
-                font-size: clamp(12px, 1.8vw, 14px);
-            }
-
-            .status {
-                padding: clamp(8px, 1.5vw, 10px) clamp(10px, 1.5vw, 15px);
-                font-size: clamp(11px, 1.8vw, 12px);
                 gap: 8px;
             }
 
-            .status-text {
-                font-size: clamp(11px, 1.8vw, 12px);
+            .lang-select {
+                height: clamp(42px, 8vw, 48px);
+                font-size: clamp(13px, 2.5vw, 15px);
             }
 
             .mic-button {
-                width: clamp(50px, 12vw, 65px);
-                height: clamp(50px, 12vw, 65px);
-                font-size: clamp(22px, 4.5vw, 28px);
+                width: clamp(60px, 15vw, 70px);
+                height: clamp(60px, 15vw, 70px);
+                font-size: clamp(26px, 6vw, 32px);
             }
 
             .audio-visualizer {
-                height: clamp(35px, 7vw, 50px);
-                margin: clamp(8px, 1.5vw, 12px) 0;
+                height: clamp(45px, 10vw, 55px);
             }
 
-            .translation-area {
-                padding: clamp(10px, 1.5vw, 15px);
-            }
-
-            .translation-panel {
-                padding: clamp(8px, 1.5vw, 12px);
-            }
-
-            .panel-header {
-                font-size: clamp(13px, 2vw, 16px);
-            }
-
-            #translatedText {
-                padding: clamp(8px, 1.5vw, 12px);
-                gap: clamp(6px, 1vw, 10px);
+            .audio-bar {
+                width: 6px;
             }
 
             .sentence {
-                font-size: clamp(13px, 2vw, 16px);
-                line-height: 1.4;
-            }
-
-            .actions {
-                padding: clamp(10px, 1.5vw, 15px);
-                gap: clamp(6px, 1.5vw, 10px);
+                font-size: clamp(14px, 3vw, 16px);
+                padding: 14px;
             }
 
             .btn {
-                min-width: 70px;
-                padding: clamp(8px, 1.5vw, 10px) clamp(10px, 2vw, 16px);
-                font-size: clamp(11px, 1.8vw, 13px);
-                flex: 1;
+                padding: clamp(12px, 2.5vw, 14px) clamp(16px, 3vw, 20px);
+                font-size: clamp(13px, 2.5vw, 15px);
+            }
+
+            .help-btn {
+                bottom: 70px;
+                right: 15px;
+                width: 45px;
+                height: 45px;
+                font-size: 20px;
             }
         }
 
         @media (max-width: 480px) {
             .app-container {
-                padding: 6px;
+                padding: 4px;
                 gap: 4px;
             }
 
@@ -896,129 +1132,142 @@
             }
 
             .header h1 {
-                font-size: clamp(16px, 4.5vw, 20px);
-                margin-bottom: 3px;
-            }
-
-            .header p {
-                font-size: clamp(10px, 2vw, 12px);
-            }
-
-            .nav-tabs {
-                overflow-x: auto;
+                font-size: clamp(14px, 3.5vw, 18px);
             }
 
             .nav-tab {
-                font-size: clamp(10px, 2vw, 11px);
-                min-width: 70px;
-                padding: clamp(7px, 1.2vw, 10px) clamp(5px, 1vw, 8px);
-            }
-
-            .lang-row {
-                grid-template-columns: 1fr auto 1fr;
-                gap: 6px;
-            }
-
-            .lang-label {
-                font-size: clamp(10px, 1.8vw, 11px);
-            }
-
-            .lang-select {
-                height: clamp(35px, 6vw, 40px);
-                font-size: clamp(11px, 1.6vw, 12px);
-                padding: 0 clamp(8px, 1.5vw, 10px);
+                font-size: clamp(10px, 2.2vw, 12px);
+                min-width: 60px;
+                padding: clamp(8px, 1.5vw, 10px) clamp(6px, 1vw, 8px);
             }
 
             .controls {
-                padding: clamp(8px, 1.2vw, 12px);
-                gap: 6px;
+                padding: clamp(8px, 1.5vw, 10px);
+                gap: 8px;
             }
 
-            .status {
-                padding: clamp(6px, 1.2vw, 8px) clamp(8px, 1.2vw, 10px);
-                font-size: clamp(10px, 1.6vw, 11px);
+            .lang-label {
+                font-size: clamp(9px, 2vw, 11px);
             }
 
-            .status-dot {
-                width: 10px;
-                height: 10px;
-            }
-
-            .status-text {
-                font-size: clamp(10px, 1.6vw, 11px);
+            .lang-select {
+                height: clamp(38px, 7vw, 44px);
+                font-size: clamp(12px, 2.2vw, 14px);
             }
 
             .mic-button {
-                width: clamp(45px, 10vw, 55px);
-                height: clamp(45px, 10vw, 55px);
-                font-size: clamp(20px, 4vw, 24px);
+                width: clamp(55px, 14vw, 65px);
+                height: clamp(55px, 14vw, 65px);
+                font-size: clamp(24px, 5.5vw, 30px);
+            }
+
+            .status {
+                padding: clamp(8px, 1.5vw, 10px);
+                font-size: clamp(10px, 2vw, 12px);
             }
 
             .audio-visualizer {
-                height: clamp(30px, 6vw, 40px);
-                margin: 6px 0;
-                gap: 2px;
+                height: clamp(38px, 8vw, 45px);
+                gap: 3px;
             }
 
             .audio-bar {
-                width: 3px;
+                width: 4px;
             }
 
             .translation-area {
-                padding: clamp(8px, 1.2vw, 10px);
+                padding: clamp(8px, 1.5vw, 10px);
             }
 
             .translation-panel {
-                padding: clamp(6px, 1.2vw, 8px);
+                padding: clamp(8px, 1.5vw, 10px);
             }
 
             .panel-header {
-                font-size: clamp(12px, 1.8vw, 14px);
-            }
-
-            .panel-controls {
-                top: 5px;
-                right: 5px;
+                font-size: clamp(11px, 2vw, 13px);
             }
 
             .font-btn {
-                width: clamp(20px, 4vw, 24px);
-                height: clamp(20px, 4vw, 24px);
-                font-size: clamp(12px, 2.5vw, 14px);
+                width: clamp(26px, 5vw, 30px);
+                height: clamp(26px, 5vw, 30px);
+                font-size: clamp(14px, 2.5vw, 16px);
             }
 
-            .font-size-value {
-                font-size: 10px;
-            }
-
-            #translatedText {
-                padding: clamp(6px, 1.2vw, 8px);
-                gap: 5px;
+            .text-content {
+                min-height: 120px;
             }
 
             .sentence {
-                font-size: clamp(12px, 1.8vw, 14px);
-                line-height: 1.3;
-            }
-
-            .empty {
-                font-size: clamp(11px, 1.6vw, 12px);
+                font-size: clamp(13px, 2.8vw, 15px);
+                padding: 10px;
+                margin-bottom: 10px;
             }
 
             .actions {
-                padding: clamp(8px, 1.2vw, 10px);
-                gap: 4px;
+                padding: clamp(8px, 1.5vw, 10px);
+                gap: 6px;
             }
 
             .btn {
-                min-width: 60px;
-                padding: clamp(6px, 1vw, 8px) clamp(8px, 1.5vw, 12px);
-                font-size: clamp(10px, 1.6vw, 11px);
-                flex: 1;
+                padding: clamp(10px, 2vw, 12px) clamp(12px, 2.5vw, 16px);
+                font-size: clamp(11px, 2.2vw, 13px);
+                min-width: 85px;
             }
 
-            .btn span:first-child {
-                font-size: clamp(14px, 2.5vw, 16px);
+            .tutorial-card {
+                max-height: 85vh;
+            }
+
+            .tutorial-header {
+                padding: 20px;
+            }
+
+            .tutorial-header h2 {
+                font-size: 20px;
+            }
+
+            .step-icon {
+                width: 65px;
+                height: 65px;
+                font-size: 28px;
+            }
+
+            .step-title {
+                font-size: 18px;
+            }
+
+            .step-description {
+                font-size: 14px;
+            }
+
+            .help-btn {
+                bottom: 65px;
+                right: 12px;
+                width: 42px;
+                height: 42px;
+                font-size: 18px;
+            }
+        }
+
+        /* Landscape orientation fix for mobile */
+        @media (max-height: 500px) and (orientation: landscape) {
+            .app-container {
+                height: auto;
+                min-height: 100vh;
+            }
+
+            .controls {
+                max-height: none;
+            }
+
+            .mic-button {
+                width: 50px;
+                height: 50px;
+                font-size: 22px;
+            }
+
+            .audio-visualizer {
+                height: 35px;
             }
         }
     </style>
@@ -1027,6 +1276,110 @@
     <div class="loader" id="loader">
         <div class="loader-circle"></div>
     </div>
+
+    <!-- Tutorial Overlay -->
+    <div class="tutorial-overlay" id="tutorialOverlay">
+        <div class="tutorial-card">
+            <div class="tutorial-header">
+                <h2>بِسْمِ اللَّهِ</h2>
+                <p>Welcome to Khutbah Live Translator</p>
+            </div>
+            
+            <div class="tutorial-steps">
+                <!-- Step 1 -->
+                <div class="tutorial-step active" data-step="1">
+                    <div class="step-icon">🕌</div>
+                    <div class="step-title">Welcome, Brother/Sister!</div>
+                    <div class="step-description">
+                        This app translates Friday sermons (Khutbah) in real-time, helping Muslims worldwide understand the beautiful teachings regardless of language barriers.
+                    </div>
+                    <div class="step-tip">
+                        <strong>💡 Tip:</strong> You can use this app in any mosque or while watching online sermons.
+                    </div>
+                </div>
+
+                <!-- Step 2 -->
+                <div class="tutorial-step" data-step="2">
+                    <div class="step-icon">🌍</div>
+                    <div class="step-title">Select Languages</div>
+                    <div class="step-description">
+                        Choose the <strong>Source Language</strong> (what the Imam speaks) and <strong>Translation Language</strong> (your preferred language). We support 30+ languages including Arabic dialects and Latin American Spanish!
+                    </div>
+                    <div class="step-tip">
+                        <strong>💡 Tip:</strong> If the Imam speaks Arabic, select the specific dialect (Saudi, Egyptian, etc.) for better accuracy.
+                    </div>
+                </div>
+
+                <!-- Step 3 -->
+                <div class="tutorial-step" data-step="3">
+                    <div class="step-icon">🎤</div>
+                    <div class="step-title">Start Listening</div>
+                    <div class="step-description">
+                        Tap the <strong>green microphone button</strong> to start. The app will listen to the sermon and translate it automatically. You'll see the audio visualizer moving when speech is detected.
+                    </div>
+                    <div class="step-tip">
+                        <strong>💡 Tip:</strong> Position your phone near the speaker for best results. Allow microphone permission when prompted.
+                    </div>
+                </div>
+
+                <!-- Step 4 -->
+                <div class="tutorial-step" data-step="4">
+                    <div class="step-icon">📱</div>
+                    <div class="step-title">Android Users</div>
+                    <div class="step-description">
+                        <strong>Important for Android:</strong> Use <strong>Chrome browser</strong> for best experience. Enable "Desktop site" if you face issues. Keep the screen on and the app in foreground during use.
+                    </div>
+                    <div class="step-tip">
+                        <strong>💡 Tip:</strong> Go to Settings > Adjust microphone sensitivity if speech isn't being detected properly.
+                    </div>
+                </div>
+
+                <!-- Step 5 -->
+                <div class="tutorial-step" data-step="5">
+                    <div class="step-icon">✨</div>
+                    <div class="step-title">Additional Features</div>
+                    <div class="step-description">
+                        <strong>Save Transcript:</strong> Download the translation as a text file<br>
+                        <strong>Record Audio:</strong> Save the sermon audio<br>
+                        <strong>Font Size:</strong> Adjust text size using +/- buttons<br>
+                        <strong>Clear:</strong> Remove all translations
+                    </div>
+                    <div class="step-tip">
+                        <strong>💡 Tip:</strong> Tap the <strong>?</strong> button anytime to see this tutorial again.
+                    </div>
+                </div>
+
+                <!-- Step 6 -->
+                <div class="tutorial-step" data-step="6">
+                    <div class="step-icon">🤲</div>
+                    <div class="step-title">You're Ready!</div>
+                    <div class="step-description">
+                        May Allah bless you and benefit you from this tool. This app is <strong>completely free</strong> and made with love for the Muslim Ummah. Please share it with others who might benefit!
+                    </div>
+                    <div class="step-tip">
+                        <strong>دعاء:</strong> اللهم علمنا ما ينفعنا وانفعنا بما علمتنا
+                    </div>
+                </div>
+            </div>
+
+            <div class="tutorial-progress">
+                <div class="progress-dot active" data-dot="1"></div>
+                <div class="progress-dot" data-dot="2"></div>
+                <div class="progress-dot" data-dot="3"></div>
+                <div class="progress-dot" data-dot="4"></div>
+                <div class="progress-dot" data-dot="5"></div>
+                <div class="progress-dot" data-dot="6"></div>
+            </div>
+
+            <div class="tutorial-nav">
+                <button class="tutorial-btn skip" onclick="closeTutorial()">Skip</button>
+                <button class="tutorial-btn next" id="tutorialNextBtn" onclick="nextTutorialStep()">Next →</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Help Button -->
+    <button class="help-btn" onclick="showTutorial()" title="How to use">?</button>
 
     <div class="app-container">
         <div class="header">
@@ -1050,27 +1403,111 @@
                         <div class="lang-group">
                             <label class="lang-label">Source Language</label>
                             <select class="lang-select" id="inputLang">
-                                <option value="ar-SA">Arabic (Saudi)</option>
-                                <option value="ar-EG">Arabic (Egyptian)</option>
-                                <option value="ar-AE">Arabic (UAE)</option>
-                                <option value="ar-MA">Arabic (Moroccan)</option>
-                                <option value="en-US">English</option>
-                                <option value="ur-PK">Urdu</option>
-                                <option value="id-ID">Indonesian</option>
-                                <option value="ms-MY">Malay</option>
-                                <option value="tr-TR">Turkish</option>
-                                <option value="fa-IR">Farsi/Persian</option>
-                                <option value="bn-BD">Bengali</option>
-                                <option value="ps-AF">Pashto</option>
-                                <option value="so-SO">Somali</option>
-                                <option value="ha-NG">Hausa</option>
-                                <option value="sw-KE">Swahili</option>
-                                <option value="fr-FR">French</option>
-                                <option value="de-DE">German</option>
-                                <option value="es-ES">Spanish</option>
-                                <option value="ru-RU">Russian</option>
-                                <option value="zh-CN">Chinese (Mandarin)</option>
-                                <option value="hi-IN">Hindi</option>
+                                <optgroup label="Arabic Dialects">
+                                    <option value="ar-SA">Arabic (Saudi)</option>
+                                    <option value="ar-EG">Arabic (Egyptian)</option>
+                                    <option value="ar-AE">Arabic (UAE)</option>
+                                    <option value="ar-MA">Arabic (Moroccan)</option>
+                                    <option value="ar-DZ">Arabic (Algerian)</option>
+                                    <option value="ar-TN">Arabic (Tunisian)</option>
+                                    <option value="ar-LY">Arabic (Libyan)</option>
+                                    <option value="ar-JO">Arabic (Jordanian)</option>
+                                    <option value="ar-LB">Arabic (Lebanese)</option>
+                                    <option value="ar-SY">Arabic (Syrian)</option>
+                                    <option value="ar-IQ">Arabic (Iraqi)</option>
+                                    <option value="ar-KW">Arabic (Kuwaiti)</option>
+                                    <option value="ar-QA">Arabic (Qatari)</option>
+                                    <option value="ar-BH">Arabic (Bahraini)</option>
+                                    <option value="ar-OM">Arabic (Omani)</option>
+                                    <option value="ar-YE">Arabic (Yemeni)</option>
+                                    <option value="ar-SD">Arabic (Sudanese)</option>
+                                </optgroup>
+                                <optgroup label="South Asian">
+                                    <option value="ur-PK">Urdu (Pakistan)</option>
+                                    <option value="ur-IN">Urdu (India)</option>
+                                    <option value="hi-IN">Hindi</option>
+                                    <option value="bn-BD">Bengali (Bangladesh)</option>
+                                    <option value="bn-IN">Bengali (India)</option>
+                                    <option value="ta-IN">Tamil</option>
+                                    <option value="ml-IN">Malayalam</option>
+                                    <option value="gu-IN">Gujarati</option>
+                                    <option value="pa-IN">Punjabi</option>
+                                    <option value="si-LK">Sinhala</option>
+                                </optgroup>
+                                <optgroup label="Southeast Asian">
+                                    <option value="id-ID">Indonesian</option>
+                                    <option value="ms-MY">Malay (Malaysia)</option>
+                                    <option value="ms-SG">Malay (Singapore)</option>
+                                    <option value="tl-PH">Tagalog/Filipino</option>
+                                    <option value="th-TH">Thai</option>
+                                    <option value="vi-VN">Vietnamese</option>
+                                </optgroup>
+                                <optgroup label="Middle Eastern & Central Asian">
+                                    <option value="tr-TR">Turkish</option>
+                                    <option value="fa-IR">Farsi/Persian</option>
+                                    <option value="ps-AF">Pashto</option>
+                                    <option value="ku-TR">Kurdish</option>
+                                    <option value="az-AZ">Azerbaijani</option>
+                                    <option value="uz-UZ">Uzbek</option>
+                                    <option value="kk-KZ">Kazakh</option>
+                                </optgroup>
+                                <optgroup label="African">
+                                    <option value="sw-KE">Swahili (Kenya)</option>
+                                    <option value="sw-TZ">Swahili (Tanzania)</option>
+                                    <option value="ha-NG">Hausa (Nigeria)</option>
+                                    <option value="so-SO">Somali</option>
+                                    <option value="am-ET">Amharic</option>
+                                    <option value="yo-NG">Yoruba</option>
+                                    <option value="zu-ZA">Zulu</option>
+                                </optgroup>
+                                <optgroup label="European">
+                                    <option value="en-US">English (US)</option>
+                                    <option value="en-GB">English (UK)</option>
+                                    <option value="en-AU">English (Australia)</option>
+                                    <option value="fr-FR">French (France)</option>
+                                    <option value="fr-CA">French (Canada)</option>
+                                    <option value="de-DE">German</option>
+                                    <option value="nl-NL">Dutch</option>
+                                    <option value="it-IT">Italian</option>
+                                    <option value="pt-PT">Portuguese (Portugal)</option>
+                                    <option value="ru-RU">Russian</option>
+                                    <option value="uk-UA">Ukrainian</option>
+                                    <option value="pl-PL">Polish</option>
+                                    <option value="ro-RO">Romanian</option>
+                                    <option value="el-GR">Greek</option>
+                                    <option value="bs-BA">Bosnian</option>
+                                    <option value="sq-AL">Albanian</option>
+                                </optgroup>
+                                <optgroup label="Spanish & Latin American">
+                                    <option value="es-ES">Spanish (Spain)</option>
+                                    <option value="es-MX">Spanish (Mexico)</option>
+                                    <option value="es-AR">Spanish (Argentina)</option>
+                                    <option value="es-CO">Spanish (Colombia)</option>
+                                    <option value="es-CL">Spanish (Chile)</option>
+                                    <option value="es-PE">Spanish (Peru)</option>
+                                    <option value="es-VE">Spanish (Venezuela)</option>
+                                    <option value="es-EC">Spanish (Ecuador)</option>
+                                    <option value="es-GT">Spanish (Guatemala)</option>
+                                    <option value="es-CU">Spanish (Cuba)</option>
+                                    <option value="es-BO">Spanish (Bolivia)</option>
+                                    <option value="es-DO">Spanish (Dominican Rep.)</option>
+                                    <option value="es-HN">Spanish (Honduras)</option>
+                                    <option value="es-PY">Spanish (Paraguay)</option>
+                                    <option value="es-SV">Spanish (El Salvador)</option>
+                                    <option value="es-NI">Spanish (Nicaragua)</option>
+                                    <option value="es-CR">Spanish (Costa Rica)</option>
+                                    <option value="es-PA">Spanish (Panama)</option>
+                                    <option value="es-UY">Spanish (Uruguay)</option>
+                                    <option value="es-PR">Spanish (Puerto Rico)</option>
+                                    <option value="pt-BR">Portuguese (Brazil)</option>
+                                </optgroup>
+                                <optgroup label="East Asian">
+                                    <option value="zh-CN">Chinese (Mandarin)</option>
+                                    <option value="zh-TW">Chinese (Taiwan)</option>
+                                    <option value="zh-HK">Chinese (Cantonese)</option>
+                                    <option value="ja-JP">Japanese</option>
+                                    <option value="ko-KR">Korean</option>
+                                </optgroup>
                             </select>
                         </div>
 
@@ -1081,24 +1518,66 @@
                         <div class="lang-group">
                             <label class="lang-label">Translation Language</label>
                             <select class="lang-select" id="outputLang">
-                                <option value="en">English</option>
-                                <option value="ar">Arabic</option>
-                                <option value="ur">Urdu</option>
-                                <option value="id">Indonesian</option>
-                                <option value="ms">Malay</option>
-                                <option value="tr">Turkish</option>
-                                <option value="fa">Farsi/Persian</option>
-                                <option value="bn">Bengali</option>
-                                <option value="ps">Pashto</option>
-                                <option value="so">Somali</option>
-                                <option value="ha">Hausa</option>
-                                <option value="sw">Swahili</option>
-                                <option value="fr">French</option>
-                                <option value="de">German</option>
-                                <option value="es">Spanish</option>
-                                <option value="ru">Russian</option>
-                                <option value="zh">Chinese</option>
-                                <option value="hi">Hindi</option>
+                                <optgroup label="Most Common">
+                                    <option value="en">English</option>
+                                    <option value="ar">Arabic</option>
+                                    <option value="ur">Urdu</option>
+                                    <option value="id">Indonesian</option>
+                                    <option value="ms">Malay</option>
+                                    <option value="tr">Turkish</option>
+                                </optgroup>
+                                <optgroup label="South Asian">
+                                    <option value="hi">Hindi</option>
+                                    <option value="bn">Bengali</option>
+                                    <option value="ta">Tamil</option>
+                                    <option value="ml">Malayalam</option>
+                                    <option value="gu">Gujarati</option>
+                                    <option value="pa">Punjabi</option>
+                                    <option value="si">Sinhala</option>
+                                </optgroup>
+                                <optgroup label="Southeast Asian">
+                                    <option value="tl">Tagalog/Filipino</option>
+                                    <option value="th">Thai</option>
+                                    <option value="vi">Vietnamese</option>
+                                </optgroup>
+                                <optgroup label="Middle Eastern & Central Asian">
+                                    <option value="fa">Farsi/Persian</option>
+                                    <option value="ps">Pashto</option>
+                                    <option value="ku">Kurdish</option>
+                                    <option value="az">Azerbaijani</option>
+                                    <option value="uz">Uzbek</option>
+                                    <option value="kk">Kazakh</option>
+                                </optgroup>
+                                <optgroup label="African">
+                                    <option value="sw">Swahili</option>
+                                    <option value="ha">Hausa</option>
+                                    <option value="so">Somali</option>
+                                    <option value="am">Amharic</option>
+                                    <option value="yo">Yoruba</option>
+                                    <option value="zu">Zulu</option>
+                                </optgroup>
+                                <optgroup label="European">
+                                    <option value="fr">French</option>
+                                    <option value="de">German</option>
+                                    <option value="nl">Dutch</option>
+                                    <option value="it">Italian</option>
+                                    <option value="ru">Russian</option>
+                                    <option value="uk">Ukrainian</option>
+                                    <option value="pl">Polish</option>
+                                    <option value="ro">Romanian</option>
+                                    <option value="el">Greek</option>
+                                    <option value="bs">Bosnian</option>
+                                    <option value="sq">Albanian</option>
+                                </optgroup>
+                                <optgroup label="Spanish & Portuguese">
+                                    <option value="es">Spanish</option>
+                                    <option value="pt">Portuguese</option>
+                                </optgroup>
+                                <optgroup label="East Asian">
+                                    <option value="zh">Chinese</option>
+                                    <option value="ja">Japanese</option>
+                                    <option value="ko">Korean</option>
+                                </optgroup>
                             </select>
                         </div>
                     </div>
@@ -1114,12 +1593,14 @@
                         <div class="audio-bar"></div>
                         <div class="audio-bar"></div>
                         <div class="audio-bar"></div>
+                        <div class="audio-bar"></div>
+                        <div class="audio-bar"></div>
                     </div>
 
                     <div class="status">
                         <div class="status-info">
                             <div class="status-dot" id="statusDot"></div>
-                            <span class="status-text" id="statusText">Click microphone to start</span>
+                            <span class="status-text" id="statusText">Tap microphone to start</span>
                         </div>
                     </div>
                 </div>
@@ -1135,7 +1616,7 @@
                         </div>
                         <div class="panel-header">Live Translation</div>
                         <div class="text-content" id="translatedText">
-                            <div class="empty">Click the microphone button to start listening...</div>
+                            <div class="empty">Tap the microphone button to start listening...</div>
                         </div>
                     </div>
                 </div>
@@ -1147,11 +1628,11 @@
                     </button>
                     <button class="btn btn-secondary" onclick="saveTranscript()">
                         <span>💾</span>
-                        Save Transcript
+                        Save
                     </button>
                     <button class="btn btn-secondary" id="recordBtn" onclick="toggleRecording()">
                         <span>⏺️</span>
-                        <span id="recordText">Record Audio</span>
+                        <span id="recordText">Record</span>
                     </button>
                 </div>
             </div>
@@ -1161,11 +1642,11 @@
                 <div class="settings-content">
                     <div class="setting-group">
                         <div class="setting-title">⚙️ Translation Settings</div>
-                        <label style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                        <label class="setting-label">
                             <input type="checkbox" id="instantTranslate" checked>
                             <span>Instant translation (translate as you speak)</span>
                         </label>
-                        <label style="display: flex; align-items: center; gap: 10px;">
+                        <label class="setting-label">
                             <input type="checkbox" id="autoDetectDialects" checked>
                             <span>Auto-detect regional dialects</span>
                         </label>
@@ -1173,22 +1654,26 @@
 
                     <div class="setting-group">
                         <div class="setting-title">🎨 Display Settings</div>
-                        <label style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                        <label class="setting-label">
                             <input type="checkbox" id="autoScroll" checked>
                             <span>Auto-scroll to latest translation</span>
                         </label>
-                        <label style="display: flex; align-items: center; gap: 10px;">
+                        <label class="setting-label">
                             <input type="checkbox" id="highlightLatest" checked>
                             <span>Highlight latest translation</span>
+                        </label>
+                        <label class="setting-label">
+                            <input type="checkbox" id="keepScreenOn" checked>
+                            <span>Keep screen on while listening (Android)</span>
                         </label>
                     </div>
 
                     <div class="setting-group">
                         <div class="setting-title">🎙️ Microphone Sensitivity</div>
                         <label style="display: block; margin-bottom: 10px;">
-                            <span>Volume Threshold: <span id="thresholdValue">15</span></span>
+                            <span>Volume Threshold: <strong id="thresholdValue">15</strong></span>
                             <input type="range" id="volumeThreshold" min="5" max="50" value="15" 
-                                   style="width: 100%; margin-top: 10px;" 
+                                   style="width: 100%; margin-top: 10px; accent-color: var(--primary-green);" 
                                    oninput="updateThreshold(this.value)">
                         </label>
                         <p style="font-size: 12px; color: #666; margin-top: 10px;">
@@ -1198,7 +1683,21 @@
                     </div>
 
                     <div class="setting-group">
-                        <button class="btn btn-primary" onclick="saveSettings()">Save Settings</button>
+                        <div class="setting-title">📱 Android Troubleshooting</div>
+                        <p style="font-size: 13px; color: #555; line-height: 1.6;">
+                            <strong>If speech recognition doesn't work:</strong><br>
+                            1. Use Chrome browser (recommended)<br>
+                            2. Allow microphone permission<br>
+                            3. Disable battery optimization for Chrome<br>
+                            4. Keep app in foreground<br>
+                            5. Try refreshing the page
+                        </p>
+                    </div>
+
+                    <div class="setting-group">
+                        <button class="btn btn-primary" onclick="saveSettings()" style="width: 100%;">
+                            💾 Save Settings
+                        </button>
                     </div>
                 </div>
             </div>
@@ -1218,7 +1717,7 @@
                             I was moved when a Muslim brother shared with me that he couldn't understand a single word of what the Sheikh was saying during the khutbah. Despite being in the same congregation, praising the same Allah, the language barrier prevented him from receiving the spiritual guidance being shared.
                         </p>
                         <p>
-                            This encounter inspired me to create this tool - a bridge for Muslims worldwide to understand the beautiful messages delivered in our mosques, regardless of the language they speak. It's my humble contribution to unite the Ummah and ensure that no Muslim feels excluded from understanding the word of Allah and the teachings of our Prophet ﷺ.
+                            This encounter inspired me to create this tool - a bridge for Muslims worldwide to understand the beautiful messages delivered in our mosques, regardless of the language they speak.
                         </p>
                         <p style="margin-top: 20px; font-style: italic; color: var(--primary-green);">
                             "وَمَا أَرْسَلْنَاكَ إِلَّا رَحْمَةً لِّلْعَالَمِينَ"<br>
@@ -1227,7 +1726,7 @@
                         </p>
                     </div>
 
-                    <p style="margin-top: 30px; font-size: 14px; color: #777;">
+                    <p style="margin-top: 25px; font-size: 14px; color: #777;">
                         May Allah accept this work and make it beneficial for all Muslims. Ameen.
                     </p>
                 </div>
@@ -1235,59 +1734,49 @@
 
             <!-- Contact Tab -->
             <div class="tab-content" id="contactTab">
-                <div class="contact-content" style="max-width: 700px; margin: 0 auto; padding: 30px;">
-                    <h2 style="font-family: 'Amiri', serif; font-size: 32px; color: var(--primary-green); text-align: center; margin-bottom: 30px;">
-                        Contact Developer
-                    </h2>
+                <div class="contact-content">
+                    <h2>Contact Developer</h2>
                     
-                    <div style="background: var(--cream); padding: 30px; border-radius: 15px; border: 2px solid var(--light-gold); margin-bottom: 30px;">
-                        <h3 style="font-size: 24px; color: var(--primary-green); margin-bottom: 20px; text-align: center;">
-                            Khaled Diab
-                        </h3>
+                    <div class="contact-card">
+                        <h3>Khaled Diab</h3>
                         
-                        <div style="display: grid; gap: 20px;">
-                            <!-- Email -->
-                            <div style="display: flex; align-items: center; gap: 15px; padding: 15px; background: white; border-radius: 10px;">
-                                <span style="font-size: 24px;">📧</span>
-                                <div>
-                                    <div style="font-size: 12px; color: #666; margin-bottom: 5px;">Email</div>
-                                    <a href="mailto:khaled.mohamed.rady@outlook.com" style="color: var(--primary-green); text-decoration: none; font-weight: 600;">
-                                        khaled.mohamed.rady@outlook.com
-                                    </a>
-                                </div>
+                        <div class="contact-item">
+                            <span class="contact-icon">📧</span>
+                            <div class="contact-details">
+                                <div class="contact-label">Email</div>
+                                <a href="mailto:khaled.mohamed.rady@outlook.com" class="contact-link">
+                                    khaled.mohamed.rady@outlook.com
+                                </a>
                             </div>
-                            
-                            <!-- WhatsApp -->
-                            <div style="display: flex; align-items: center; gap: 15px; padding: 15px; background: white; border-radius: 10px;">
-                                <span style="font-size: 24px;">💬</span>
-                                <div>
-                                    <div style="font-size: 12px; color: #666; margin-bottom: 5px;">WhatsApp</div>
-                                    <a href="https://wa.me/201227822099" style="color: var(--primary-green); text-decoration: none; font-weight: 600;">
-                                        +20 122 782 2099
-                                    </a>
-                                </div>
+                        </div>
+                        
+                        <div class="contact-item">
+                            <span class="contact-icon">💬</span>
+                            <div class="contact-details">
+                                <div class="contact-label">WhatsApp</div>
+                                <a href="https://wa.me/201227822099" class="contact-link">
+                                    +20 122 782 2099
+                                </a>
                             </div>
-                            
-                            <!-- LinkedIn -->
-                            <div style="display: flex; align-items: center; gap: 15px; padding: 15px; background: white; border-radius: 10px;">
-                                <span style="font-size: 24px;">💼</span>
-                                <div>
-                                    <div style="font-size: 12px; color: #666; margin-bottom: 5px;">LinkedIn</div>
-                                    <a href="https://www.linkedin.com/in/dr-khaled-diab/" style="color: var(--primary-green); text-decoration: none; font-weight: 600;">
-                                        https://www.linkedin.com/in/dr-khaled-diab/
-                                    </a>
-                                </div>
+                        </div>
+                        
+                        <div class="contact-item">
+                            <span class="contact-icon">💼</span>
+                            <div class="contact-details">
+                                <div class="contact-label">LinkedIn</div>
+                                <a href="https://www.linkedin.com/in/dr-khaled-diab/" class="contact-link">
+                                    linkedin.com/in/dr-khaled-diab
+                                </a>
                             </div>
-                            
-                            <!-- GitHub -->
-                            <div style="display: flex; align-items: center; gap: 15px; padding: 15px; background: white; border-radius: 10px;">
-                                <span style="font-size: 24px;">🔧</span>
-                                <div>
-                                    <div style="font-size: 12px; color: #666; margin-bottom: 5px;">GitHub</div>
-                                    <a href="https://github.com/khalecl" style="color: var(--primary-green); text-decoration: none; font-weight: 600;">
-                                        github.com/khalecl
-                                    </a>
-                                </div>
+                        </div>
+                        
+                        <div class="contact-item">
+                            <span class="contact-icon">🔧</span>
+                            <div class="contact-details">
+                                <div class="contact-label">GitHub</div>
+                                <a href="https://github.com/khalecl" class="contact-link">
+                                    github.com/khalecl
+                                </a>
                             </div>
                         </div>
                     </div>
@@ -1296,79 +1785,43 @@
                     <div class="donation-section">
                         <div class="donation-title">💚 Support This Project</div>
                         <div class="donation-subtitle">
-                            "The example of those who spend their wealth in the way of Allah is like a seed which grows seven spikes"<br>
-                            - Quran 2:261
+                            "The example of those who spend their wealth in the way of Allah is like a seed which grows seven spikes" - Quran 2:261
                         </div>
                         
                         <div class="donation-methods">
-
-                            
-                            <!-- WhatsApp for Other Methods -->
                             <a href="https://wa.me/201227822099?text=السلام%20عليكم%2C%20I%20would%20like%20to%20support%20the%20Khutbah%20Translator%20project" class="donation-method" target="_blank">
                                 <div class="donation-method-icon">💬</div>
                                 <div class="donation-method-name">WhatsApp</div>
-                                <div class="donation-method-info">Contact for PayPal, Bank Transfer & More</div>
+                                <div class="donation-method-info">Contact for donation methods</div>
                             </a>
                         </div>
                         
-                        <!-- Bitcoin Address Display -->
-                        <div id="bitcoin-address-display" style="display: none; margin-top: 20px; padding: 20px; background: white; border-radius: 10px; border: 2px solid var(--gold);">
-                            <div style="font-weight: 600; color: var(--primary-green); margin-bottom: 10px; text-align: center;">Bitcoin Address</div>
-                            <div style="word-break: break-all; font-family: monospace; font-size: 14px; padding: 15px; background: var(--cream); border-radius: 8px; margin-bottom: 15px; text-align: center;">
-                                12idhuWL6T9nun9UFYz9fFwway8uLeqd3t
-                            </div>
-                            <button onclick="copyBitcoinAddress()" class="btn btn-secondary" style="width: 100%; margin-top: 10px;">
-                                📋 Copy Address
-                            </button>
-                        </div>
-                        
-                        <p style="margin-top: 20px; font-size: 14px; color: #666;">
-                            Your support helps maintain and improve this free service for the Muslim community worldwide.<br>
-                            May Allah reward you abundantly for your generosity. 
+                        <p style="margin-top: 15px; font-size: 13px; color: #666;">
+                            Your support helps maintain this free service for Muslims worldwide.
                         </p>
                     </div>
                     
                     <!-- Feedback Section -->
-                    <div style="background: linear-gradient(135deg, rgba(212, 175, 55, 0.1), rgba(212, 175, 55, 0.05)); padding: 30px; border-radius: 15px; border: 2px solid var(--light-gold); margin-top: 30px;">
-                        <h3 style="font-size: 20px; color: var(--primary-green); margin-bottom: 20px; text-align: center;">
-                            Send Feedback
-                        </h3>
+                    <div class="feedback-section">
+                        <h3>Send Feedback</h3>
                         
-                        <div style="display: grid; gap: 15px;">
-                            <input type="text" id="feedbackName" placeholder="Your Name" 
-                                style="padding: 12px; border: 2px solid var(--light-gold); border-radius: 8px; font-size: 15px;">
-                            
-                            <input type="email" id="feedbackEmail" placeholder="Your Email" 
-                                style="padding: 12px; border: 2px solid var(--light-gold); border-radius: 8px; font-size: 15px;">
-                            
-                            <select id="feedbackType" 
-                                style="padding: 12px; border: 2px solid var(--light-gold); border-radius: 8px; font-size: 15px; background: white;">
-                                <option value="">Select Feedback Type</option>
-                                <option value="bug">Bug Report</option>
-                                <option value="feature">Feature Request</option>
-                                <option value="translation">Translation Issue</option>
-                                <option value="general">General Feedback</option>
-                                <option value="collaboration">Collaboration</option>
-                            </select>
-                            
-                            <textarea id="feedbackMessage" placeholder="Your message..." rows="5"
-                                style="padding: 12px; border: 2px solid var(--light-gold); border-radius: 8px; font-size: 15px; resize: vertical;">
-                            </textarea>
-                            
-                            <button onclick="sendFeedback()" class="btn btn-primary" style="width: 100%;">
-                                Send Message
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <div style="text-align: center; margin-top: 30px; padding: 20px; background: white; border-radius: 10px;">
-                        <p style="color: #666; margin-bottom: 10px;">
-                            "The believers are but brothers"<br>
-                            - Quran 49:10
-                        </p>
-                        <p style="font-size: 14px; color: #999;">
-                            Feel free to reach out with any suggestions, bug reports, or if you'd like to contribute to making this app better for the Muslim community worldwide.
-                        </p>
+                        <input type="text" id="feedbackName" placeholder="Your Name" class="feedback-input">
+                        <input type="email" id="feedbackEmail" placeholder="Your Email" class="feedback-input">
+                        
+                        <select id="feedbackType" class="feedback-input">
+                            <option value="">Select Feedback Type</option>
+                            <option value="bug">Bug Report</option>
+                            <option value="feature">Feature Request</option>
+                            <option value="translation">Translation Issue</option>
+                            <option value="general">General Feedback</option>
+                            <option value="collaboration">Collaboration</option>
+                        </select>
+                        
+                        <textarea id="feedbackMessage" placeholder="Your message..." class="feedback-input"></textarea>
+                        
+                        <button onclick="sendFeedback()" class="btn btn-primary" style="width: 100%;">
+                            📤 Send Message
+                        </button>
                     </div>
                 </div>
             </div>
@@ -1376,7 +1829,7 @@
 
         <!-- Visitor Counter -->
         <div class="visitor-info">
-            <img src="https://hitscounter.dev/api/hit?url=https%3A%2F%2Fkhalecl.github.io%2Fkhaledcv%2Fjumuah.html&label=Visitor+worldwide&icon=graph-up&color=%23198754&message=&style=flat&tz=ROK" alt="Visitor Counter">
+            <img src="https://hitscounter.dev/api/hit?url=https%3A%2F%2Fkhalecl.github.io%2Fkhaledcv%2Fjumuah.html&label=Visitors+Worldwide&icon=graph-up&color=%23198754" alt="Visitor Counter">
         </div>
     </div>
 
@@ -1393,19 +1846,86 @@
         let analyser;
         let microphone;
         let volumeThreshold = 15;
+        let wakeLock = null;
+        let currentTutorialStep = 1;
+        const totalTutorialSteps = 6;
+        
         let settings = {
             instantTranslate: true,
             autoDetectDialects: true,
             autoScroll: true,
             highlightLatest: true,
-            volumeThreshold: 15
+            volumeThreshold: 15,
+            keepScreenOn: true
         };
+
+        // Check if first time user
+        function checkFirstTimeUser() {
+            const hasSeenTutorial = localStorage.getItem('khutbahTutorialSeen');
+            if (!hasSeenTutorial) {
+                setTimeout(() => {
+                    showTutorial();
+                }, 500);
+            }
+        }
+
+        // Tutorial functions
+        function showTutorial() {
+            currentTutorialStep = 1;
+            updateTutorialUI();
+            document.getElementById('tutorialOverlay').classList.add('active');
+        }
+
+        function closeTutorial() {
+            document.getElementById('tutorialOverlay').classList.remove('active');
+            localStorage.setItem('khutbahTutorialSeen', 'true');
+        }
+
+        function nextTutorialStep() {
+            if (currentTutorialStep < totalTutorialSteps) {
+                currentTutorialStep++;
+                updateTutorialUI();
+            } else {
+                closeTutorial();
+            }
+        }
+
+        function updateTutorialUI() {
+            // Update steps
+            document.querySelectorAll('.tutorial-step').forEach(step => {
+                step.classList.remove('active');
+                if (parseInt(step.dataset.step) === currentTutorialStep) {
+                    step.classList.add('active');
+                }
+            });
+
+            // Update progress dots
+            document.querySelectorAll('.progress-dot').forEach(dot => {
+                const dotStep = parseInt(dot.dataset.dot);
+                dot.classList.remove('active', 'completed');
+                if (dotStep === currentTutorialStep) {
+                    dot.classList.add('active');
+                } else if (dotStep < currentTutorialStep) {
+                    dot.classList.add('completed');
+                }
+            });
+
+            // Update button text
+            const nextBtn = document.getElementById('tutorialNextBtn');
+            if (currentTutorialStep === totalTutorialSteps) {
+                nextBtn.textContent = 'Start Using ✓';
+                nextBtn.classList.add('finish');
+            } else {
+                nextBtn.textContent = 'Next →';
+                nextBtn.classList.remove('finish');
+            }
+        }
 
         // Load settings
         function loadSettings() {
             const saved = localStorage.getItem('khutbahSettings');
             if (saved) {
-                settings = JSON.parse(saved);
+                settings = { ...settings, ...JSON.parse(saved) };
                 applySettings();
             }
         }
@@ -1417,6 +1937,7 @@
             document.getElementById('highlightLatest').checked = settings.highlightLatest;
             document.getElementById('volumeThreshold').value = settings.volumeThreshold;
             document.getElementById('thresholdValue').textContent = settings.volumeThreshold;
+            document.getElementById('keepScreenOn').checked = settings.keepScreenOn;
             volumeThreshold = settings.volumeThreshold;
         }
 
@@ -1426,6 +1947,7 @@
             settings.autoScroll = document.getElementById('autoScroll').checked;
             settings.highlightLatest = document.getElementById('highlightLatest').checked;
             settings.volumeThreshold = volumeThreshold;
+            settings.keepScreenOn = document.getElementById('keepScreenOn').checked;
             
             localStorage.setItem('khutbahSettings', JSON.stringify(settings));
             alert('Settings saved successfully!');
@@ -1434,6 +1956,28 @@
         function updateThreshold(value) {
             volumeThreshold = parseInt(value);
             document.getElementById('thresholdValue').textContent = value;
+        }
+
+        // Wake Lock for keeping screen on (Android)
+        async function requestWakeLock() {
+            if (!settings.keepScreenOn) return;
+            
+            try {
+                if ('wakeLock' in navigator) {
+                    wakeLock = await navigator.wakeLock.request('screen');
+                    console.log('Wake Lock activated');
+                }
+            } catch (err) {
+                console.log('Wake Lock not supported or failed:', err);
+            }
+        }
+
+        async function releaseWakeLock() {
+            if (wakeLock) {
+                await wakeLock.release();
+                wakeLock = null;
+                console.log('Wake Lock released');
+            }
         }
 
         // Tab switching
@@ -1461,26 +2005,29 @@
             }
         }
 
-        // Start listening
+        // Start listening with Android optimizations
         async function startListening() {
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
             
             if (!SpeechRecognition) {
-                alert('Speech recognition not supported. Please use Chrome, Edge, or Safari.');
+                alert('Speech recognition not supported. Please use Chrome browser on Android or Safari on iOS.');
                 return;
             }
 
             try {
-                // Request microphone with enhanced audio constraints
+                // Request microphone with Android-optimized constraints
                 const stream = await navigator.mediaDevices.getUserMedia({ 
                     audio: {
                         echoCancellation: true,
                         noiseSuppression: true,
                         autoGainControl: true,
-                        sampleRate: 48000,
+                        sampleRate: { ideal: 16000 },
                         channelCount: 1
                     } 
                 });
+
+                // Request wake lock for Android
+                await requestWakeLock();
 
                 // Setup audio visualization
                 setupAudioVisualization(stream);
@@ -1488,7 +2035,7 @@
                 // Setup media recorder
                 setupMediaRecorder(stream);
 
-                // Initialize speech recognition
+                // Initialize speech recognition with Android fixes
                 recognition = new SpeechRecognition();
                 recognition.continuous = true;
                 recognition.interimResults = true;
@@ -1497,15 +2044,19 @@
 
                 let currentTranscript = '';
                 let silenceTimer;
+                let restartAttempts = 0;
+                const maxRestartAttempts = 10;
 
                 recognition.onstart = () => {
                     console.log('Speech recognition started');
                     isListening = true;
+                    restartAttempts = 0;
                     updateUI(true);
                 };
 
                 recognition.onresult = (event) => {
                     clearTimeout(silenceTimer);
+                    restartAttempts = 0;
                     
                     let interim = '';
                     let final = '';
@@ -1524,6 +2075,9 @@
                     
                     const fullText = currentTranscript + interim;
                     
+                    // Update status to show we're receiving speech
+                    document.getElementById('statusText').textContent = '🎤 Listening... ' + (interim ? '(speech detected)' : '');
+                    
                     if (settings.instantTranslate && final && currentTranscript.trim()) {
                         translateText(currentTranscript.trim());
                         currentTranscript = '';
@@ -1539,12 +2093,24 @@
 
                 recognition.onerror = (event) => {
                     console.error('Speech recognition error:', event.error);
-                    if (event.error === 'no-speech') {
-                        setTimeout(() => {
-                            if (isListening) {
-                                recognition.start();
-                            }
-                        }, 1000);
+                    
+                    if (event.error === 'no-speech' || event.error === 'audio-capture') {
+                        // Common Android issue - restart recognition
+                        if (isListening && restartAttempts < maxRestartAttempts) {
+                            restartAttempts++;
+                            setTimeout(() => {
+                                if (isListening) {
+                                    try {
+                                        recognition.start();
+                                    } catch (e) {
+                                        console.log('Restart failed, will retry');
+                                    }
+                                }
+                            }, 500);
+                        }
+                    } else if (event.error === 'not-allowed') {
+                        alert('Microphone permission denied. Please allow microphone access and refresh the page.');
+                        stopListening();
                     }
                 };
 
@@ -1554,10 +2120,15 @@
                         currentTranscript = '';
                     }
                     
-                    if (isListening) {
+                    // Auto-restart for Android
+                    if (isListening && restartAttempts < maxRestartAttempts) {
                         setTimeout(() => {
                             if (isListening) {
-                                recognition.start();
+                                try {
+                                    recognition.start();
+                                } catch (e) {
+                                    console.log('Recognition restart error:', e);
+                                }
                             }
                         }, 100);
                     }
@@ -1567,7 +2138,7 @@
 
             } catch (error) {
                 console.error('Microphone access error:', error);
-                alert('Please allow microphone access to use the translator.');
+                alert('Microphone access denied. Please allow microphone permission in your browser settings and try again.');
             }
         }
 
@@ -1575,73 +2146,91 @@
         function stopListening() {
             if (recognition) {
                 isListening = false;
-                recognition.stop();
+                try {
+                    recognition.stop();
+                } catch (e) {
+                    console.log('Recognition stop error:', e);
+                }
                 
                 if (audioContext) {
                     audioContext.close();
                     audioContext = null;
                 }
                 
+                releaseWakeLock();
                 updateUI(false);
             }
         }
 
         // Setup audio visualization
         function setupAudioVisualization(stream) {
-            audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            analyser = audioContext.createAnalyser();
-            microphone = audioContext.createMediaStreamSource(stream);
-            microphone.connect(analyser);
-            analyser.fftSize = 256;
-            
-            const dataArray = new Uint8Array(analyser.frequencyBinCount);
-            const bars = document.querySelectorAll('.audio-bar');
-            
-            function visualize() {
-                if (!isListening) return;
+            try {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                analyser = audioContext.createAnalyser();
+                microphone = audioContext.createMediaStreamSource(stream);
+                microphone.connect(analyser);
+                analyser.fftSize = 256;
                 
-                analyser.getByteFrequencyData(dataArray);
-                const average = dataArray.reduce((a, b) => a + b) / dataArray.length;
+                const dataArray = new Uint8Array(analyser.frequencyBinCount);
+                const bars = document.querySelectorAll('.audio-bar');
                 
-                // Update status dot based on volume
-                const statusDot = document.getElementById('statusDot');
-                if (average > volumeThreshold) {
-                    statusDot.style.boxShadow = `0 0 ${Math.min(average / 3, 20)}px var(--gold)`;
-                } else {
-                    statusDot.style.boxShadow = 'none';
+                function visualize() {
+                    if (!isListening || !audioContext) return;
+                    
+                    analyser.getByteFrequencyData(dataArray);
+                    const average = dataArray.reduce((a, b) => a + b) / dataArray.length;
+                    
+                    // Update status dot based on volume
+                    const statusDot = document.getElementById('statusDot');
+                    if (average > volumeThreshold) {
+                        statusDot.style.boxShadow = `0 0 ${Math.min(average / 3, 20)}px var(--gold)`;
+                    } else {
+                        statusDot.style.boxShadow = 'none';
+                    }
+                    
+                    // Animate bars with smoother animation
+                    bars.forEach((bar, index) => {
+                        const value = dataArray[index * 6] || 0;
+                        const height = Math.max(8, (value / 255) * 45);
+                        bar.style.height = height + 'px';
+                        bar.style.background = average > volumeThreshold ? 'var(--gold)' : 'var(--primary-green)';
+                    });
+                    
+                    requestAnimationFrame(visualize);
                 }
                 
-                // Animate bars
-                bars.forEach((bar, index) => {
-                    const value = dataArray[index * 8] || 0;
-                    const height = Math.max(10, (value / 255) * 40);
-                    bar.style.height = height + 'px';
-                    bar.style.background = average > volumeThreshold ? 'var(--gold)' : 'var(--primary-green)';
-                });
-                
-                requestAnimationFrame(visualize);
+                visualize();
+            } catch (e) {
+                console.log('Audio visualization setup error:', e);
             }
-            
-            visualize();
         }
 
         // Setup media recorder
         function setupMediaRecorder(stream) {
-            mediaRecorder = new MediaRecorder(stream);
-            
-            mediaRecorder.ondataavailable = (event) => {
-                audioChunks.push(event.data);
-            };
+            try {
+                // Use webm for better Android compatibility
+                const mimeType = MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : 'audio/mp4';
+                mediaRecorder = new MediaRecorder(stream, { mimeType });
+                
+                mediaRecorder.ondataavailable = (event) => {
+                    if (event.data.size > 0) {
+                        audioChunks.push(event.data);
+                    }
+                };
 
-            mediaRecorder.onstop = () => {
-                const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
-                const url = URL.createObjectURL(audioBlob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `khutbah-${new Date().toISOString().slice(0, 10)}.webm`;
-                a.click();
-                audioChunks = [];
-            };
+                mediaRecorder.onstop = () => {
+                    const audioBlob = new Blob(audioChunks, { type: mimeType });
+                    const url = URL.createObjectURL(audioBlob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    const extension = mimeType.includes('webm') ? 'webm' : 'm4a';
+                    a.download = `khutbah-${new Date().toISOString().slice(0, 10)}.${extension}`;
+                    a.click();
+                    audioChunks = [];
+                };
+            } catch (e) {
+                console.log('Media recorder setup error:', e);
+            }
         }
 
         // Update UI
@@ -1661,7 +2250,13 @@
                 startBtn.classList.add('start');
                 startBtn.textContent = '🎤';
                 statusDot.classList.remove('active');
-                statusText.textContent = 'Click microphone to start';
+                statusText.textContent = 'Tap microphone to start';
+                
+                // Reset audio bars
+                document.querySelectorAll('.audio-bar').forEach(bar => {
+                    bar.style.height = '10px';
+                    bar.style.background = 'var(--primary-green)';
+                });
             }
         }
 
@@ -1669,6 +2264,7 @@
         async function translateText(text) {
             if (!text || !text.trim()) return;
             
+            // Check for duplicate
             const recentText = translations[translations.length - 1];
             if (recentText && recentText.originalText === text.trim()) {
                 return;
@@ -1726,10 +2322,10 @@
         function displayTranslations() {
             const container = document.getElementById('translatedText');
             const targetLang = document.getElementById('outputLang').value;
-            const isRTL = ['ar', 'ur', 'fa', 'ps'].includes(targetLang);
+            const isRTL = ['ar', 'ur', 'fa', 'ps', 'he'].includes(targetLang);
             
             if (translations.length === 0) {
-                container.innerHTML = '<div class="empty">Click the microphone button to start listening...</div>';
+                container.innerHTML = '<div class="empty">Tap the microphone button to start listening...</div>';
                 return;
             }
             
@@ -1749,7 +2345,7 @@
 
         // Clear transcript
         function clearTranscript() {
-            if (confirm('Clear all translations?')) {
+            if (translations.length === 0 || confirm('Clear all translations?')) {
                 translations = [];
                 displayTranslations();
             }
@@ -1769,55 +2365,39 @@
             a.href = url;
             a.download = `khutbah-transcript-${new Date().toISOString().slice(0, 10)}.txt`;
             a.click();
+            URL.revokeObjectURL(url);
         }
 
         // Toggle recording
         function toggleRecording() {
             if (!mediaRecorder) {
-                alert('Please start listening first');
+                alert('Please start listening first to enable recording.');
                 return;
             }
             
+            const recordBtn = document.getElementById('recordBtn');
+            const recordText = document.getElementById('recordText');
+            
             if (!isRecording) {
-                mediaRecorder.start();
+                audioChunks = [];
+                mediaRecorder.start(1000); // Collect data every second for Android
                 isRecording = true;
-                document.getElementById('recordText').textContent = 'Stop Recording';
-                document.getElementById('recordBtn').style.background = 'linear-gradient(135deg, #dc2626, #ef4444)';
+                recordText.textContent = 'Stop';
+                recordBtn.style.background = 'linear-gradient(135deg, #dc2626, #ef4444)';
             } else {
                 mediaRecorder.stop();
                 isRecording = false;
-                document.getElementById('recordText').textContent = 'Record Audio';
-                document.getElementById('recordBtn').style.background = '';
+                recordText.textContent = 'Record';
+                recordBtn.style.background = '';
             }
-        }
-
-        // Toggle Bitcoin Address Display
-        function toggleBitcoinAddress() {
-            const display = document.getElementById('bitcoin-address-display');
-            if (display.style.display === 'none') {
-                display.style.display = 'block';
-            } else {
-                display.style.display = 'none';
-            }
-        }
-
-        // Copy Bitcoin Address
-        function copyBitcoinAddress() {
-            const address = '12idhuWL6T9nun9UFYz9fFwway8uLeqd3t';
-            navigator.clipboard.writeText(address).then(() => {
-                alert('Bitcoin address copied to clipboard!');
-            }).catch(err => {
-                console.error('Failed to copy:', err);
-                alert('Failed to copy address. Please copy manually.');
-            });
         }
 
         // Send Feedback
         function sendFeedback() {
-            const name = document.getElementById('feedbackName').value;
-            const email = document.getElementById('feedbackEmail').value;
+            const name = document.getElementById('feedbackName').value.trim();
+            const email = document.getElementById('feedbackEmail').value.trim();
             const type = document.getElementById('feedbackType').value;
-            const message = document.getElementById('feedbackMessage').value;
+            const message = document.getElementById('feedbackMessage').value.trim();
             
             if (!name || !email || !type || !message) {
                 alert('Please fill in all fields');
@@ -1828,7 +2408,7 @@
             const whatsappMessage = `*Khutbah Translator Feedback*%0A%0AName: ${encodeURIComponent(name)}%0AEmail: ${encodeURIComponent(email)}%0AType: ${encodeURIComponent(type)}%0A%0AMessage:%0A${encodeURIComponent(message)}`;
             
             // Open WhatsApp with pre-filled message
-            window.open(`https://wa.me/1234567890?text=${whatsappMessage}`, '_blank');
+            window.open(`https://wa.me/201227822099?text=${whatsappMessage}`, '_blank');
             
             // Clear form
             document.getElementById('feedbackName').value = '';
@@ -1841,8 +2421,16 @@
         document.getElementById('inputLang').addEventListener('change', () => {
             if (recognition && isListening) {
                 recognition.lang = document.getElementById('inputLang').value;
-                recognition.stop();
-                setTimeout(() => recognition.start(), 100);
+                try {
+                    recognition.stop();
+                } catch (e) {}
+                setTimeout(() => {
+                    if (isListening) {
+                        try {
+                            recognition.start();
+                        } catch (e) {}
+                    }
+                }, 200);
             }
         });
 
@@ -1850,13 +2438,7 @@
             displayTranslations();
         });
 
-        // Initialize on load
-        window.addEventListener('load', () => {
-            loadSettings();
-            console.log('Khutbah Translator initialized');
-        });
-
-        // Handle visibility change
+        // Handle visibility change (important for Android)
         document.addEventListener('visibilitychange', () => {
             if (document.hidden && isListening) {
                 console.log('Page hidden but still listening...');

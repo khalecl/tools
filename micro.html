@@ -1,0 +1,1280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portable Micro Refineries - Complete Technical Engineering Guide</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 20px 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        /* Header Section */
+        .header {
+            background: linear-gradient(135deg, #1a3a52 0%, #2d5a7b 100%);
+            color: white;
+            padding: 60px 40px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -10%;
+            width: 500px;
+            height: 500px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 50%;
+        }
+
+        .header h1 {
+            font-size: 2.8em;
+            margin-bottom: 15px;
+            font-weight: 700;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header .subtitle {
+            font-size: 1.2em;
+            margin-bottom: 10px;
+            opacity: 0.95;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header .tagline {
+            font-size: 0.95em;
+            opacity: 0.9;
+            margin: 10px 0;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header .date {
+            font-size: 0.9em;
+            margin-top: 20px;
+            opacity: 0.85;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Logo Section */
+        .logo-bar {
+            background: #f8f9fa;
+            padding: 30px 40px;
+            text-align: center;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .logo-bar h3 {
+            color: #2d5a7b;
+            margin-bottom: 15px;
+            font-size: 0.95em;
+        }
+
+        .logos {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .logo-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo-item img {
+            height: 50px;
+            object-fit: contain;
+            opacity: 0.8;
+            transition: opacity 0.3s;
+        }
+
+        .logo-item img:hover {
+            opacity: 1;
+        }
+
+        .logo-item p {
+            font-size: 0.85em;
+            color: #666;
+        }
+
+        /* Main Content */
+        .content {
+            padding: 50px 40px;
+        }
+
+        .section {
+            margin-bottom: 50px;
+        }
+
+        .section h2 {
+            color: #1a3a52;
+            font-size: 1.8em;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #2d5a7b;
+            position: relative;
+        }
+
+        .section h2::before {
+            content: '';
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            background: #ff6b6b;
+            border-radius: 50%;
+            margin-right: 12px;
+            position: relative;
+            top: -2px;
+        }
+
+        .section h3 {
+            color: #2d5a7b;
+            font-size: 1.3em;
+            margin-top: 30px;
+            margin-bottom: 15px;
+        }
+
+        .section h4 {
+            color: #495057;
+            font-size: 1.1em;
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+
+        p {
+            margin-bottom: 15px;
+            text-align: justify;
+            color: #555;
+        }
+
+        /* Executive Summary */
+        .executive-summary {
+            background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
+            padding: 30px;
+            border-left: 5px solid #1a3a52;
+            border-radius: 4px;
+            margin-bottom: 40px;
+        }
+
+        .executive-summary h3 {
+            color: #1a3a52;
+            margin-top: 0;
+        }
+
+        /* Tables */
+        .table-wrapper {
+            margin: 30px 0;
+            overflow-x: auto;
+            border-radius: 4px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.95em;
+        }
+
+        table thead {
+            background: linear-gradient(135deg, #1a3a52 0%, #2d5a7b 100%);
+            color: white;
+            font-weight: 600;
+        }
+
+        table th {
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        table tbody tr {
+            transition: background-color 0.2s;
+        }
+
+        table tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        table tbody tr:nth-child(even) {
+            background-color: #fafbfc;
+        }
+
+        /* Highlight Boxes */
+        .highlight-box {
+            background: #fff3cd;
+            border-left: 4px solid #ff9800;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+
+        .highlight-box strong {
+            color: #ff6b6b;
+        }
+
+        .info-box {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+
+        .success-box {
+            background: #e8f5e9;
+            border-left: 4px solid #4caf50;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+
+        /* Lists */
+        ul, ol {
+            margin-left: 30px;
+            margin-bottom: 15px;
+        }
+
+        ul li, ol li {
+            margin-bottom: 10px;
+            color: #555;
+        }
+
+        /* Image Section */
+        .image-section {
+            text-align: center;
+            margin: 30px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 4px;
+        }
+
+        .image-section img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 4px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            margin: 15px 0;
+        }
+
+        .image-caption {
+            font-size: 0.9em;
+            color: #666;
+            font-style: italic;
+            margin-top: 10px;
+        }
+
+        /* Two Column Layout for Tables */
+        .two-col-table {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin: 30px 0;
+        }
+
+        .two-col-table .table-wrapper {
+            margin: 0;
+        }
+
+        @media (max-width: 768px) {
+            .two-col-table {
+                grid-template-columns: 1fr;
+            }
+
+            .header h1 {
+                font-size: 1.8em;
+            }
+
+            .content {
+                padding: 30px 20px;
+            }
+
+            .logos {
+                gap: 20px;
+            }
+        }
+
+        /* Footer */
+        .footer {
+            background: #f8f9fa;
+            padding: 30px 40px;
+            border-top: 2px solid #e9ecef;
+            text-align: center;
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        /* Reference Section */
+        .references {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 4px;
+            margin-top: 20px;
+        }
+
+        .references h4 {
+            color: #1a3a52;
+            margin-top: 15px;
+            margin-bottom: 10px;
+        }
+
+        .reference-list {
+            margin-left: 20px;
+            font-size: 0.9em;
+            color: #555;
+        }
+
+        .reference-list li {
+            margin-bottom: 8px;
+            list-style-position: outside;
+        }
+
+        /* Case Study */
+        .case-study {
+            background: linear-gradient(135deg, #f0f4ff 0%, #f8f0ff 100%);
+            padding: 25px;
+            border-radius: 4px;
+            margin: 20px 0;
+            border-left: 5px solid #7c3aed;
+        }
+
+        .case-study h4 {
+            color: #1a3a52;
+            margin-top: 0;
+        }
+
+        /* Typography Improvements */
+        strong {
+            color: #1a3a52;
+            font-weight: 600;
+        }
+
+        em {
+            color: #d32f2f;
+            font-style: italic;
+        }
+
+        code {
+            background: #f5f5f5;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            color: #d32f2f;
+        }
+
+        /* Print Styles */
+        @media print {
+            body {
+                background: white;
+            }
+
+            .container {
+                box-shadow: none;
+            }
+
+            .header {
+                page-break-after: avoid;
+            }
+
+            .section {
+                page-break-inside: avoid;
+            }
+
+            table {
+                page-break-inside: avoid;
+            }
+        }
+
+        /* Navigation */
+        .toc {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 4px;
+            margin-bottom: 30px;
+        }
+
+        .toc h3 {
+            color: #1a3a52;
+            margin-top: 0;
+        }
+
+        .toc ul {
+            margin-left: 20px;
+        }
+
+        .toc a {
+            color: #2d5a7b;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .toc a:hover {
+            color: #ff6b6b;
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header Section -->
+        <div class="header">
+            <h1>Portable Micro Refineries</h1>
+            <div class="subtitle">Complete Technical Engineering Guide</div>
+            <div class="tagline">Small-Scale Crude Distillation Systems for Remote and Emerging Markets</div>
+            <div class="tagline"><em>Revised Edition with References, Manufacturers Directory, and Assembly Guide</em></div>
+            <div class="date">January 2026</div>
+        </div>
+
+        <!-- Logo Bar -->
+        <div class="logo-bar">
+            <h3>Key Technology Providers</h3>
+            <div class="logos">
+                <div class="logo-item">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/3c/Logo_of_Honeywell_UOP_%282021%29.svg/1200px-Logo_of_Honeywell_UOP_%282021%29.svg.png" alt="Honeywell UOP">
+                    <p>Honeywell UOP</p>
+                </div>
+                <div class="logo-item">
+                    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRXFJC67xgk4J5Z57J-jnHD0AcoO2NO3f1Z4Q&s" alt="Shell">
+                    <p>Shell Catalysts</p>
+                </div>
+                <div class="logo-item">
+                    <img src="https://www.chevronlummus.com/wp-content/uploads/2025/04/clg-logo-transparent-310x180-1.png" alt="Chevron Lummus">
+                    <p>Chevron Lummus</p>
+                </div>
+                <div class="logo-item">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/18/Exxon_Mobil_Logo.svg/1280px-Exxon_Mobil_Logo.svg.png" alt="ExxonMobil">
+                    <p>ExxonMobil</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="content">
+            <!-- Executive Summary -->
+            <div class="executive-summary">
+                <h3>Executive Summary</h3>
+                <p>Portable "micro refineries"—modular crude distillation systems ranging from 200 to 50,000 bpd—provide a proven alternative to conventional refineries for remote locations, developing markets, oilfield operations, and emergency fuel supply. These skid-mounted atmospheric distillation units deliver naphtha, kerosene, diesel, and fuel oil with 15–20 month deployment timelines and CAPEX of $5,000–15,000/bpd capacity, roughly 30–50% below conventional refinery costs.</p>
+                <p>The global modular refinery market is projected to reach <strong>$5.4 billion by 2031</strong> at <strong>6.7% CAGR</strong>, with Africa and Asia-Pacific accounting for 65% of new installations.<sup><a href="#ref-transparency" style="color: #2d5a7b; text-decoration: none;">[3]</a></sup> For downstream engineers evaluating these systems, critical success factors include matching crude feedstock properties to unit configuration, understanding product quality limitations versus full-scale refineries, and designing for operational flexibility with appropriate turndown ratios.</p>
+            </div>
+
+            <!-- Table of Contents -->
+            <div class="toc">
+                <h3>📋 Document Overview</h3>
+                <ul>
+                    <li><a href="#section1">Process Engineering Fundamentals</a></li>
+                    <li><a href="#section2">Product Yields and Quality</a></li>
+                    <li><a href="#section3">Modular Equipment Design</a></li>
+                    <li><a href="#section4">Materials of Construction</a></li>
+                    <li><a href="#section5">Economics and Project Viability</a></li>
+                    <li><a href="#section6">Typical Assembly Sequence and Site Layout</a></li>
+                    <li><a href="#section7">Leading Manufacturers and Fabricators</a></li>
+                    <li><a href="#section8">Case Studies and Operational Installations</a></li>
+                </ul>
+            </div>
+
+            <!-- Section 1: Process Engineering -->
+            <div class="section" id="section1">
+                <h2>1. Process Engineering Fundamentals</h2>
+                <p>Micro refinery process design centres on atmospheric crude distillation units (CDUs) configured as simplified versions of conventional refinery topping units. The atmospheric column separates crude into four to six fractions based on boiling point, operating at <strong>340–380°C (644–716°F)</strong> inlet temperature and <strong>1.0–1.4 bar</strong> column pressure.<sup><a href="#ref-al-lagtah" style="color: #2d5a7b; text-decoration: none;">[1]</a></sup></p>
+                <p>Unlike mega-refineries with 50+ tray towers, micro-scale columns typically feature <strong>25–50 valve trays</strong> in towers measuring 15–25 metres tall with 0.5–2.0 metre diameters for 1,000–10,000 bpd capacities. For columns under 1 metre diameter, packed columns using structured packing (Sulzer Mellapak or Koch-Glitsch FLEXIPAC) offer one-sixth the pressure drop of tray columns with superior separation efficiency.<sup><a href="#ref-gary" style="color: #2d5a7b; text-decoration: none;">[4]</a></sup></p>
+
+                <!-- IMAGE SECTION 1 -->
+                <div class="image-section">
+                    <img src="https://scontent.faly8-1.fna.fbcdn.net/v/t39.30808-6/482022083_943384961337511_8911674758620637092_n.jpg?stp=dst-jpg_p526x296_tt6&_nc_cat=103&ccb=1-7&_nc_sid=833d8c&_nc_eui2=AeEvo7ZxB-gXwaTvdtSlHdPcd2PiXqzcqy13Y-JerNyrLcd8OtdpDKUev0UDse8uvLA&_nc_ohc=Xqj-Ea_WGiUQ7kNvwHswkin&_nc_oc=AdkB-qqaKeyCoQniuICRrNqAZEGJvKNPN0vm7bULxHwTetpzZNKIyANZOY-IGr3A5e8&_nc_zt=23&_nc_ht=scontent.faly8-1.fna&_nc_gid=iOkVe2cVdgj6WghTHs5yLQ&oh=00_AfoTh9uFVUhBCpMcVEwvAsnfErd9wRgINWaaZr2w-NznLA&oe=696D9C21" alt="Atmospheric crude distillation column schematic">
+                    <p class="image-caption">Atmospheric crude distillation column showing product draws, temperature zones, and operating conditions for typical CDU operations</p>
+                </div>
+
+                <h3>Operating Conditions</h3>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Location</th>
+                                <th>Operating Temperature</th>
+                                <th>Operating Pressure</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Desalter inlet</td>
+                                <td>100–150°C (215–280°F)</td>
+                                <td>Up to 11 bar</td>
+                            </tr>
+                            <tr>
+                                <td>Fired heater outlet</td>
+                                <td>340–380°C (644–716°F)</td>
+                                <td>Slight positive</td>
+                            </tr>
+                            <tr>
+                                <td>Column overhead</td>
+                                <td>120–130°C (248–266°F)</td>
+                                <td>1.0–1.4 bar</td>
+                            </tr>
+                            <tr>
+                                <td>Kerosene draw</td>
+                                <td>190–200°C (374–392°F)</td>
+                                <td>Atmospheric</td>
+                            </tr>
+                            <tr>
+                                <td>Diesel draw</td>
+                                <td>250–350°C (482–662°F)</td>
+                                <td>Atmospheric</td>
+                            </tr>
+                            <tr>
+                                <td>Column bottom</td>
+                                <td>330–385°C (626–725°F)</td>
+                                <td>Atmospheric</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+
+            <!-- Section 2: Product Yields -->
+            <div class="section" id="section2">
+                <h2>2. Product Yields and Quality</h2>
+                <p>The product slate from atmospheric distillation reflects crude feedstock characteristics more directly than complex refineries with conversion units. Light sweet crudes (API >35°, sulphur <0.5%) yield <strong>15–25% naphtha, 10–15% kerosene, 15–25% diesel, and 25–35% atmospheric residue</strong>, while heavy crudes shift output dramatically toward 45–55% residue.<sup><a href="#ref-jegede" style="color: #2d5a7b; text-decoration: none;">[2]</a></sup></p>
+
+                <!-- IMAGE PLACEHOLDER SECTION 2 -->
+                <div class="image-section">
+                    <img src="https://energyeducation.ca/wiki/images/thumb/7/7e/Oilbarrel.png/1170px-Oilbarrel.png" alt="Oil barrel showing crude oil resource">
+                    <p class="image-caption">Crude oil barrel representing the feedstock for distillation processes and product separation</p>
+                </div>
+                <p style="background: #f0f0f0; padding: 10px; border-radius: 4px; font-size: 0.9em; color: #666;"><strong>📌 Image 2.1:</strong> Crude oil resource visualization showing the starting material for product yields and separation</p>
+
+                <h3>Straight-Run Product Quality Limitations</h3>
+                <div class="highlight-box">
+                    <strong>Naphtha:</strong> RON of only 40–70—insufficient for modern gasoline engines requiring RON 87–98. Catalytic reforming or isomerisation is mandatory for marketable gasoline.
+                </div>
+                <div class="highlight-box">
+                    <strong>Diesel:</strong> Contains 500–5,000 ppm sulphur depending on crude, suitable only for non-road applications. ULSD (15 ppm) requires hydrotreating units.
+                </div>
+                <div class="highlight-box">
+                    <strong>Kerosene/Jet Fuel:</strong> May meet Jet A/A-1 specifications if processing suitable crudes, though hydrotreating is often needed.
+                </div>
+                <div class="highlight-box">
+                    <strong>Fuel Oil:</strong> Atmospheric residue serves as marine bunker fuel or industrial heating oil.
+                </div>
+            </div>
+
+            <!-- Section 3: Equipment Design -->
+            <div class="section" id="section3">
+                <h2>3. Modular Equipment Design</h2>
+                <p>The defining characteristic of micro refineries is modular, skid-mounted construction enabling factory fabrication, testing, and commissioning before shipment. Standard configurations fit within 20 ft and 40 ft ISO containers for ocean and road transport without special permits.<sup><a href="#ref-transparency" style="color: #2d5a7b; text-decoration: none;">[3]</a></sup></p>
+
+                <!-- IMAGE PLACEHOLDER SECTION 3A -->
+                <div class="image-section">
+                    <img src="https://www.apacherefineryservices.com/wp-content/uploads/2024/06/Picture4.jpg" alt="Industrial refinery equipment and processing modules">
+                    <p class="image-caption">Modern refinery processing equipment showing integrated distillation and separation systems for crude oil treatment</p>
+                </div>
+                <p style="background: #f0f0f0; padding: 10px; border-radius: 4px; font-size: 0.9em; color: #666;"><strong>📌 Image 3.1:</strong> Industrial refinery processing systems and equipment integration</p>
+
+                <h3>Distillation Tower Sizing</h3>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Capacity (bpd)</th>
+                                <th>Column Dia.</th>
+                                <th>Tower Height</th>
+                                <th>Trays</th>
+                                <th>Heater Duty</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>1,000</td>
+                                <td>0.5–1.0 m</td>
+                                <td>15–20 m</td>
+                                <td>25–35</td>
+                                <td>2–5 MMBtu/hr</td>
+                            </tr>
+                            <tr>
+                                <td>5,000</td>
+                                <td>1.0–2.0 m</td>
+                                <td>20–30 m</td>
+                                <td>30–40</td>
+                                <td>10–25 MMBtu/hr</td>
+                            </tr>
+                            <tr>
+                                <td>10,000</td>
+                                <td>2.0–3.0 m</td>
+                                <td>25–40 m</td>
+                                <td>35–50</td>
+                                <td>25–50 MMBtu/hr</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="info-box">
+                    <strong>Key Design Consideration:</strong> Multiple smaller trains (e.g., 2×6,000 bpd) provide superior operational flexibility and turndown capability compared to single-train designs (1×12,000 bpd).
+                </div>
+
+                <!-- IMAGE PLACEHOLDER SECTION 3B -->
+                <div class="image-section">
+                    <img src="https://www.peiyangchem.com/uploads/image/20171215/10/process-diagram.jpg" alt="Valve tray design cross-section showing internal configuration">
+                    <p class="image-caption">Valve tray cross-section illustrating downcomer design, valve arrangement, and fluid dynamics for efficient separation</p>
+                </div>
+                <p style="background: #f0f0f0; padding: 10px; border-radius: 4px; font-size: 0.9em; color: #666;"><strong>📌 Image 3.2:</strong> Technical drawing of valve tray design and column internals</p>
+            </div>
+
+            <!-- Section 4: Materials -->
+            <div class="section" id="section4">
+                <h2>4. Materials of Construction</h2>
+                <p>High-temperature sulphidic corrosion occurs at 230–425°C wherever hydrogen sulphide contacts carbon steel. Naphthenic acid corrosion (NAC) presents challenges when processing crudes with TAN exceeding 0.5 mg KOH/g.<sup><a href="#ref-gary" style="color: #2d5a7b; text-decoration: none;">[4]</a></sup></p>
+
+                <!-- IMAGE PLACEHOLDER SECTION 4 -->
+                <div class="image-section">
+                    <img src="https://i.ibb.co/gMhCRkq0/04.png" alt="Material corrosion analysis and rate comparison graph">
+                    <p class="image-caption">Corrosion rate analysis showing material performance across different temperature ranges and corrosive environments typical in refinery operations</p>
+                </div>
+                <p style="background: #f0f0f0; padding: 10px; border-radius: 4px; font-size: 0.9em; color: #666;"><strong>📌 Image 4.1:</strong> Graph showing corrosion rate curves for different materials vs temperature, or material selection matrix visualization</p>
+
+                <h3>Material Selection Guidelines</h3>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Service</th>
+                                <th>Temperature</th>
+                                <th>Recommended Material</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Low-temperature HC</td>
+                                <td>&lt;230°C</td>
+                                <td>Carbon steel (A-106 Gr B)</td>
+                            </tr>
+                            <tr>
+                                <td>Moderate sulphidic</td>
+                                <td>230–350°C</td>
+                                <td>5Cr-0.5Mo (A335 P5)</td>
+                            </tr>
+                            <tr>
+                                <td>High-temp sulphidic</td>
+                                <td>350–425°C</td>
+                                <td>9Cr-1Mo (A182-F9)</td>
+                            </tr>
+                            <tr>
+                                <td>Naphthenic acid</td>
+                                <td>190–360°C, high TAN</td>
+                                <td>316L/316Ti stainless</td>
+                            </tr>
+                            <tr>
+                                <td>Severe corrosion</td>
+                                <td>Multiple mechanisms</td>
+                                <td>Alloy 625, Hastelloy C-276</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="success-box">
+                    <strong>Critical Requirement:</strong> Conduct comprehensive crude assay analysis including salt, metals, nitrogen, TAN, and sulphur content before finalizing material specifications.
+                </div>
+            </div>
+
+            <!-- Section 5: Economics -->
+            <div class="section" id="section5">
+                <h2>5. Economics and Project Viability</h2>
+                <p>The economic case for micro refineries depends on crack spread, location advantages, and capital efficiency. Analysis indicates <strong>5,000 bpd as the minimum economically viable capacity</strong> for positive NPV under typical market conditions.<sup><a href="#ref-transparency" style="color: #2d5a7b; text-decoration: none;">[3]</a></sup></p>
+
+                <h3>Capital Investment Analysis</h3>
+                <p>Capital costs exhibit significant economies of scale. The cost per barrel of daily capacity drops dramatically as facility size increases:</p>
+
+                <ul>
+                    <li><strong>200-500 bpd:</strong> $2,500-4,000/bpd (highest cost, uneconomical at scale)</li>
+                    <li><strong>1,000-3,000 bpd:</strong> $10,000-12,700/bpd (still expensive, limited returns)</li>
+                    <li><strong>5,000 bpd:</strong> $9,600/bpd (approaching viability threshold)</li>
+                    <li><strong>10,000 bpd:</strong> $5,500/bpd (optimal range for most applications)</li>
+                    <li><strong>20,000 bpd:</strong> $4,600/bpd (superior economies of scale)</li>
+                </ul>
+
+                <div class="success-box">
+                    <strong>Cost Reduction Achievement:</strong> Unit capital cost decreases 84% from 200 bpd to 20,000 bpd facilities, demonstrating powerful economies of scale in modular construction.
+                </div>
+
+                <!-- IMAGE PLACEHOLDER SECTION 5A -->
+                <div class="image-section">
+                    <img src="https://i.ibb.co/dZfSZWT/Economics-Analysis-Charts-1.png" alt="Economics analysis comprehensive charts">
+                    <p class="image-caption">Comprehensive economics analysis showing capital costs, financial returns (NPV, IRR), and payback periods across different micro-refinery capacities</p>
+                </div>
+                <p style="background: #f0f0f0; padding: 10px; border-radius: 4px; font-size: 0.9em; color: #666;"><strong>📌 Image 5.1:</strong> Modular refinery system showing economic viability and compact footprint</p>
+
+                <h3>Capital Costs by Capacity</h3>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Capacity (bpd)</th>
+                                <th>Investment</th>
+                                <th>$/bpd</th>
+                                <th>Configuration</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>200–500</td>
+                                <td>$0.5–2M</td>
+                                <td>$2,500–4,000</td>
+                                <td>Micro/portable</td>
+                            </tr>
+                            <tr>
+                                <td>1,000–3,000</td>
+                                <td>$29–38M</td>
+                                <td>$10,000–12,700</td>
+                                <td>Small modular</td>
+                            </tr>
+                            <tr>
+                                <td>5,000</td>
+                                <td>$38–48M</td>
+                                <td>$7,600–9,600</td>
+                                <td>Mid-size modular</td>
+                            </tr>
+                            <tr>
+                                <td>10,000</td>
+                                <td>$55M</td>
+                                <td>$5,500</td>
+                                <td>Standard modular</td>
+                            </tr>
+                            <tr>
+                                <td>20,000</td>
+                                <td>$92–187M</td>
+                                <td>$4,600–9,350</td>
+                                <td>Large modular</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3>Project Economics Analysis</h3>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Capacity</th>
+                                <th>CAPEX</th>
+                                <th>NPV</th>
+                                <th>IRR</th>
+                                <th>Payback</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>3,000 bpd</td>
+                                <td>$29M</td>
+                                <td>-$0.96M</td>
+                                <td>21%</td>
+                                <td>2.9 years</td>
+                            </tr>
+                            <tr>
+                                <td>5,000 bpd</td>
+                                <td>$38M</td>
+                                <td><strong style="color: #4caf50">+$8.9M</strong></td>
+                                <td>34%</td>
+                                <td>2.3 years</td>
+                            </tr>
+                            <tr>
+                                <td>10,000 bpd</td>
+                                <td>$55M</td>
+                                <td><strong style="color: #4caf50">+$38.8M</strong></td>
+                                <td>54%</td>
+                                <td>1.6 years</td>
+                            </tr>
+                            <tr>
+                                <td>20,000 bpd</td>
+                                <td>$92M</td>
+                                <td><strong style="color: #4caf50">+$95.6M</strong></td>
+                                <td>67%</td>
+                                <td>1.4 years</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3>Critical Economic Thresholds</h3>
+                <div class="info-box">
+                    <strong>Break-Even Analysis:</strong>
+                    <ul style="margin: 10px 0 0 20px;">
+                        <li><strong>Minimum Viable Capacity: 5,000 bpd</strong> (first positive NPV)</li>
+                        <li>At 3,000 bpd: Negative NPV of -$0.96M (NOT RECOMMENDED)</li>
+                        <li>At 5,000 bpd: Positive NPV of +$8.9M, IRR 34%, payback 2.3 years</li>
+                        <li>At 10,000 bpd: Strong NPV of +$38.8M, IRR 54%, payback 1.6 years</li>
+                        <li>At 20,000 bpd: Excellent NPV of +$95.6M, IRR 67%, payback 1.4 years</li>
+                    </ul>
+                </div>
+
+                <h3>Financial Performance Metrics</h3>
+                <p><strong>Profitability Assumptions (10-Year Project Life):</strong></p>
+                <ul>
+                    <li>Crack spread: $12-15/barrel (moderate market conditions)</li>
+                    <li>Barrel margin: $6/barrel (after processing costs)</li>
+                    <li>Operating days: 330/year (accounting for maintenance)</li>
+                    <li>Capacity utilization: 85% (conservative estimate)</li>
+                    <li>Operating cost: 40% of gross revenue</li>
+                    <li>Tax rate: 25%</li>
+                    <li>Discount rate (WACC): 12%</li>
+                </ul>
+
+                <p><strong>Example: 10,000 bpd Facility Annual Performance</strong></p>
+                <ul>
+                    <li>Annual throughput: 2,805,000 barrels/year (at 85% utilization)</li>
+                    <li>Gross margin revenue: $16.83M @ $6/bbl</li>
+                    <li>Operating costs (40%): $6.73M/year</li>
+                    <li>EBITDA: $10.10M/year (60% margin)</li>
+                    <li>Annual free cash flow: $4.27M (after taxes and depreciation)</li>
+                    <li><strong>Capital payback: 12.9 years, or 1.6 years on an internal project basis</strong></li>
+                </ul>
+
+
+
+            <!-- Section 6: Assembly & Layout -->
+            <div class="section" id="section6">
+                <h2>6. Typical Assembly Sequence and Site Layout</h2>
+                <p>Factory fabrication comprises approximately <strong>70% of total project work</strong> before modules ship. The modular approach changes the project execution sequence compared to conventional stick-built refineries.</p>
+
+                <h3>Pre-Fabrication Sequence</h3>
+                <ul>
+                    <li>Structural frame fabrication with lifting lugs and monorail systems</li>
+                    <li>Equipment installation: vessels, columns, exchangers, pumps</li>
+                    <li>Piping installation: process piping, small-bore tubing, utility connections</li>
+                    <li>Electrical and instrumentation: cable trays, junction boxes, control panels</li>
+                    <li>Factory Acceptance Testing (FAT): hydrostatic testing, loop checks</li>
+                    <li>Insulation, painting, and preservation for shipment</li>
+                </ul>
+
+                <h3>Module Transport Constraints</h3>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Transport Mode</th>
+                                <th>Max Width</th>
+                                <th>Max Height</th>
+                                <th>Max Length</th>
+                                <th>Max Weight</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Standard truck</td>
+                                <td>4.3 m (14 ft)</td>
+                                <td>4.3 m (14 ft)</td>
+                                <td>12–15 m</td>
+                                <td>40–60 tonnes</td>
+                            </tr>
+                            <tr>
+                                <td>Oversize load</td>
+                                <td>6.0 m (20 ft)</td>
+                                <td>5.5 m (18 ft)</td>
+                                <td>25–30 m</td>
+                                <td>100–200 tonnes</td>
+                            </tr>
+                            <tr>
+                                <td>Barge/ship</td>
+                                <td>10 m (33 ft)</td>
+                                <td>10 m (33 ft)</td>
+                                <td>30+ m</td>
+                                <td>500–1,000 tonnes</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3>Field Installation Timelines</h3>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Unit Size</th>
+                                <th>Module Count</th>
+                                <th>Field Installation</th>
+                                <th>Total Project</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>1,000 bpd</td>
+                                <td>3 skids</td>
+                                <td>4–6 weeks</td>
+                                <td>10–12 months</td>
+                            </tr>
+                            <tr>
+                                <td>5,000 bpd</td>
+                                <td>6–8 skids</td>
+                                <td>8–12 weeks</td>
+                                <td>15–18 months</td>
+                            </tr>
+                            <tr>
+                                <td>10,000 bpd</td>
+                                <td>10–15 skids</td>
+                                <td>12–16 weeks</td>
+                                <td>18–24 months</td>
+                            </tr>
+                            <tr>
+                                <td>20,000 bpd</td>
+                                <td>20–26 skids</td>
+                                <td>16–24 weeks</td>
+                                <td>20–30 months</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <!-- IMAGE PLACEHOLDER SECTION 5B -->
+                <div class="image-section">
+                    <img src="https://www.peiyangchem.com/uploads/image/20200908/16/mini-oil-refinery.jpg" alt="Economic analysis and financial metrics comparison">
+                    <p class="image-caption">Typical Assembly Sequence and Site Layout</p>
+                </div>
+                <p style="background: #f0f0f0; padding: 10px; border-radius: 4px; font-size: 0.9em; color: #666;"><strong>📌 Image 5.2:</strong> Typical Assembly Sequence and Site Layout</p>
+            </div>
+                <h3>Online Layout Resources</h3>
+                <ul>
+                    <li><strong>Ventech Engineers</strong>—Module arrangements: ventech-eng.com/modularunits/</li>
+                    <li><strong>VFuels LLC</strong>—Process flow diagrams: vfuels.com</li>
+                    <li><strong>Pyramid E&C</strong>—3D models and GA drawings: pyramidenc.com/modular-refineries/</li>
+                    <li><strong>Peiyang Chemical (PCC)</strong>—CDU configurations: peiyangchem.com/modular-refinery/</li>
+                    <li><strong>Google Patents WO2003031012A1</strong>—Detailed layout figures: patents.google.com</li>
+                </ul>
+            </div>
+
+            <!-- Section 7: Manufacturers -->
+            <div class="section" id="section7">
+                <h2>7. Leading Manufacturers and Fabricators</h2>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Company</th>
+                                <th>Location</th>
+                                <th>Capacity Range</th>
+                                <th>Key Capabilities</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Ventech Engineers</strong></td>
+                                <td>Pasadena, TX, USA</td>
+                                <td>750–20,000 bpd</td>
+                                <td>Full modularisation, relocation</td>
+                            </tr>
+                            <tr>
+                                <td><strong>VFuels LLC</strong></td>
+                                <td>Houston, TX, USA</td>
+                                <td>1,000–30,000 bpd</td>
+                                <td>CDU, hydrotreating, reforming</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Pyramid E&C</strong></td>
+                                <td>Houston/Mumbai/Mundra</td>
+                                <td>200–30,000 bpd</td>
+                                <td>SULFEX desulphurisation</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Peiyang Chemical (PCC)</strong></td>
+                                <td>Tianjin, China</td>
+                                <td>200–25,000 bpd</td>
+                                <td>Cost-competitive, Winpak internals</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Honeywell UOP</strong></td>
+                                <td>Des Plaines, IL, USA</td>
+                                <td>Up to 30,000 bpd</td>
+                                <td>Licensed technologies</td>
+                            </tr>
+                            <tr>
+                                <td><strong>AIPCC Energy</strong></td>
+                                <td>Lagos, Nigeria</td>
+                                <td>1,000–20,000 bpd</td>
+                                <td>Nigerian local content</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Howe Baker</strong></td>
+                                <td>Tyler, TX, USA</td>
+                                <td>1,000–20,000 bpd</td>
+                                <td>Desalters, process heaters</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Reotek</strong></td>
+                                <td>Russia</td>
+                                <td>1,000–10,000 bpd</td>
+                                <td>Cold climate designs</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3>Process Technology Licensors</h3>
+                <p>For units beyond simple atmospheric distillation, licensed technologies are typically required for hydrotreating, reforming, isomerisation, and other conversion processes.</p>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Licensor</th>
+                                <th>Technologies</th>
+                                <th>Application</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Honeywell UOP</strong></td>
+                                <td>Platforming, Penex, Unicracking, Alkylation</td>
+                                <td>Gasoline octane upgrade, conversion</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Axens (IFP)</strong></td>
+                                <td>Prime-D, Vegan, Naphthaforming</td>
+                                <td>ULSD production, renewables</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Topsoe</strong></td>
+                                <td>HydroTech, HydroFlex, BRIM catalysts</td>
+                                <td>Diesel desulphurisation, renewables</td>
+                            </tr>
+                            <tr>
+                                <td><strong>ExxonMobil</strong></td>
+                                <td>SCANfining, MTBE/TAME</td>
+                                <td>Gasoline treating</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Shell Catalysts</strong></td>
+                                <td>ATLAS, Centurion</td>
+                                <td>Reforming, resid upgrading</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Chevron Lummus</strong></td>
+                                <td>Isocracking, LC-Fining</td>
+                                <td>Hydrocracking, residue</td>
+                            </tr>
+                            <tr>
+                                <td><strong>AET/Pyramid</strong></td>
+                                <td>SULFEX</td>
+                                <td>Low-pressure desulphurisation</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Section 8: Case Studies -->
+            <div class="section" id="section8">
+                <h2>8. Case Studies and Operational Installations</h2>
+
+                <div class="case-study">
+                    <h4>🏭 Kurdistan Region, Iraq — Kalak Refinery</h4>
+                    <p><strong>Operator:</strong> KAR Oil & Gas | <strong>Capacity:</strong> 185,000 bpd (phased) | <strong>EPC:</strong> Ventech Engineers</p>
+                    <p>This project demonstrates modular scalability. The initial 20,000 bpd crude unit comprised 26 process modules fabricated in Pasadena, Texas, shipped via Mersin, Turkey, with field installation in 16 weeks. Subsequent expansions added hydrotreating, reforming, and isomerisation—making Kalak the sole producer of unleaded gasoline in Iraq.<sup><a href="#ref-ogj2010" style="color: #2d5a7b; text-decoration: none;">[13]</a></sup></p>
+                </div>
+
+                <div class="case-study">
+                    <h4>❄️ Urai, Siberia, Russia</h4>
+                    <p><strong>Operator:</strong> Uraineftegas (Lukoil) | <strong>Capacity:</strong> 2,000 bpd | <strong>EPC:</strong> Ventech Engineers</p>
+                    <p>The first American-built refinery in Russia demonstrated capability in extreme conditions (-50°C/-58°F). Contract to startup: 6 months; field installation: 4 weeks. Enclosed, heated modules maintained operability in Siberian winters.<sup><a href="#ref-ogj1996" style="color: #2d5a7b; text-decoration: none;">[12]</a></sup></p>
+                </div>
+
+                <div class="case-study">
+                    <h4>🌍 Waltersmith Ibigwe Refinery, Nigeria</h4>
+                    <p><strong>Operator:</strong> Waltersmith Refining | <strong>Capacity:</strong> 5,000 bpd (Phase 1) | <strong>EPC:</strong> VFuels/Lambert Electromec</p>
+                    <p>Nigeria's most prominent modular refinery success, commissioned November 2020. Demonstrates phased development approach—starting with economically viable 5,000 bpd and expanding to 50,000 bpd. Reduces Nigeria's dependence on refined product imports.<sup><a href="#ref-nsenergy" style="color: #2d5a7b; text-decoration: none;">[15]</a></sup></p>
+                </div>
+            </div>
+                <!-- IMAGE PLACEHOLDER SECTION 5B -->
+                <div class="image-section">
+                    <img src="https://i.ibb.co/d41QbZK5/07.jpg" alt="Economic analysis and financial metrics comparison">
+                    <p class="image-caption">case studies</p>
+                </div>
+                <p style="background: #f0f0f0; padding: 10px; border-radius: 4px; font-size: 0.9em; color: #666;"><strong>📌 Image 5.2:</strong> Ce studies of modular refineries</p>
+            </div>
+            <!-- Section 9: Codes and Standards -->
+            <div class="section">
+                <h2>9. Applicable Codes and Standards</h2>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Category</th>
+                                <th>Standard</th>
+                                <th>Requirement</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Pressure vessels</td>
+                                <td>ASME VIII Div 1</td>
+                                <td>Design, fabrication, U-stamp</td>
+                            </tr>
+                            <tr>
+                                <td>Process piping</td>
+                                <td>ASME B31.3</td>
+                                <td>Petroleum refinery piping</td>
+                            </tr>
+                            <tr>
+                                <td>Fired heaters</td>
+                                <td>API 560</td>
+                                <td>Design, materials, fabrication</td>
+                            </tr>
+                            <tr>
+                                <td>Storage tanks</td>
+                                <td>API 650</td>
+                                <td>Welded steel tanks</td>
+                            </tr>
+                            <tr>
+                                <td>Centrifugal pumps</td>
+                                <td>API 610</td>
+                                <td>Refinery pump specifications</td>
+                            </tr>
+                            <tr>
+                                <td>Safety relief</td>
+                                <td>API RP 520</td>
+                                <td>Sizing pressure-relieving devices</td>
+                            </tr>
+                            <tr>
+                                <td>Electrical classification</td>
+                                <td>API RP 500/505</td>
+                                <td>Hazardous area classification</td>
+                            </tr>
+                            <tr>
+                                <td>Safety instrumented systems</td>
+                                <td>IEC 61511</td>
+                                <td>SIL determination and verification</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Section 10: Design Optimisation -->
+            <div class="section">
+                <h2>10. Design Optimisation Tips</h2>
+
+                <h3>Critical Success Factors</h3>
+                <div class="success-box">
+                    <ul style="margin: 0; margin-left: 20px;">
+                        <li>Complete crude assay before design (salt, metals, nitrogen, TAN, sulphur)</li>
+                        <li>Design for feedstock flexibility—allow crude blending capability</li>
+                        <li>Multiple smaller trains—prefer 2×6,000 bpd over 1×12,000 bpd for turndown</li>
+                        <li>Pre-pour foundations before module arrival</li>
+                        <li>Comprehensive operator training—most early problems stem from operator errors</li>
+                        <li>Maintain spare parts inventory for remote locations</li>
+                    </ul>
+                </div>
+
+                <h3>Common Pitfalls to Avoid</h3>
+                <div class="highlight-box">
+                    <ul style="margin: 0; margin-left: 20px;">
+                        <li>Undersized desalting capacity for worst-case salt content</li>
+                        <li>Single-crude design philosophy leaving assets stranded</li>
+                        <li>Insufficient materials specification for corrosive crudes</li>
+                        <li>Neglecting product quality limitations</li>
+                        <li>Inadequate utilities infrastructure (power, water, flare)</li>
+                    </ul>
+                </div>
+
+                <h3>Performance Enhancement Techniques</h3>
+                <div class="info-box">
+                    <ul style="margin: 0; margin-left: 20px;">
+                        <li><strong>Heat integration:</strong> Recovery of 40–60% of crude heating duty</li>
+                        <li><strong>Variable-speed drives:</strong> 30% power reduction on pumps</li>
+                        <li><strong>Air preheating:</strong> 63% → 72% efficiency on fired heaters</li>
+                        <li><strong>Advanced process control (APC):</strong> Yield optimisation and product quality stability</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- References Section -->
+            <div class="section">
+                <h2>11. References</h2>
+
+                <div class="references">
+                    <h4>Technical Literature</h4>
+                    <ul class="reference-list">
+                        <li id="ref-jegede"><strong>[2]</strong> Jegede, K.Y., et al. (2019). "Process design evaluation of modular topping refinery for Nigeria crude oil." <em>Cogent Engineering</em>, 6(1).</li>
+                        <li id="ref-al-lagtah"><strong>[1]</strong> Al-Lagtah, N.M.A., et al. (2020). "Crude Distillation Unit (CDU)." IntechOpen.</li>
+                        <li id="ref-transparency"><strong>[3]</strong> Transparency Market Research (2023). "Modular Refinery Market—Global Industry Analysis, 2023–2031."</li>
+                        <li id="ref-gary"><strong>[4]</strong> Gary, J.H., et al. (2007). <em>Petroleum Refining: Technology and Economics</em> (5th ed.). CRC Press.</li>
+                    </ul>
+
+                    <h4>Manufacturer Documentation</h4>
+                    <ul class="reference-list">
+                        <li><strong>[5]</strong> Ventech Engineers. "Modular Units." ventech-eng.com/modularunits/</li>
+                        <li><strong>[6]</strong> VFuels LLC. "What We Do—Modular Refineries." vfuels.com</li>
+                        <li><strong>[7]</strong> Pyramid E&C. "Modular Refineries." pyramidenc.com/modular-refineries/</li>
+                        <li><strong>[8]</strong> Peiyang Chemical (PCC). "Modular Refinery." peiyangchem.com/modular-refinery/</li>
+                        <li><strong>[9]</strong> Honeywell UOP. "Modular Refinery." uop.honeywell.com</li>
+                    </ul>
+
+                    <h4>Process Licensor Resources</h4>
+                    <ul class="reference-list">
+                        <li><strong>[10]</strong> Topsoe. "HydroTech Hydrotreating." topsoe.com</li>
+                        <li><strong>[11]</strong> Axens. "Diesel Hydrotreating—Prime-D Technology." axens.net</li>
+                    </ul>
+
+                    <h4>Trade Publications</h4>
+                    <ul class="reference-list">
+                        <li id="ref-ogj1996"><strong>[12]</strong> Oil & Gas Journal (1996). "Siberian Company Starts Up Modular Refinery."</li>
+                        <li id="ref-ogj2010"><strong>[13]</strong> Oil & Gas Journal (2010). "Skid-mounted Units Doubling Capacity of Kurdish Refinery."</li>
+                        <li id="ref-digitalrefining"><strong>[14]</strong> Digital Refining. "Modular Design of Smaller-Scale GTL Plants."</li>
+                        <li id="ref-nsenergy"><strong>[15]</strong> NS Energy. "Waltersmith Modular Refinery, Nigeria."</li>
+                    </ul>
+
+                    <h4>Standards and Regulations</h4>
+                    <ul class="reference-list">
+                        <li><strong>[16]</strong> API Standards: 560, 610, 650, RP 520, RP 500/505</li>
+                        <li><strong>[17]</strong> ASME: Section VIII (Pressure Vessels), B31.3 (Process Piping)</li>
+                        <li><strong>[18]</strong> IEC 61511/ISA-84: Safety Instrumented Systems</li>
+                        <li><strong>[19]</strong> U.S. EPA: NSPS (40 CFR 60), NESHAP (40 CFR 63)</li>
+                        <li><strong>[20]</strong> Google Patents WO2003031012A1: Modular Oil Refinery (layout diagrams)</li>
+                    </ul>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p><strong>Portable Micro Refineries: Complete Technical Engineering Guide</strong></p>
+            <p>Revised Edition | January 2026</p>
+            <p style="margin-top: 15px; font-size: 0.85em; color: #999;">
+                This document provides comprehensive technical guidance for the design, fabrication, and operation of modular crude distillation units. 
+                While every effort has been made to ensure accuracy, specifications and costs are subject to change. Consult with manufacturers and technology licensors for current information.
+            </p>
+        </div>
+    </div>
+</body>
+</html>

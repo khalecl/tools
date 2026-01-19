@@ -1,0 +1,1218 @@
+<!DOCTYPE html>
+
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>🎬 صانع أفلام جروك - اللعبة التفاعلية</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+```
+    body {
+        font-family: 'Segoe UI', 'Arial', sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding: 0;
+        overflow-x: hidden;
+        direction: rtl;
+    }
+
+    .app-container {
+        width: 100%;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        background: white;
+        position: relative;
+    }
+
+    /* HEADER */
+    .header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 15px;
+        text-align: center;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -10%;
+        width: 300px;
+        height: 300px;
+        background: rgba(255,255,255,0.1);
+        border-radius: 50%;
+        animation: float 6s ease-in-out infinite;
+    }
+
+    .header::after {
+        content: '';
+        position: absolute;
+        bottom: -50%;
+        right: -10%;
+        width: 250px;
+        height: 250px;
+        background: rgba(255,255,255,0.08);
+        border-radius: 50%;
+        animation: float 8s ease-in-out infinite reverse;
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(20px); }
+    }
+
+    .header-content {
+        position: relative;
+        z-index: 2;
+    }
+
+    .header-icon {
+        font-size: 2em;
+        margin-bottom: 5px;
+        display: inline-block;
+        animation: rotate 3s linear infinite;
+    }
+
+    @keyframes rotate {
+        0%, 100% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    .header h1 {
+        font-size: 1.5em;
+        margin: 5px 0;
+        font-weight: bold;
+    }
+
+    .header p {
+        font-size: 0.9em;
+        opacity: 0.95;
+    }
+
+    /* PROGRESS BAR */
+    .progress-container {
+        background: rgba(0,0,0,0.1);
+        padding: 15px;
+        border-radius: 10px;
+        margin: 15px;
+    }
+
+    .progress-label {
+        font-size: 0.85em;
+        color: #666;
+        margin-bottom: 8px;
+        font-weight: bold;
+    }
+
+    .progress-bar {
+        background: #e0e0e0;
+        height: 10px;
+        border-radius: 10px;
+        overflow: hidden;
+        position: relative;
+    }
+
+    .progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #667eea, #764ba2);
+        width: 0%;
+        transition: width 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        border-radius: 10px;
+        position: relative;
+    }
+
+    .progress-fill::after {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 10px;
+        background: rgba(255,255,255,0.3);
+        border-radius: 10px;
+        animation: shimmer 1.5s infinite;
+    }
+
+    @keyframes shimmer {
+        0% { opacity: 0; }
+        50% { opacity: 1; }
+        100% { opacity: 0; }
+    }
+
+    /* MAIN CONTENT */
+    .content {
+        flex: 1;
+        padding: 20px;
+        overflow-y: auto;
+        padding-bottom: 120px;
+    }
+
+    /* PAGE SECTION */
+    .page {
+        display: none;
+        animation: slideInUp 0.5s ease-out;
+    }
+
+    .page.active {
+        display: block;
+    }
+
+    @keyframes slideInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* CARDS */
+    .card {
+        background: white;
+        border-radius: 15px;
+        padding: 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        border: 2px solid transparent;
+    }
+
+    .card:active {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    }
+
+    .card.highlight {
+        border: 2px solid #667eea;
+        background: linear-gradient(135deg, #f0f4ff 0%, #f5f0ff 100%);
+    }
+
+    .card.highlight-alt {
+        border: 2px solid #764ba2;
+        background: linear-gradient(135deg, #fef5ff 0%, #f5f0ff 100%);
+    }
+
+    .card-title {
+        font-size: 1.3em;
+        font-weight: bold;
+        color: #667eea;
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-direction: row-reverse;
+    }
+
+    .card-content {
+        color: #333;
+        line-height: 1.7;
+        font-size: 0.95em;
+    }
+
+    /* HERO CARD */
+    .hero-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        text-align: center;
+        padding: 30px 20px;
+        border-radius: 20px;
+        margin-bottom: 25px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .hero-card::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -10%;
+        width: 300px;
+        height: 300px;
+        background: rgba(255,255,255,0.1);
+        border-radius: 50%;
+        animation: float 6s ease-in-out infinite;
+    }
+
+    .hero-card::after {
+        content: '';
+        position: absolute;
+        bottom: -50%;
+        right: -10%;
+        width: 250px;
+        height: 250px;
+        background: rgba(255,255,255,0.08);
+        border-radius: 50%;
+        animation: float 8s ease-in-out infinite reverse;
+    }
+
+    .hero-content {
+        position: relative;
+        z-index: 2;
+    }
+
+    .hero-icon {
+        font-size: 3.5em;
+        margin-bottom: 10px;
+        display: inline-block;
+        animation: bounce 2s ease-in-out infinite;
+    }
+
+    @keyframes bounce {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-15px); }
+    }
+
+    .hero-title {
+        font-size: 1.8em;
+        margin-bottom: 10px;
+        font-weight: bold;
+    }
+
+    .hero-subtitle {
+        font-size: 1em;
+        opacity: 0.95;
+    }
+
+    /* INPUT AREA */
+    .input-box {
+        background: linear-gradient(135deg, #fff9e6 0%, #fff0e6 100%);
+        border: 2px dashed #ffa500;
+        border-radius: 15px;
+        padding: 18px;
+        margin: 18px 0;
+        position: relative;
+    }
+
+    .input-label {
+        font-weight: bold;
+        color: #ff8c00;
+        margin-bottom: 10px;
+        display: block;
+        font-size: 0.95em;
+    }
+
+    input[type="text"], textarea {
+        width: 100%;
+        padding: 12px;
+        border: 2px solid #ddd;
+        border-radius: 10px;
+        font-size: 1em;
+        font-family: Arial;
+        margin-bottom: 12px;
+        transition: all 0.3s ease;
+        text-align: right;
+        direction: rtl;
+    }
+
+    input[type="text"]:focus, textarea:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 15px rgba(102, 126, 234, 0.3);
+        transform: scale(1.02);
+    }
+
+    /* EXAMPLE BOX */
+    .example-box {
+        background: #f0f4ff;
+        border-right: 5px solid #667eea;
+        border-radius: 10px;
+        padding: 14px;
+        margin: 12px 0;
+        font-size: 0.9em;
+        line-height: 1.6;
+        position: relative;
+        text-align: right;
+    }
+
+    .example-box::before {
+        content: '✨';
+        position: absolute;
+        left: 10px;
+        top: 10px;
+        font-size: 1.2em;
+        opacity: 0.5;
+    }
+
+    /* COLOR GRID */
+    .color-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        margin: 15px 0;
+    }
+
+    .color-box {
+        padding: 20px;
+        border-radius: 12px;
+        text-align: center;
+        color: white;
+        font-weight: bold;
+        font-size: 0.9em;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .color-box::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: -100%;
+        width: 100%;
+        height: 100%;
+        background: rgba(255,255,255,0.2);
+        transition: right 0.3s ease;
+        z-index: 0;
+    }
+
+    .color-box:active::before {
+        right: 100%;
+    }
+
+    .color-box-content {
+        position: relative;
+        z-index: 1;
+    }
+
+    .color-box:active {
+        transform: scale(1.05);
+        box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+    }
+
+    /* BUTTONS */
+    .btn {
+        padding: 14px 24px;
+        border: none;
+        border-radius: 12px;
+        font-size: 1em;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        display: inline-block;
+        position: relative;
+        overflow: hidden;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: -100%;
+        width: 100%;
+        height: 100%;
+        background: rgba(255,255,255,0.3);
+        transition: right 0.3s ease;
+        z-index: 0;
+    }
+
+    .btn:active::before {
+        right: 100%;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        width: 100%;
+        margin: 15px 0;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-primary:active {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.6);
+    }
+
+    .btn-secondary {
+        background: #f5f5f5;
+        color: #667eea;
+        border: 2px solid #667eea;
+        margin: 10px 5px 10px 0;
+    }
+
+    .btn-secondary:active {
+        background: #667eea;
+        color: white;
+        transform: scale(0.98);
+    }
+
+    .btn-success {
+        background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
+        color: white;
+        width: 100%;
+        margin: 15px 0;
+        box-shadow: 0 4px 15px rgba(76, 175, 80, 0.4);
+    }
+
+    .btn-success:active {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(76, 175, 80, 0.6);
+    }
+
+    .btn span {
+        position: relative;
+        z-index: 1;
+    }
+
+    /* BOTTOM BUTTONS */
+    .button-group {
+        display: flex;
+        gap: 10px;
+        margin-top: 30px;
+        margin-bottom: 20px;
+        flex-direction: row-reverse;
+    }
+
+    .button-group .btn {
+        flex: 1;
+        margin: 0;
+    }
+
+    /* COMPARISON */
+    .comparison {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        margin: 15px 0;
+    }
+
+    .comparison-item {
+        padding: 14px;
+        border-radius: 10px;
+        font-size: 0.85em;
+        line-height: 1.5;
+        font-weight: 500;
+        text-align: right;
+    }
+
+    .comparison-bad {
+        background: #ffebee;
+        border-right: 4px solid #d32f2f;
+    }
+
+    .comparison-good {
+        background: #e8f5e9;
+        border-right: 4px solid #4caf50;
+    }
+
+    /* BADGES */
+    .badge {
+        display: inline-block;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-size: 0.85em;
+        font-weight: bold;
+        margin: 8px 5px 8px 0;
+    }
+
+    .badge-level-1 {
+        background: #e3f2fd;
+        color: #1976d2;
+        border: 2px solid #1976d2;
+    }
+
+    .badge-level-2 {
+        background: #f3e5f5;
+        color: #6a1b9a;
+        border: 2px solid #6a1b9a;
+    }
+
+    .badge-level-3 {
+        background: #fff3e0;
+        color: #e65100;
+        border: 2px solid #e65100;
+    }
+
+    /* CHECKLIST */
+    .checklist {
+        list-style: none;
+        padding: 0;
+    }
+
+    .checklist li {
+        padding: 12px;
+        margin: 10px 0;
+        background: #f9f9f9;
+        border-right: 4px solid #667eea;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        text-align: right;
+    }
+
+    .checklist li:hover {
+        background: #f0f4ff;
+        transform: translateX(-5px);
+    }
+
+    .checklist li::before {
+        content: "✓ ";
+        color: #667eea;
+        font-weight: bold;
+        margin-left: 10px;
+        font-size: 1.1em;
+    }
+
+    /* MODAL */
+    .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0,0,0,0.6);
+        z-index: 200;
+        animation: fadeIn 0.3s ease;
+        align-items: center;
+        justify-content: center;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    .modal.active {
+        display: flex;
+    }
+
+    .modal-content {
+        background: white;
+        border-radius: 20px;
+        padding: 40px 30px;
+        max-width: 85%;
+        box-shadow: 0 15px 50px rgba(0,0,0,0.3);
+        text-align: center;
+        animation: popIn 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+
+    @keyframes popIn {
+        0% {
+            opacity: 0;
+            transform: scale(0.7);
+        }
+        100% {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+
+    .modal-emoji {
+        font-size: 4em;
+        margin-bottom: 15px;
+        display: inline-block;
+        animation: bounce 0.6s ease-in-out;
+    }
+
+    .modal-title {
+        font-size: 1.7em;
+        font-weight: bold;
+        color: #667eea;
+        margin-bottom: 12px;
+    }
+
+    .modal-text {
+        color: #666;
+        margin-bottom: 25px;
+        line-height: 1.7;
+        font-size: 0.95em;
+    }
+
+    /* HIDDEN */
+    .hidden {
+        display: none !important;
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 600px) {
+        .card {
+            padding: 15px;
+        }
+        
+        .header {
+            padding: 12px;
+        }
+
+        .header h1 {
+            font-size: 1.3em;
+        }
+
+        .modal-content {
+            padding: 30px 20px;
+        }
+    }
+</style>
+```
+
+</head>
+<body>
+    <div class="app-container">
+        <!-- HEADER -->
+        <div class="header">
+            <div class="header-content">
+                <div class="header-icon">🎬</div>
+                <h1>صانع أفلام جروك</h1>
+                <p>تعلمي كيف تصنعي أفلام رائعة جداً!</p>
+            </div>
+        </div>
+
+```
+    <!-- PROGRESS BAR -->
+    <div class="progress-container">
+        <div class="progress-label">مستوى تعلمك: <span id="progressNum">0%</span></div>
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+        </div>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div class="content" id="mainContent">
+
+        <!-- PAGE 1: WELCOME -->
+        <div class="page active" id="page1">
+            <div class="hero-card">
+                <div class="hero-content">
+                    <div class="hero-icon">🎥</div>
+                    <div class="hero-title">أهلاً يا مخرجتنا!</div>
+                    <div class="hero-subtitle">انتِ هتصيري صانعة أفلام مع جروك الآن!</div>
+                </div>
+            </div>
+
+            <div class="card highlight">
+                <div class="card-title">🌟 هتتعلمي إيه:</div>
+                <ul class="checklist">
+                    <li>الأسئلة السحرية الخمسة</li>
+                    <li>كلمات الكاميرا زي المخرجين الحقيقيين</li>
+                    <li>إزاي تضيفي الإضاءة الخاصة</li>
+                    <li>إزاي تكتبي طلبات الأفلام الاحترافية</li>
+                    <li>تصنعي فيديوهات تحفة جداً!</li>
+                </ul>
+            </div>
+
+            <div class="button-group">
+                <button class="btn btn-primary" onclick="goToPage(2)"><span>▶️ هيا بنا</span></button>
+            </div>
+        </div>
+
+        <!-- PAGE 2: SAFETY -->
+        <div class="page" id="page2">
+            <div class="card highlight-alt">
+                <div class="card-title">🛡️ قوانين الأمان</div>
+                <div class="card-content">
+                    <strong>لازم تتذكري دايماً:</strong>
+                </div>
+                <ul class="checklist">
+                    <li>لازم يكون حد كبير معاك (ماما أو معلمة)</li>
+                    <li>استخدمي بس وضع Normal في جروك</li>
+                    <li>اجعليها إيجابية وممتعة ومرحة</li>
+                    <li>قولي لحد كبير لو حصل حاجة تخوف</li>
+                </ul>
+            </div>
+
+            <div class="button-group">
+                <button class="btn btn-secondary" onclick="goToPage(1)"><span>← رجعي</span></button>
+                <button class="btn btn-primary" onclick="goToPage(3)"><span>هيا ▶️</span></button>
+            </div>
+        </div>
+
+        <!-- PAGE 3: MAGIC 5 QUESTIONS -->
+        <div class="page" id="page3">
+            <div class="card highlight">
+                <div class="card-title">✨ الأسئلة السحرية الخمسة</div>
+                <div class="card-content">اسألي نفسك الأسئلة دي قبل ما تكتبي الطلب:</div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">1️⃣ مين؟</div>
+                <div class="card-content">مين أو إيه اللي هيكون في الفيديو؟</div>
+                <div class="example-box">🤖 روبوت  🐉 تنين  👸 أميرة  🚀 صاروخ</div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">2️⃣ بيعمل إيه؟</div>
+                <div class="card-content">هم بيعملوا إيه؟</div>
+                <div class="example-box">🕺 بيرقصوا  ✈️ بيطيروا  🏗️ بيبنوا  🏃 بيركضوا</div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">3️⃣ فين؟</div>
+                <div class="card-content">ده بيحصل فين؟</div>
+                <div class="example-box">🌌 في الفضاء  🏖️ في الشاطئ  🏰 في القلعة  🌊 تحت الماء</div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">4️⃣ الإحساس إيه؟</div>
+                <div class="card-content">شكله إيه والإحساس فيه إيه؟</div>
+                <div class="example-box">✨ سحري  🎉 مثير  😌 هادي وساكت  😄 فاضي ومضحك</div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">5️⃣ الكاميرا قد إيه؟</div>
+                <div class="card-content">الكاميرا قريبة قد إيه؟</div>
+                <div class="example-box">📍 قريب جداً  📽️ متوسط  🌄 بعيد جداً</div>
+            </div>
+
+            <div class="button-group">
+                <button class="btn btn-secondary" onclick="goToPage(2)"><span>← رجعي</span></button>
+                <button class="btn btn-primary" onclick="goToPage(4)"><span>هيا ▶️</span></button>
+            </div>
+        </div>
+
+        <!-- PAGE 4: CAMERA WORDS -->
+        <div class="page" id="page4">
+            <div class="card highlight">
+                <div class="card-title">📷 كلمات الكاميرا</div>
+                <div class="card-content">الكلمات دي بتقول لجروك إزاي نصور الفيديو!</div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">🔍 قريب جداً</div>
+                <div class="card-content">قريب جداً من الوشه أو الحاجة</div>
+                <div class="example-box">"زي ما تقتربي من وشك صديقتك لما تقولك سر"</div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">📽️ متوسط</div>
+                <div class="card-content">تقدري شفي الجسم كله</div>
+                <div class="example-box">"قاعدة على بعد متر ونص من الحد اللي قدامك"</div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">🌄 بعيد جداً</div>
+                <div class="card-content">تشوفي كل حاجة من بعيد</div>
+                <div class="example-box">"واقفة على جبل عالي تشوفي البلد كلها"</div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">🦅 من الأعلى</div>
+                <div class="card-content">بتطلع من فوق عالي جداً</div>
+                <div class="example-box">"تطلعي من السماء زي الطير اللي بيطير"</div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">👀 الكاميرا تتحرك</div>
+                <div class="card-content">الكاميرا بتطلع لليمين أو لليسار</div>
+                <div class="example-box">"الكاميرا بتحرك دماغها عشان تشوف حاجة تانية"</div>
+            </div>
+
+            <div class="button-group">
+                <button class="btn btn-secondary" onclick="goToPage(3)"><span>← رجعي</span></button>
+                <button class="btn btn-primary" onclick="goToPage(5)"><span>هيا ▶️</span></button>
+            </div>
+        </div>
+
+        <!-- PAGE 5: FEELING WORDS -->
+        <div class="page" id="page5">
+            <div class="card highlight">
+                <div class="card-title">✨ كلمات الإحساس السحرية</div>
+                <div class="card-content">كل فيلم له إحساس معين. الكلمات دي تخليه حلو جداً!</div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">😊 أحاسيس مرحة</div>
+                <div class="color-grid">
+                    <div class="color-box" style="background: linear-gradient(135deg, #ff6b9d, #ff8ab9);">
+                        <div class="color-box-content">سحري ✨</div>
+                    </div>
+                    <div class="color-box" style="background: linear-gradient(135deg, #ffd93d, #ffeb3d);">
+                        <div class="color-box-content">فرحة 😄</div>
+                    </div>
+                    <div class="color-box" style="background: linear-gradient(135deg, #6bcf7f, #81c784);">
+                        <div class="color-box-content">لعب ومرح 🎮</div>
+                    </div>
+                    <div class="color-box" style="background: linear-gradient(135deg, #4d96ff, #64b5f6);">
+                        <div class="color-box-content">مثير 🎉</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">😌 أحاسيس هادية</div>
+                <div class="color-grid">
+                    <div class="color-box" style="background: linear-gradient(135deg, #87ceeb, #87ceeb);">
+                        <div class="color-box-content">سلام 😌</div>
+                    </div>
+                    <div class="color-box" style="background: linear-gradient(135deg, #d4a5ff, #e1bee7);">
+                        <div class="color-box-content">حلم 😴</div>
+                    </div>
+                    <div class="color-box" style="background: linear-gradient(135deg, #b0e0e6, #b2dfdb);">
+                        <div class="color-box-content">حنان 🌸</div>
+                    </div>
+                    <div class="color-box" style="background: linear-gradient(135deg, #a8d8ea, #78d1d1);">
+                        <div class="color-box-content">هادي 🤫</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">⚡ أحاسيس المغامرة</div>
+                <div class="color-grid">
+                    <div class="color-box" style="background: linear-gradient(135deg, #ff6b35, #ff8c42);">
+                        <div class="color-box-content">أسطوري 🏰</div>
+                    </div>
+                    <div class="color-box" style="background: linear-gradient(135deg, #f7931e, #fb8500);">
+                        <div class="color-box-content">درامي 🎭</div>
+                    </div>
+                    <div class="color-box" style="background: linear-gradient(135deg, #8b4513, #a0522d);">
+                        <div class="color-box-content">غامض 🔮</div>
+                    </div>
+                    <div class="color-box" style="background: linear-gradient(135deg, #cc0000, #e53935);">
+                        <div class="color-box-content">مرعب شوية 🎢</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="button-group">
+                <button class="btn btn-secondary" onclick="goToPage(4)"><span>← رجعي</span></button>
+                <button class="btn btn-primary" onclick="goToPage(6)"><span>هيا ▶️</span></button>
+            </div>
+        </div>
+
+        <!-- PAGE 6: LIGHTING -->
+        <div class="page" id="page6">
+            <div class="card highlight">
+                <div class="card-title">💡 سحر الإضاءة</div>
+                <div class="card-content">الإضاءة الكويسة تخلي كل حاجة تحفة!</div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">🌅 إضاءة الغروب</div>
+                <div class="card-content">إضاءة دافية وناعمة برتقالي - زي الغروب</div>
+                <div style="background: linear-gradient(90deg, #ffd700, #ff8c00); color: white; padding: 20px; border-radius: 12px; text-align: center; margin: 12px 0; font-weight: bold;">إضاءة الغروب</div>
+                <div class="example-box">استخدميها: للحب، المغامرة، الجمال</div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">☀️ إضاءة شمس الظهر</div>
+                <div class="card-content">إضاءة واضحة نظيفة ومليانة طاقة</div>
+                <div style="background: linear-gradient(90deg, #ffeb3b, #ffc107); color: white; padding: 20px; border-radius: 12px; text-align: center; margin: 12px 0; font-weight: bold;">إضاءة النهار</div>
+                <div class="example-box">استخدميها: للأكشن والإثارة والنهار</div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">🔵 إضاءة ناعمة</div>
+                <div class="card-content">إضاءة حنونة ما فيش ظلال قاسية</div>
+                <div style="background: linear-gradient(90deg, #87ceeb, #b0e0e6); color: white; padding: 20px; border-radius: 12px; text-align: center; margin: 12px 0; font-weight: bold;">إضاءة ناعمة</div>
+                <div class="example-box">استخدميها: للهدوء والأحلام والسحر</div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">🌌 إضاءة نيون</div>
+                <div class="card-content">إضاءة ملونة براق - أزرق وزهري وأخضر</div>
+                <div style="background: linear-gradient(90deg, #ff006e, #00d9ff); color: white; padding: 20px; border-radius: 12px; text-align: center; margin: 12px 0; font-weight: bold;">إضاءة النيون</div>
+                <div class="example-box">استخدميها: للمستقبل والفضاء والحاجات الحديثة</div>
+            </div>
+
+            <div class="button-group">
+                <button class="btn btn-secondary" onclick="goToPage(5)"><span>← رجعي</span></button>
+                <button class="btn btn-primary" onclick="goToPage(7)"><span>هيا ▶️</span></button>
+            </div>
+        </div>
+
+        <!-- PAGE 7: EXAMPLES -->
+        <div class="page" id="page7">
+            <div class="card highlight">
+                <div class="card-title">💡 أمثلة أفلام حقيقية</div>
+                <div class="card-content">اتفرجي على الطلبات الكويسة!</div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">🏰 مغامرة</div>
+                <div class="example-box">"صورة بعيدة جداً لمستكشفة شجاعة بمعطف جلد وقبعة، بتصعد جبل ضبابي فيه أطلال قديمة، إضاءة ذهبية، الإحساس أسطوري ومثير"</div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">✨ أسطورة وسحر</div>
+                <div class="example-box">"قريب جداً من ساحرة أنيقة شعرها فضي طويل وعصا كريستال، بتعمل تعويذة سحرية بحركات أنيقة، في برج قديم من الحجر مع نوافذ عليها نجوم، إضاءة أزرق سحري، الإحساس غامض وقوي"</div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">🚀 المستقبل والفضاء</div>
+                <div class="example-box">"قريب جداً من روبوت فضي لامع عيونه زرقاء بتتوقد، في معمل عالي التقنية فيه شاشات وألواح نيون أزرق وبنفسجي، إضاءة نيون بتلمع على المعادن، الإحساس مستقبلي وغامض"</div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">🌲 الطبيعة</div>
+                <div class="example-box">"كاميرا بتتحرك ببطء على بحيرة جبلية واضحة وقت الشروق، ضباب بيطلع من المية وغزالتين بيشربوا من الشاطئ، إضاءة ذهبية، الإحساس سلام وهيبة"</div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">🐉 تنين الأسطورة</div>
+                <div class="example-box">"صورة بعيدة جداً لتنين أخضر زمردي له حراشيف لامعة، بيطير ببراعة في وادي ضبابي، الشمس بتلمع على أجنحته، وادي بعيد تحته، الإحساس درامي ورهيب، أسلوب أفلام الأساطير"</div>
+            </div>
+
+            <div class="button-group">
+                <button class="btn btn-secondary" onclick="goToPage(6)"><span>← رجعي</span></button>
+                <button class="btn btn-primary" onclick="goToPage(8)"><span>هيا ▶️</span></button>
+            </div>
+        </div>
+
+        <!-- PAGE 8: TIPS -->
+        <div class="page" id="page8">
+            <div class="card highlight">
+                <div class="card-title">💎 نصائح المحترفين</div>
+                <div class="card-content">اتعلمي من مخرجي الأفلام الحقيقيين!</div>
+            </div>
+
+            <div class="card" style="border-left: 4px solid #ffa500;">
+                <div class="card-title" style="color: #ff8c00;">نصيحة 1: كوني محددة جداً</div>
+                <div class="comparison">
+                    <div class="comparison-item comparison-bad">❌ "تنين بيطير"<br><span style="font-size: 0.8em; margin-top: 5px; display: block;">غير واضح!</span></div>
+                    <div class="comparison-item comparison-good">✅ "تنين أخضر بيطير"<br><span style="font-size: 0.8em; margin-top: 5px; display: block;">أحسن كتير!</span></div>
+                </div>
+            </div>
+
+            <div class="card" style="border-left: 4px solid #ffa500;">
+                <div class="card-title" style="color: #ff8c00;">نصيحة 2: استخدمي الألوان</div>
+                <div class="card-content">ما تقولي بس "أزرق" - قولي:</div>
+                <div class="example-box">🔷 "أزرق المحيط الغميق"<br>🔷 "أزرق السماء"<br>🔷 "فيروزي"</div>
+            </div>
+
+            <div class="card" style="border-left: 4px solid #ffa500;">
+                <div class="card-title" style="color: #ff8c00;">نصيحة 3: أضيفي الإحساس</div>
+                <div class="card-content">نفس الحركة، إحساسات مختلفة:</div>
+                <div class="example-box">"بتجري بخوف" = مخيفة 😨<br>"بتجري وفرح" = لطيفة 😄<br>"بتجري بأناقة" = جميلة ✨</div>
+            </div>
+
+            <div class="card" style="border-left: 4px solid #ffa500;">
+                <div class="card-title" style="color: #ff8c00;">نصيحة 4: اكتبي أكتر</div>
+                <div class="card-content">الطلبات الطويلة = فيديوهات أحسن!</div>
+                <div class="example-box">قصير: "روبوت" (كلمة واحدة)<br>طويل: "روبوت فضي لامع له عيون نور" (6 كلمات)</div>
+            </div>
+
+            <div class="button-group">
+                <button class="btn btn-secondary" onclick="goToPage(7)"><span>← رجعي</span></button>
+                <button class="btn btn-primary" onclick="goToPage(9)"><span>هيا ▶️</span></button>
+            </div>
+        </div>
+
+        <!-- PAGE 9: LEVEL 1 PRACTICE -->
+        <div class="page" id="page9">
+            <div class="hero-card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                <div class="hero-content">
+                    <div class="hero-icon">🎮</div>
+                    <div class="hero-title">بدء التطبيق!</div>
+                    <div class="hero-subtitle">اكتبي أول طلب فيديو ليكِ!</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <span class="badge badge-level-1">⭐ الأسهل</span>
+                <div class="card-title">المستوى الأول 1️⃣ - سهل</div>
+                <div class="card-content">ملي الفراغات:</div>
+            </div>
+
+            <div class="input-box">
+                <label class="input-label">أريد أن أرى [لون] [حيوان] في [مكان]</label>
+                <input type="text" id="level1Input" placeholder="مثال: أريد أن أرى تنين بنفسجي في قلعة">
+                <button class="btn btn-success" onclick="checkLevel1()"><span>✅ شوفي طلبي</span></button>
+            </div>
+
+            <div class="button-group">
+                <button class="btn btn-secondary" onclick="goToPage(8)"><span>← رجعي</span></button>
+                <button class="btn btn-primary" onclick="goToPage(10)"><span>هيا ▶️</span></button>
+            </div>
+        </div>
+
+        <!-- PAGE 10: LEVEL 2 PRACTICE -->
+        <div class="page" id="page10">
+            <div class="card">
+                <span class="badge badge-level-2">⭐⭐ متوسط</span>
+                <div class="card-title">المستوى الثاني 2️⃣ - وسط</div>
+                <div class="card-content">اجابي على الأسئلة:</div>
+            </div>
+
+            <div class="input-box">
+                <label class="input-label">1️⃣ البطلة في قصتك مين؟</label>
+                <input type="text" id="level2q1" placeholder="مثال: روبوت شجاع">
+
+                <label class="input-label">2️⃣ اسمها إيه؟</label>
+                <input type="text" id="level2q2" placeholder="مثال: سباركي">
+
+                <label class="input-label">3️⃣ بتعمل إيه؟</label>
+                <input type="text" id="level2q3" placeholder="مثال: بتستكشف بحذر">
+
+                <label class="input-label">4️⃣ هي فين؟</label>
+                <input type="text" id="level2q4" placeholder="مثال: في معمل سحري">
+
+                <label class="input-label">5️⃣ الكاميرا قد إيه؟</label>
+                <input type="text" id="level2q5" placeholder="مثال: متوسطة المسافة">
+
+                <button class="btn btn-success" onclick="checkLevel2()"><span>✅ اصنعي طلبي</span></button>
+            </div>
+
+            <div class="button-group">
+                <button class="btn btn-secondary" onclick="goToPage(9)"><span>← رجعي</span></button>
+                <button class="btn btn-primary" onclick="goToPage(11)"><span>هيا ▶️</span></button>
+            </div>
+        </div>
+
+        <!-- PAGE 11: LEVEL 3 PRACTICE -->
+        <div class="page" id="page11">
+            <div class="card">
+                <span class="badge badge-level-3">⭐⭐⭐ خبيرة</span>
+                <div class="card-title">المستوى الثالث 3️⃣ - احترافي</div>
+                <div class="card-content">اكتبي طلب فيديو احترافي مثل المحترفين!</div>
+            </div>
+
+            <div class="input-box">
+                <label class="input-label">طلب الفيديو الاحترافي بتاعك:</label>
+                <textarea id="level3Input" placeholder="مثال: صورة قريبة من عالمة معملة شعرها وسخ، بتصب سائل أزرق لامع ببطء في دورق زجاجي..." style="height: 120px; resize: none;"></textarea>
+                <button class="btn btn-success" onclick="checkLevel3()"><span>✅ أرسلي طلبي</span></button>
+            </div>
+
+            <div class="button-group">
+                <button class="btn btn-secondary" onclick="goToPage(10)"><span>← رجعي</span></button>
+                <button class="btn btn-primary" onclick="goToPage(12)"><span>هيا ▶️</span></button>
+            </div>
+        </div>
+
+        <!-- PAGE 12: FINISH -->
+        <div class="page" id="page12">
+            <div class="hero-card" style="background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);">
+                <div class="hero-content">
+                    <div class="hero-icon" style="animation: bounce 0.8s ease-in-out infinite;">🎉</div>
+                    <div class="hero-title">أنتِ مخرجة أفلام!</div>
+                    <div class="hero-subtitle">تعلمتِ كل حاجة عشان تصنعي أفلام رائعة!</div>
+                </div>
+            </div>
+
+            <div class="card highlight">
+                <div class="card-title">✅ تعلمتِ:</div>
+                <ul class="checklist">
+                    <li>الأسئلة السحرية الخمسة</li>
+                    <li>كلمات الكاميرا الاحترافية</li>
+                    <li>إزاي الإضاءة تغير الإحساس</li>
+                    <li>أفعال تخليها أفلام حية</li>
+                    <li>التفاصيل اللي تخليها حقيقية</li>
+                    <li>كيفية تفتيشك على شغلك</li>
+                </ul>
+            </div>
+
+            <div class="card" style="background: linear-gradient(135deg, #fff9e6 0%, #fff0e6 100%); border: 2px dashed #ffa500; text-align: center;">
+                <div style="font-size: 1.5em; margin-bottom: 10px;">🚀</div>
+                <div class="card-title" style="color: #ff8c00; justify-content: center;">الخطوة التالية؟</div>
+                <div class="card-content">
+                    روحي استخدمي الطلبات بتاعك في جروك مع ماما أو معلمتك واصنعي أفلام رائعة جداً!
+                </div>
+            </div>
+
+            <div class="button-group">
+                <button class="btn btn-secondary" onclick="goToPage(1)"><span>🔄 ابدئي من الأول</span></button>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- SUCCESS MODAL -->
+    <div class="modal" id="successModal">
+        <div class="modal-content">
+            <div class="modal-emoji" id="modalEmoji">🎉</div>
+            <div class="modal-title" id="modalTitle">تمام التمام!</div>
+            <div class="modal-text" id="modalText"></div>
+            <button class="btn btn-primary" onclick="closeModal()"><span>تمام</span></button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let currentPage = 1;
+    const totalPages = 12;
+
+    function goToPage(pageNum) {
+        // Hide all pages
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        
+        // Show selected page
+        document.getElementById('page' + pageNum).classList.add('active');
+        
+        // Update progress
+        updateProgress(pageNum);
+        
+        // Scroll to top
+        document.getElementById('mainContent').scrollTop = 0;
+        
+        currentPage = pageNum;
+    }
+
+    function updateProgress(pageNum) {
+        const progress = Math.round((pageNum / totalPages) * 100);
+        document.getElementById('progressFill').style.width = progress + '%';
+        document.getElementById('progressNum').textContent = progress + '%';
+    }
+
+    function showSuccess(emoji, title, text) {
+        document.getElementById('modalEmoji').textContent = emoji;
+        document.getElementById('modalTitle').textContent = title;
+        document.getElementById('modalText').textContent = text;
+        document.getElementById('successModal').classList.add('active');
+    }
+
+    function closeModal() {
+        document.getElementById('successModal').classList.remove('active');
+    }
+
+    // CLOSE MODAL ON OUTSIDE CLICK
+    document.getElementById('successModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeModal();
+        }
+    });
+
+    // LEVEL CHECKING
+    function checkLevel1() {
+        const input = document.getElementById('level1Input').value.trim();
+        if (input.length < 5) {
+            alert('اكتبي طلب أطول شوية!');
+            return;
+        }
+        showSuccess('🎬', 'تحفة!', 'الطلب بتاعك المستوى الأول:\n\n"' + input + '"\n\nدلوقتي جربي المستوى الثاني! 🚀');
+    }
+
+    function checkLevel2() {
+        const q1 = document.getElementById('level2q1').value.trim();
+        const q2 = document.getElementById('level2q2').value.trim();
+        const q3 = document.getElementById('level2q3').value.trim();
+        const q4 = document.getElementById('level2q4').value.trim();
+        const q5 = document.getElementById('level2q5').value.trim();
+
+        if (!q1 || !q2 || !q3 || !q4 || !q5) {
+            alert('ملي كل الإجابات بالرجاء!');
+            return;
+        }
+
+        const prompt = `اصنعي فيديو ل ${q1} اسمها ${q2}، ${q3} في ${q4}، ${q5}.`;
+        showSuccess('🌟', 'ممتاز!', 'الطلب بتاعك المستوى الثاني:\n\n"' + prompt + '"\n\nأحسن بكتير! الآن جربي المستوى الثالث!');
+    }
+
+    function checkLevel3() {
+        const input = document.getElementById('level3Input').value.trim();
+        if (input.length < 30) {
+            alert('الطلب قصير شوية! اكتبي 30 كلمة على الأقل.');
+            return;
+        }
+        showSuccess('🎥', 'عظيم جداً!', 'الطلب الاحترافي بتاعك:\n\n"' + input + '"\n\nأنتِ مخرجة أفلام دلوقتي! 🎬 استخدمي ده في جروك مع ماما!');
+    }
+
+    // Initialize
+    updateProgress(1);
+</script>
+```
+
+</body>
+</html>

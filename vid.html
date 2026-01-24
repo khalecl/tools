@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>VideoFlow - Join & Speed Control</title>
+    <title>VideoFlow - Fast Merge</title>
     <style>
         * {
             margin: 0;
@@ -334,6 +334,7 @@
         display: none;
         flex-direction: column;
         gap: 12px;
+        margin-top: 12px;
     }
 
     .progress-section.active {
@@ -361,25 +362,28 @@
         font-size: 12px;
         color: #94a3b8;
         text-align: center;
+        line-height: 1.4;
     }
 
-    .preview-section {
+    .result-section {
         display: none;
         flex-direction: column;
         gap: 12px;
     }
 
-    .preview-section.active {
+    .result-section.active {
         display: flex;
         animation: slideUp 0.4s ease-out;
     }
 
-    video {
-        width: 100%;
-        height: auto;
-        border-radius: 12px;
-        background: #0f172a;
-        border: 1px solid rgba(148, 163, 184, 0.1);
+    .result-info {
+        background: rgba(34, 197, 94, 0.15);
+        border: 1px solid rgba(34, 197, 94, 0.3);
+        padding: 12px;
+        border-radius: 10px;
+        font-size: 13px;
+        color: #86efac;
+        line-height: 1.5;
     }
 
     .video-controls {
@@ -389,18 +393,18 @@
     }
 
     .control-btn {
-        width: 44px;
-        height: 44px;
-        border-radius: 50%;
+        flex: 1;
+        padding: 12px;
+        border-radius: 8px;
         background: rgba(59, 130, 246, 0.2);
         border: 1px solid rgba(59, 130, 246, 0.4);
         color: #93c5fd;
         cursor: pointer;
-        font-size: 18px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+        font-size: 13px;
+        font-weight: 700;
         transition: all 0.2s;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
     }
 
     .control-btn:active {
@@ -486,23 +490,6 @@
         }
     }
 
-    /* iPhone-specific optimizations */
-    @supports (-webkit-touch-callout: none) {
-        input[type="range"] {
-            -webkit-appearance: slider-horizontal;
-        }
-
-        button {
-            -webkit-appearance: none;
-            -webkit-border-radius: 10px;
-        }
-
-        .file-input-label {
-            -webkit-user-select: none;
-            user-select: none;
-        }
-    }
-
     @media (max-height: 600px) {
         .container {
             padding: 8px;
@@ -530,14 +517,14 @@
     <div class="container">
         <div class="header">
             <h1>VideoFlow</h1>
-            <p>Join & Speed Control</p>
+            <p>Fast Merge & Speed Control</p>
         </div>
 
 ```
     <div id="messageContainer"></div>
 
     <div class="section">
-        <div class="section-title">📹 Videos</div>
+        <div class="section-title">📹 Videos to Merge</div>
         <div class="input-group">
             <label class="file-input-label" for="videoInput">
                 + Add Videos
@@ -547,28 +534,28 @@
         
         <div id="videoListContainer" class="empty-state">
             <div class="empty-state-icon">🎬</div>
-            <div class="empty-state-text">Select videos to join</div>
+            <div class="empty-state-text">Select videos to merge</div>
         </div>
     </div>
 
     <div class="section">
-        <div class="section-title">⚡ Playback Speed</div>
+        <div class="section-title">⚡ Output Speed</div>
         <div class="speed-control">
             <div class="speed-display">
-                <span class="speed-label">Output Speed</span>
+                <span class="speed-label">Playback Speed</span>
                 <span class="speed-value"><span id="speedValue">1.0</span>x</span>
             </div>
             <input type="range" id="speedSlider" min="0.25" max="2" step="0.25" value="1">
             <div style="font-size: 11px; color: #64748b; text-align: center;">
-                0.25x (slowest) to 2x (fastest)
+                0.25x to 2x (slower to faster)
             </div>
         </div>
     </div>
 
     <div class="section">
-        <div class="section-title">⚙️ Process</div>
+        <div class="section-title">⚙️ Merge</div>
         <div class="buttons-group">
-            <button class="btn-primary" id="joinBtn" disabled>Join Videos</button>
+            <button class="btn-primary" id="mergeBtn" disabled>Merge Videos</button>
             <button class="btn-secondary" id="clearBtn">Clear</button>
         </div>
         
@@ -580,21 +567,21 @@
         </div>
     </div>
 
-    <div id="previewSection" class="section preview-section">
-        <div class="section-title">👁️ Preview</div>
-        <video id="previewVideo" controls playsinline></video>
+    <div id="resultSection" class="section result-section">
+        <div class="section-title">✅ Merged Successfully!</div>
+        <div class="result-info" id="resultInfo"></div>
         <div class="video-controls">
-            <button class="control-btn" id="downloadBtn" title="Download">⬇️</button>
-            <button class="control-btn" id="shareBtn" title="Share">📤</button>
+            <button class="control-btn" id="downloadBtn">⬇️ Download</button>
+            <button class="control-btn" id="shareBtn">📤 Share</button>
         </div>
     </div>
 </div>
 
 <script>
-    class VideoJoiner {
+    class VideoMerger {
         constructor() {
             this.videos = [];
-            this.joinedBlob = null;
+            this.mergedBlob = null;
             this.speed = 1.0;
             this.setupEventListeners();
         }
@@ -602,7 +589,7 @@
         setupEventListeners() {
             document.getElementById('videoInput').addEventListener('change', (e) => this.handleVideoSelect(e));
             document.getElementById('speedSlider').addEventListener('input', (e) => this.updateSpeed(e));
-            document.getElementById('joinBtn').addEventListener('click', () => this.joinVideos());
+            document.getElementById('mergeBtn').addEventListener('click', () => this.mergeVideos());
             document.getElementById('clearBtn').addEventListener('click', () => this.clearAll());
             document.getElementById('downloadBtn').addEventListener('click', () => this.downloadVideo());
             document.getElementById('shareBtn').addEventListener('click', () => this.shareVideo());
@@ -613,13 +600,12 @@
             
             if (files.length === 0) return;
 
-            // Validate video files
             const validVideos = files.filter(file => {
                 if (!file.type.startsWith('video/')) {
                     this.showMessage('Invalid file type. Please select video files.', 'error');
                     return false;
                 }
-                if (file.size > 500 * 1024 * 1024) { // 500MB limit
+                if (file.size > 500 * 1024 * 1024) {
                     this.showMessage(`${file.name} is too large (max 500MB)`, 'error');
                     return false;
                 }
@@ -638,10 +624,10 @@
                 container.innerHTML = `
                     <div class="empty-state">
                         <div class="empty-state-icon">🎬</div>
-                        <div class="empty-state-text">Select videos to join</div>
+                        <div class="empty-state-text">Select videos to merge</div>
                     </div>
                 `;
-                document.getElementById('joinBtn').disabled = true;
+                document.getElementById('mergeBtn').disabled = true;
                 return;
             }
 
@@ -653,13 +639,13 @@
                                 <div class="video-item-name">${idx + 1}. ${video.name}</div>
                                 <div class="video-item-size">${(video.size / 1024 / 1024).toFixed(1)}MB</div>
                             </div>
-                            <button class="video-item-remove" onclick="joiner.removeVideo(${idx})">Remove</button>
+                            <button class="video-item-remove" onclick="merger.removeVideo(${idx})">Remove</button>
                         </li>
                     `).join('')}
                 </ul>
             `;
             
-            document.getElementById('joinBtn').disabled = false;
+            document.getElementById('mergeBtn').disabled = false;
         }
 
         removeVideo(index) {
@@ -672,153 +658,153 @@
             document.getElementById('speedValue').textContent = this.speed.toFixed(2);
         }
 
-        async joinVideos() {
+        async mergeVideos() {
             if (this.videos.length === 0) {
-                this.showMessage('Please select videos to join', 'error');
+                this.showMessage('Please select videos to merge', 'error');
                 return;
             }
 
             this.showProgress(true);
-            document.getElementById('joinBtn').disabled = true;
+            document.getElementById('mergeBtn').disabled = true;
 
             try {
-                const canvas = document.createElement('canvas');
-                const ctx = canvas.getContext('2d');
-                
-                // Get dimensions from first video
-                const firstVideo = await this.loadVideoMetadata(this.videos[0]);
-                canvas.width = firstVideo.videoWidth;
-                canvas.height = firstVideo.videoHeight;
+                // Create a temporary container for video metadata extraction
+                const ffmpegScript = document.createElement('script');
+                ffmpegScript.src = 'https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.6/dist/ffmpeg.min.js';
+                document.head.appendChild(ffmpegScript);
 
-                // Create MediaRecorder with appropriate codec
-                const stream = canvas.captureStream(30);
-                const mediaRecorder = new MediaRecorder(stream, {
-                    mimeType: 'video/mp4',
-                    videoBitsPerSecond: 5000000
-                });
+                ffmpegScript.onload = async () => {
+                    const { FFmpeg, fetchFile } = FFmpeg;
+                    const ffmpeg = new FFmpeg.FFmpeg();
 
-                const chunks = [];
-                mediaRecorder.ondataavailable = (e) => chunks.push(e.data);
-                mediaRecorder.onstop = () => {
-                    this.joinedBlob = new Blob(chunks, { type: 'video/mp4' });
-                    this.showPreview();
-                    this.showMessage('Videos joined successfully!', 'success');
-                    this.showProgress(false);
-                    document.getElementById('joinBtn').disabled = false;
-                };
-
-                mediaRecorder.start();
-                await this.playVideosSequentially(canvas, ctx, firstVideo, mediaRecorder);
-            } catch (error) {
-                console.error('Error joining videos:', error);
-                this.showMessage(`Error: ${error.message}`, 'error');
-                this.showProgress(false);
-                document.getElementById('joinBtn').disabled = false;
-            }
-        }
-
-        async loadVideoMetadata(file) {
-            return new Promise((resolve, reject) => {
-                const video = document.createElement('video');
-                const url = URL.createObjectURL(file);
-                
-                video.onloadedmetadata = () => {
-                    resolve(video);
-                };
-                
-                video.onerror = reject;
-                video.src = url;
-            });
-        }
-
-        async playVideosSequentially(canvas, ctx, baseVideo, mediaRecorder) {
-            const totalDuration = await this.calculateTotalDuration();
-            const startTime = Date.now();
-
-            for (let i = 0; i < this.videos.length; i++) {
-                const videoFile = this.videos[i];
-                const video = await this.loadVideoMetadata(videoFile);
-                const url = URL.createObjectURL(videoFile);
-                video.src = url;
-                
-                await new Promise((resolve) => {
-                    video.play().then(() => {
-                        const playDuration = (video.duration / this.speed) * 1000;
-                        let lastTime = Date.now();
-
-                        const renderFrame = () => {
-                            const elapsed = Date.now() - startTime;
-                            const progress = (elapsed / totalDuration) * 100;
+                    // Load FFmpeg WASM
+                    await ffmpeg.load();
+                    
+                    try {
+                        // Write all input videos to FFmpeg
+                        for (let i = 0; i < this.videos.length; i++) {
+                            const file = this.videos[i];
+                            const data = await fetchFile(file);
+                            ffmpeg.writeFile(`input${i}.mp4`, data);
                             
-                            document.getElementById('progressFill').style.width = progress + '%';
                             document.getElementById('progressText').textContent = 
-                                `Processing: ${Math.round(progress)}% (Video ${i + 1}/${this.videos.length})`;
+                                `Loading videos: ${i + 1}/${this.videos.length}`;
+                            document.getElementById('progressFill').style.width = 
+                                ((i + 1) / this.videos.length * 50) + '%';
+                        }
 
-                            if (!video.paused && !video.ended) {
-                                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-                                requestAnimationFrame(renderFrame);
-                            } else {
-                                resolve();
-                            }
-                        };
+                        // Create concat file
+                        let concatContent = '';
+                        for (let i = 0; i < this.videos.length; i++) {
+                            concatContent += `file 'input${i}.mp4'\n`;
+                        }
+                        ffmpeg.writeFile('concat.txt', concatContent);
 
-                        video.playbackRate = this.speed;
-                        video.onended = resolve;
-                        renderFrame();
-                    });
-                });
+                        document.getElementById('progressText').textContent = 'Merging videos...';
+                        document.getElementById('progressFill').style.width = '50%';
 
-                URL.revokeObjectURL(url);
+                        // Build FFmpeg command with speed control
+                        const speedFilter = this.speed !== 1.0 
+                            ? `-filter:v "setpts=PTS/${this.speed}" -filter:a "atempo=${this.speed}"` 
+                            : '';
+
+                        // Execute merge command
+                        await ffmpeg.exec([
+                            '-f', 'concat',
+                            '-safe', '0',
+                            '-i', 'concat.txt',
+                            '-c', 'copy',
+                            'output.mp4'
+                        ]);
+
+                        // If speed is not 1.0, re-encode with speed filter
+                        if (this.speed !== 1.0) {
+                            await ffmpeg.exec([
+                                '-i', 'output.mp4',
+                                '-filter:v', `setpts=PTS/${this.speed}`,
+                                '-filter:a', `atempo=${this.speed}`,
+                                '-y',
+                                'output_speed.mp4'
+                            ]);
+                            ffmpeg.deleteFile('output.mp4');
+                            ffmpeg.renameFile('output_speed.mp4', 'output.mp4');
+                        }
+
+                        document.getElementById('progressFill').style.width = '90%';
+
+                        // Read the output
+                        const data = ffmpeg.readFile('output.mp4');
+                        this.mergedBlob = new Blob([data.buffer], { type: 'video/mp4' });
+
+                        ffmpeg.deleteFile('output.mp4');
+
+                        this.showResult();
+                        this.showMessage('Videos merged successfully!', 'success');
+                        this.showProgress(false);
+                        document.getElementById('mergeBtn').disabled = false;
+
+                    } catch (error) {
+                        throw error;
+                    }
+                };
+
+                ffmpegScript.onerror = () => {
+                    this.showMessage('Failed to load FFmpeg library', 'error');
+                    this.showProgress(false);
+                    document.getElementById('mergeBtn').disabled = false;
+                };
+
+            } catch (error) {
+                console.error('Error merging videos:', error);
+                this.showMessage(`Error: ${error.message || 'Failed to merge videos'}`, 'error');
+                this.showProgress(false);
+                document.getElementById('mergeBtn').disabled = false;
             }
-
-            mediaRecorder.stop();
-        }
-
-        async calculateTotalDuration() {
-            let total = 0;
-            for (const file of this.videos) {
-                const video = await this.loadVideoMetadata(file);
-                total += (video.duration / this.speed) * 1000;
-            }
-            return total;
         }
 
         showProgress(show) {
             document.getElementById('progressSection').classList.toggle('active', show);
         }
 
-        showPreview() {
-            const video = document.getElementById('previewVideo');
-            const url = URL.createObjectURL(this.joinedBlob);
-            video.src = url;
-            document.getElementById('previewSection').classList.add('active');
+        showResult() {
+            const resultSection = document.getElementById('resultSection');
+            const sizeInMB = (this.mergedBlob.size / 1024 / 1024).toFixed(2);
+            
+            document.getElementById('resultInfo').innerHTML = `
+                <strong>Merged File:</strong> ${sizeInMB}MB<br>
+                <strong>Speed:</strong> ${this.speed}x<br>
+                <strong>Videos Combined:</strong> ${this.videos.length}
+            `;
+            
+            resultSection.classList.add('active');
         }
 
         downloadVideo() {
-            if (!this.joinedBlob) return;
+            if (!this.mergedBlob) return;
 
-            const url = URL.createObjectURL(this.joinedBlob);
+            const url = URL.createObjectURL(this.mergedBlob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `joined-video-${this.speed}x-${Date.now()}.mp4`;
+            const timestamp = new Date().toISOString().split('T')[0];
+            a.download = `merged-${this.speed}x-${timestamp}.mp4`;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
-            this.showMessage('Video downloaded!', 'success');
+            this.showMessage('Download started!', 'success');
         }
 
         async shareVideo() {
-            if (!this.joinedBlob) return;
+            if (!this.mergedBlob) return;
 
             try {
-                const file = new File([this.joinedBlob], 'joined-video.mp4', { type: 'video/mp4' });
+                const file = new File([this.mergedBlob], 'merged-video.mp4', { type: 'video/mp4' });
                 
                 if (navigator.share) {
                     await navigator.share({
                         files: [file],
-                        title: 'VideoFlow - Joined Video',
-                        text: `Joined video at ${this.speed}x speed`
+                        title: 'VideoFlow - Merged Video',
+                        text: `Merged video at ${this.speed}x speed`
                     });
                     this.showMessage('Video shared!', 'success');
                 } else {
@@ -827,20 +813,21 @@
             } catch (error) {
                 if (error.name !== 'AbortError') {
                     console.error('Share error:', error);
+                    this.downloadVideo();
                 }
             }
         }
 
         clearAll() {
             this.videos = [];
-            this.joinedBlob = null;
+            this.mergedBlob = null;
             this.speed = 1.0;
             document.getElementById('videoInput').value = '';
             document.getElementById('speedSlider').value = '1';
             document.getElementById('speedValue').textContent = '1.00';
             this.updateVideoList();
             this.showProgress(false);
-            document.getElementById('previewSection').classList.remove('active');
+            document.getElementById('resultSection').classList.remove('active');
         }
 
         showMessage(text, type) {
@@ -855,11 +842,11 @@
                 if (message.parentNode) {
                     message.remove();
                 }
-            }, 3000);
+            }, 4000);
         }
     }
 
-    const joiner = new VideoJoiner();
+    const merger = new VideoMerger();
 </script>
 ```
 

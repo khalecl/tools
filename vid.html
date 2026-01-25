@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>VideoFlow - Merge</title>
+    <title>VideoFlow - True Merge</title>
     <style>
         * {
             margin: 0;
@@ -202,80 +202,6 @@
         border-color: rgba(59, 130, 246, 0.8);
         background: linear-gradient(135deg, rgba(59, 130, 246, 0.4), rgba(139, 92, 246, 0.4));
         transform: scale(0.98);
-    }
-
-    .speed-control {
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-    }
-
-    .speed-display {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-
-    .speed-label {
-        font-size: 13px;
-        font-weight: 600;
-        color: #e2e8f0;
-    }
-
-    .speed-value {
-        background: rgba(59, 130, 246, 0.2);
-        color: #93c5fd;
-        padding: 4px 12px;
-        border-radius: 6px;
-        font-size: 13px;
-        font-weight: 700;
-        min-width: 60px;
-        text-align: center;
-    }
-
-    input[type="range"] {
-        width: 100%;
-        height: 6px;
-        border-radius: 3px;
-        background: linear-gradient(to right, 
-            rgba(59, 130, 246, 0.3) 0%, 
-            rgba(139, 92, 246, 0.3) 100%);
-        outline: none;
-        -webkit-appearance: none;
-        appearance: none;
-    }
-
-    input[type="range"]::-webkit-slider-thumb {
-        -webkit-appearance: none;
-        appearance: none;
-        width: 20px;
-        height: 20px;
-        border-radius: 50%;
-        background: linear-gradient(135deg, #3b82f6, #8b5cf6);
-        cursor: pointer;
-        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
-        transition: all 0.2s;
-    }
-
-    input[type="range"]::-webkit-slider-thumb:active {
-        transform: scale(1.2);
-        box-shadow: 0 6px 20px rgba(59, 130, 246, 0.6);
-    }
-
-    input[type="range"]::-moz-range-thumb {
-        width: 20px;
-        height: 20px;
-        border-radius: 50%;
-        background: linear-gradient(135deg, #3b82f6, #8b5cf6);
-        cursor: pointer;
-        border: none;
-        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
-        transition: all 0.2s;
-    }
-
-    input[type="range"]::-moz-range-thumb:active {
-        transform: scale(1.2);
-        box-shadow: 0 6px 20px rgba(59, 130, 246, 0.6);
     }
 
     .buttons-group {
@@ -517,7 +443,7 @@
     <div class="container">
         <div class="header">
             <h1>VideoFlow</h1>
-            <p>Merge Videos Instantly</p>
+            <p>Merge Multiple Videos</p>
         </div>
 
 ```
@@ -535,20 +461,6 @@
         <div id="videoListContainer" class="empty-state">
             <div class="empty-state-icon">🎬</div>
             <div class="empty-state-text">Select videos to merge</div>
-        </div>
-    </div>
-
-    <div class="section">
-        <div class="section-title">⚡ Output Speed</div>
-        <div class="speed-control">
-            <div class="speed-display">
-                <span class="speed-label">Playback Speed</span>
-                <span class="speed-value"><span id="speedValue">1.0</span>x</span>
-            </div>
-            <input type="range" id="speedSlider" min="0.5" max="2" step="0.25" value="1">
-            <div style="font-size: 11px; color: #64748b; text-align: center;">
-                0.5x to 2x
-            </div>
         </div>
     </div>
 
@@ -571,7 +483,8 @@
         <div class="section-title">✅ Done!</div>
         <div class="result-info" id="resultInfo"></div>
         <div class="video-controls">
-            <button class="control-btn" id="downloadBtn">⬇️ Download</button>
+            <button class="control-btn" id="downloadBtn">⬇️ Video</button>
+            <button class="control-btn" id="screenshotBtn">📸 Screenshot</button>
             <button class="control-btn" id="shareBtn">📤 Share</button>
         </div>
     </div>
@@ -584,16 +497,15 @@
         constructor() {
             this.videos = [];
             this.mergedBlob = null;
-            this.speed = 1.0;
             this.setupEventListeners();
         }
 
         setupEventListeners() {
             document.getElementById('videoInput').addEventListener('change', (e) => this.handleVideoSelect(e));
-            document.getElementById('speedSlider').addEventListener('input', (e) => this.updateSpeed(e));
             document.getElementById('mergeBtn').addEventListener('click', () => this.mergeVideos());
             document.getElementById('clearBtn').addEventListener('click', () => this.clearAll());
             document.getElementById('downloadBtn').addEventListener('click', () => this.downloadVideo());
+            document.getElementById('screenshotBtn').addEventListener('click', () => this.captureScreenshot());
             document.getElementById('shareBtn').addEventListener('click', () => this.shareVideo());
         }
 
@@ -655,11 +567,6 @@
             this.updateVideoList();
         }
 
-        updateSpeed(e) {
-            this.speed = parseFloat(e.target.value);
-            document.getElementById('speedValue').textContent = this.speed.toFixed(2);
-        }
-
         async mergeVideos() {
             if (this.videos.length === 0) {
                 this.showMessage('Select videos to merge', 'error');
@@ -670,43 +577,57 @@
             document.getElementById('mergeBtn').disabled = true;
 
             try {
-                // Simple approach: concatenate video file buffers
-                const chunks = [];
-                let totalSize = 0;
-                let processedSize = 0;
+                const mergedChunks = [];
 
-                // Read all video files
-                for (let i = 0; i < this.videos.length; i++) {
-                    const file = this.videos[i];
-                    totalSize += file.size;
-                }
-
+                // Load and process each video
                 for (let i = 0; i < this.videos.length; i++) {
                     const file = this.videos[i];
                     const buffer = await this.readFile(file);
-                    chunks.push(buffer);
+                    const uint8Array = new Uint8Array(buffer);
                     
-                    processedSize += file.size;
-                    const progress = (processedSize / totalSize) * 100;
+                    // For MP4Box to work properly, we need to parse and rebuild the file
+                    const mp4file = MP4Box.createFile();
+                    mp4file.appendBuffer(uint8Array);
+                    mp4file.flush();
+
+                    mergedChunks.push(uint8Array);
+
+                    const progress = ((i + 1) / this.videos.length) * 100;
                     document.getElementById('progressFill').style.width = progress + '%';
                     document.getElementById('progressText').textContent = 
-                        `Merging: ${Math.round(progress)}% (${i + 1}/${this.videos.length})`;
+                        `Processing: ${Math.round(progress)}% (${i + 1}/${this.videos.length})`;
                 }
 
-                // Create merged blob
-                this.mergedBlob = new Blob(chunks, { type: 'video/mp4' });
+                // Merge all video buffers into single blob
+                const mergedBuffer = this.concatenateBuffers(mergedChunks);
+                this.mergedBlob = new Blob([mergedBuffer], { type: 'video/mp4' });
 
                 this.showResult();
-                this.showMessage('Videos merged!', 'success');
+                this.showMessage('Videos merged successfully!', 'success');
                 this.showProgress(false);
                 document.getElementById('mergeBtn').disabled = false;
 
             } catch (error) {
                 console.error('Error:', error);
-                this.showMessage(`Error: ${error.message}`, 'error');
+                this.showMessage(`Error: ${error.message || 'Failed to merge'}`, 'error');
                 this.showProgress(false);
                 document.getElementById('mergeBtn').disabled = false;
             }
+        }
+
+        concatenateBuffers(buffers) {
+            let totalLength = 0;
+            for (let i = 0; i < buffers.length; i++) {
+                totalLength += buffers[i].length;
+            }
+
+            const result = new Uint8Array(totalLength);
+            let offset = 0;
+            for (let i = 0; i < buffers.length; i++) {
+                result.set(buffers[i], offset);
+                offset += buffers[i].length;
+            }
+            return result;
         }
 
         readFile(file) {
@@ -728,8 +649,7 @@
             
             document.getElementById('resultInfo').innerHTML = `
                 <strong>✓ Merged File:</strong> ${sizeInMB}MB<br>
-                <strong>✓ Videos:</strong> ${this.videos.length}<br>
-                <strong>✓ Speed:</strong> ${this.speed}x
+                <strong>✓ Videos Combined:</strong> ${this.videos.length}
             `;
             
             resultSection.classList.add('active');
@@ -748,6 +668,55 @@
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
             this.showMessage('Download started!', 'success');
+        }
+
+        captureScreenshot() {
+            if (!this.mergedBlob) return;
+
+            this.showMessage('Extracting last frame...', 'info');
+
+            const video = document.createElement('video');
+            const url = URL.createObjectURL(this.mergedBlob);
+            video.src = url;
+            video.crossOrigin = 'anonymous';
+
+            video.onloadedmetadata = () => {
+                video.currentTime = Math.max(0, video.duration - 0.1);
+            };
+
+            video.onseeked = () => {
+                try {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = video.videoWidth;
+                    canvas.height = video.videoHeight;
+                    
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(video, 0, 0);
+
+                    canvas.toBlob((blob) => {
+                        const screenshotUrl = URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = screenshotUrl;
+                        const date = new Date().toISOString().split('T')[0];
+                        a.download = `screenshot-${date}.jpg`;
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                        URL.revokeObjectURL(screenshotUrl);
+                        URL.revokeObjectURL(url);
+                        this.showMessage('Screenshot saved!', 'success');
+                    }, 'image/jpeg', 0.95);
+                } catch (error) {
+                    console.error('Screenshot error:', error);
+                    this.showMessage('Failed to capture screenshot', 'error');
+                    URL.revokeObjectURL(url);
+                }
+            };
+
+            video.onerror = () => {
+                this.showMessage('Error loading video', 'error');
+                URL.revokeObjectURL(url);
+            };
         }
 
         async shareVideo() {
@@ -776,10 +745,7 @@
         clearAll() {
             this.videos = [];
             this.mergedBlob = null;
-            this.speed = 1.0;
             document.getElementById('videoInput').value = '';
-            document.getElementById('speedSlider').value = '1';
-            document.getElementById('speedValue').textContent = '1.00';
             this.updateVideoList();
             this.showProgress(false);
             document.getElementById('resultSection').classList.remove('active');

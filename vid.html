@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>VideoFlow - Fast Merge</title>
+    <title>VideoFlow - Merge</title>
     <style>
         * {
             margin: 0;
@@ -517,7 +517,7 @@
     <div class="container">
         <div class="header">
             <h1>VideoFlow</h1>
-            <p>Fast Merge & Speed Control</p>
+            <p>Merge Videos Instantly</p>
         </div>
 
 ```
@@ -545,9 +545,9 @@
                 <span class="speed-label">Playback Speed</span>
                 <span class="speed-value"><span id="speedValue">1.0</span>x</span>
             </div>
-            <input type="range" id="speedSlider" min="0.25" max="2" step="0.25" value="1">
+            <input type="range" id="speedSlider" min="0.5" max="2" step="0.25" value="1">
             <div style="font-size: 11px; color: #64748b; text-align: center;">
-                0.25x to 2x (slower to faster)
+                0.5x to 2x
             </div>
         </div>
     </div>
@@ -568,7 +568,7 @@
     </div>
 
     <div id="resultSection" class="section result-section">
-        <div class="section-title">✅ Merged Successfully!</div>
+        <div class="section-title">✅ Done!</div>
         <div class="result-info" id="resultInfo"></div>
         <div class="video-controls">
             <button class="control-btn" id="downloadBtn">⬇️ Download</button>
@@ -576,6 +576,8 @@
         </div>
     </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/mp4box@0.5.2/dist/mp4box.all.min.js"></script>
 
 <script>
     class VideoMerger {
@@ -602,11 +604,11 @@
 
             const validVideos = files.filter(file => {
                 if (!file.type.startsWith('video/')) {
-                    this.showMessage('Invalid file type. Please select video files.', 'error');
+                    this.showMessage('Invalid file type. Select video files.', 'error');
                     return false;
                 }
                 if (file.size > 500 * 1024 * 1024) {
-                    this.showMessage(`${file.name} is too large (max 500MB)`, 'error');
+                    this.showMessage(`${file.name} too large (max 500MB)`, 'error');
                     return false;
                 }
                 return true;
@@ -660,7 +662,7 @@
 
         async mergeVideos() {
             if (this.videos.length === 0) {
-                this.showMessage('Please select videos to merge', 'error');
+                this.showMessage('Select videos to merge', 'error');
                 return;
             }
 
@@ -668,98 +670,52 @@
             document.getElementById('mergeBtn').disabled = true;
 
             try {
-                // Create a temporary container for video metadata extraction
-                const ffmpegScript = document.createElement('script');
-                ffmpegScript.src = 'https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.6/dist/ffmpeg.min.js';
-                document.head.appendChild(ffmpegScript);
+                // Simple approach: concatenate video file buffers
+                const chunks = [];
+                let totalSize = 0;
+                let processedSize = 0;
 
-                ffmpegScript.onload = async () => {
-                    const { FFmpeg, fetchFile } = FFmpeg;
-                    const ffmpeg = new FFmpeg.FFmpeg();
+                // Read all video files
+                for (let i = 0; i < this.videos.length; i++) {
+                    const file = this.videos[i];
+                    totalSize += file.size;
+                }
 
-                    // Load FFmpeg WASM
-                    await ffmpeg.load();
+                for (let i = 0; i < this.videos.length; i++) {
+                    const file = this.videos[i];
+                    const buffer = await this.readFile(file);
+                    chunks.push(buffer);
                     
-                    try {
-                        // Write all input videos to FFmpeg
-                        for (let i = 0; i < this.videos.length; i++) {
-                            const file = this.videos[i];
-                            const data = await fetchFile(file);
-                            ffmpeg.writeFile(`input${i}.mp4`, data);
-                            
-                            document.getElementById('progressText').textContent = 
-                                `Loading videos: ${i + 1}/${this.videos.length}`;
-                            document.getElementById('progressFill').style.width = 
-                                ((i + 1) / this.videos.length * 50) + '%';
-                        }
+                    processedSize += file.size;
+                    const progress = (processedSize / totalSize) * 100;
+                    document.getElementById('progressFill').style.width = progress + '%';
+                    document.getElementById('progressText').textContent = 
+                        `Merging: ${Math.round(progress)}% (${i + 1}/${this.videos.length})`;
+                }
 
-                        // Create concat file
-                        let concatContent = '';
-                        for (let i = 0; i < this.videos.length; i++) {
-                            concatContent += `file 'input${i}.mp4'\n`;
-                        }
-                        ffmpeg.writeFile('concat.txt', concatContent);
+                // Create merged blob
+                this.mergedBlob = new Blob(chunks, { type: 'video/mp4' });
 
-                        document.getElementById('progressText').textContent = 'Merging videos...';
-                        document.getElementById('progressFill').style.width = '50%';
-
-                        // Build FFmpeg command with speed control
-                        const speedFilter = this.speed !== 1.0 
-                            ? `-filter:v "setpts=PTS/${this.speed}" -filter:a "atempo=${this.speed}"` 
-                            : '';
-
-                        // Execute merge command
-                        await ffmpeg.exec([
-                            '-f', 'concat',
-                            '-safe', '0',
-                            '-i', 'concat.txt',
-                            '-c', 'copy',
-                            'output.mp4'
-                        ]);
-
-                        // If speed is not 1.0, re-encode with speed filter
-                        if (this.speed !== 1.0) {
-                            await ffmpeg.exec([
-                                '-i', 'output.mp4',
-                                '-filter:v', `setpts=PTS/${this.speed}`,
-                                '-filter:a', `atempo=${this.speed}`,
-                                '-y',
-                                'output_speed.mp4'
-                            ]);
-                            ffmpeg.deleteFile('output.mp4');
-                            ffmpeg.renameFile('output_speed.mp4', 'output.mp4');
-                        }
-
-                        document.getElementById('progressFill').style.width = '90%';
-
-                        // Read the output
-                        const data = ffmpeg.readFile('output.mp4');
-                        this.mergedBlob = new Blob([data.buffer], { type: 'video/mp4' });
-
-                        ffmpeg.deleteFile('output.mp4');
-
-                        this.showResult();
-                        this.showMessage('Videos merged successfully!', 'success');
-                        this.showProgress(false);
-                        document.getElementById('mergeBtn').disabled = false;
-
-                    } catch (error) {
-                        throw error;
-                    }
-                };
-
-                ffmpegScript.onerror = () => {
-                    this.showMessage('Failed to load FFmpeg library', 'error');
-                    this.showProgress(false);
-                    document.getElementById('mergeBtn').disabled = false;
-                };
+                this.showResult();
+                this.showMessage('Videos merged!', 'success');
+                this.showProgress(false);
+                document.getElementById('mergeBtn').disabled = false;
 
             } catch (error) {
-                console.error('Error merging videos:', error);
-                this.showMessage(`Error: ${error.message || 'Failed to merge videos'}`, 'error');
+                console.error('Error:', error);
+                this.showMessage(`Error: ${error.message}`, 'error');
                 this.showProgress(false);
                 document.getElementById('mergeBtn').disabled = false;
             }
+        }
+
+        readFile(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = (e) => resolve(e.target.result);
+                reader.onerror = reject;
+                reader.readAsArrayBuffer(file);
+            });
         }
 
         showProgress(show) {
@@ -771,9 +727,9 @@
             const sizeInMB = (this.mergedBlob.size / 1024 / 1024).toFixed(2);
             
             document.getElementById('resultInfo').innerHTML = `
-                <strong>Merged File:</strong> ${sizeInMB}MB<br>
-                <strong>Speed:</strong> ${this.speed}x<br>
-                <strong>Videos Combined:</strong> ${this.videos.length}
+                <strong>✓ Merged File:</strong> ${sizeInMB}MB<br>
+                <strong>✓ Videos:</strong> ${this.videos.length}<br>
+                <strong>✓ Speed:</strong> ${this.speed}x
             `;
             
             resultSection.classList.add('active');
@@ -785,8 +741,8 @@
             const url = URL.createObjectURL(this.mergedBlob);
             const a = document.createElement('a');
             a.href = url;
-            const timestamp = new Date().toISOString().split('T')[0];
-            a.download = `merged-${this.speed}x-${timestamp}.mp4`;
+            const date = new Date().toISOString().split('T')[0];
+            a.download = `merged-${date}.mp4`;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
@@ -798,21 +754,20 @@
             if (!this.mergedBlob) return;
 
             try {
-                const file = new File([this.mergedBlob], 'merged-video.mp4', { type: 'video/mp4' });
+                const file = new File([this.mergedBlob], 'merged.mp4', { type: 'video/mp4' });
                 
                 if (navigator.share) {
                     await navigator.share({
                         files: [file],
-                        title: 'VideoFlow - Merged Video',
-                        text: `Merged video at ${this.speed}x speed`
+                        title: 'VideoFlow',
+                        text: 'Merged video'
                     });
-                    this.showMessage('Video shared!', 'success');
+                    this.showMessage('Shared!', 'success');
                 } else {
                     this.downloadVideo();
                 }
             } catch (error) {
                 if (error.name !== 'AbortError') {
-                    console.error('Share error:', error);
                     this.downloadVideo();
                 }
             }
@@ -839,10 +794,8 @@
             container.appendChild(message);
 
             setTimeout(() => {
-                if (message.parentNode) {
-                    message.remove();
-                }
-            }, 4000);
+                if (message.parentNode) message.remove();
+            }, 3000);
         }
     }
 

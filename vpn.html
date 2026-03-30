@@ -451,7 +451,7 @@
         </div>
 
         <div class="render-area">
-            <iframe id="renderFrame" class="render-frame" sandbox="allow-same-origin allow-scripts allow-forms" style="display:none;"></iframe>
+            <iframe id="renderFrame" class="render-frame" sandbox="allow-scripts allow-forms" style="display:none;"></iframe>
             <div class="render-placeholder" id="renderPlaceholder">
                 <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" opacity=".3">
                     <rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/>
@@ -552,7 +552,8 @@ let navHistory = [];
 let navPos = -1;
 
 // ━━━ RELAY CONFIG ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-let relayUrl = localStorage.getItem('tunnelx_relay') || '';
+let relayUrl = '';
+try { relayUrl = localStorage.getItem('tunnelx_relay') || ''; } catch(e) {}
 let relayConnected = false;
 
 // Fallback CORS relays (used when no Worker is configured)
@@ -673,38 +674,56 @@ function closeSettings() { closeModal('settingsModal'); }
 
 async function saveRelay() {
     let url = document.getElementById('relayUrlInput').value.trim();
-    // Normalize: remove trailing slash
     url = url.replace(/\/+$/, '');
 
     if (!url) {
         relayUrl = '';
         relayConnected = false;
-        localStorage.removeItem('tunnelx_relay');
+        try { localStorage.removeItem('tunnelx_relay'); } catch(e) {}
         updateRelayBadge();
         toast('Relay cleared — using public CORS fallbacks', 'warn');
         closeSettings();
         return;
     }
 
-    // Test connection
+    // Validate URL format
+    if (!/^https?:\/\//i.test(url)) {
+        toast('URL must start with https://', 'error');
+        return;
+    }
+
     toast('Testing relay connection...', 'info');
     try {
-        const resp = await fetch(`${url}/health`, { cache: 'no-store' });
+        const resp = await fetch(`${url}/health`, {
+            cache: 'no-store',
+            mode: 'cors'
+        });
         const data = await resp.json();
         if (data.status === 'ok') {
             relayUrl = url;
             relayConnected = true;
-            localStorage.setItem('tunnelx_relay', url);
+            try { localStorage.setItem('tunnelx_relay', url); } catch(e) {}
             updateRelayBadge();
             toast('Relay connected!', 'success');
             log(`Relay connected: ${url}`);
             closeSettings();
         } else {
-            throw new Error('Unexpected response');
+            throw new Error('Unexpected response from /health');
         }
     } catch (e) {
-        toast('Failed to connect — check the URL', 'error');
-        log(`Relay connection failed: ${e.message}`);
+        // If CORS error from file:// origin, still save — the Worker is likely fine
+        if (location.protocol === 'file:') {
+            relayUrl = url;
+            relayConnected = true;
+            try { localStorage.setItem('tunnelx_relay', url); } catch(e2) {}
+            updateRelayBadge();
+            toast('Relay saved (CORS check skipped — open from a web server for full features)', 'warn');
+            log(`Relay saved (file:// mode): ${url}`);
+            closeSettings();
+        } else {
+            toast(`Connection failed: ${e.message}`, 'error');
+            log(`Relay test failed: ${e.message}`);
+        }
     }
 }
 
@@ -915,39 +934,52 @@ async function navigate() {
         let html = null;
         let source = '';
 
+        // Strategy: Try Worker first, then CORS fallbacks
+        const fetchMethods = [];
+
         if (relayUrl) {
-            // ── Worker relay (primary) ──
-            const resp = await fetch(
-                `${relayUrl}/fetch?url=${encodeURIComponent(url)}`,
-                { cache: 'no-store', headers: { 'Accept': 'text/html,*/*' } }
-            );
-            if (resp.ok) {
-                html = await resp.text();
-                source = 'worker';
-            } else {
-                const err = await resp.json().catch(() => ({}));
-                throw new Error(err.error || `HTTP ${resp.status}`);
-            }
-        } else {
-            // ── Public CORS fallbacks ──
-            for (let i = 0; i < CORS_FALLBACKS.length; i++) {
-                try {
-                    const resp = await fetch(CORS_FALLBACKS[i](url), {
-                        cache: 'no-store',
-                        headers: { 'Accept': 'text/html,*/*' }
-                    });
-                    if (resp.ok) {
-                        html = await resp.text();
-                        source = `cors-fallback-${i}`;
-                        break;
-                    }
-                } catch (e) {
-                    log(`Fallback ${i} failed: ${e.message}`);
+            fetchMethods.push({
+                name: 'worker',
+                fn: () => fetch(
+                    `${relayUrl}/fetch?url=${encodeURIComponent(url)}`,
+                    { cache: 'no-store', headers: { 'Accept': 'text/html,*/*' } }
+                )
+            });
+        }
+
+        // Always add CORS fallbacks as backup
+        CORS_FALLBACKS.forEach((buildUrl, i) => {
+            fetchMethods.push({
+                name: `cors-${i}`,
+                fn: () => fetch(buildUrl(url), {
+                    cache: 'no-store', headers: { 'Accept': 'text/html,*/*' }
+                })
+            });
+        });
+
+        for (const method of fetchMethods) {
+            try {
+                document.getElementById('loadMsg').textContent = `Trying ${method.name}...`;
+                const resp = await method.fn();
+
+                if (resp.status === 429) {
+                    log(`⚠ ${method.name}: 429 rate limited — target site is blocking, trying next...`);
+                    continue;
                 }
+
+                if (resp.ok) {
+                    html = await resp.text();
+                    source = method.name;
+                    break;
+                } else {
+                    log(`⚠ ${method.name}: HTTP ${resp.status}`);
+                }
+            } catch (e) {
+                log(`⚠ ${method.name} failed: ${e.message}`);
             }
         }
 
-        if (!html) throw new Error('All fetch methods failed');
+        if (!html) throw new Error('All fetch methods failed — target may be blocking automated requests');
 
         // Inject <base> for relative URLs
         const base = `<base href="${url}">`;

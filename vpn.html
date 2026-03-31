@@ -787,7 +787,8 @@ async function testProxy(idx) {
 
             if (d.status === 'alive') {
                 p.status = 'alive'; p.latency = d.latency; p.fails = 0;
-                xlog('success', `✓ ${p.address} — ALIVE (${d.latency}ms)${d.detail ? ' [' + d.detail + ']' : ''}`);
+                p.exitIp = d.exitIp || null;
+                xlog('success', `✓ ${p.address} — ALIVE (${d.latency}ms)${d.exitIp ? ' exit-ip: ' + d.exitIp : ''}${d.detail ? ' [' + d.detail + ']' : ''}`);
             } else throw new Error(d.error || 'Dead');
         } else {
             xlog('net', `→ CORS probe to ${p.protocol}://${p.host}:${p.port}/`);

@@ -488,30 +488,42 @@ function proxyResources(html,baseUrl,proxyAddr){
     function resolve(s){if(!s||s.startsWith('data:')||s.startsWith('blob:')||s.startsWith('javascript:'))return s;try{if(s.startsWith('//'))return base.protocol+s;if(s.startsWith('/'))return `${base.protocol}//${base.host}${s}`;if(!/^https?:\/\//i.test(s))return `${base.protocol}//${base.host}${base.pathname.replace(/\/[^/]*$/,'/')}${s}`;return s}catch{return s}}
     function rfor(s){const r=resolve(s);if(!r||r.startsWith('data:'))return r;const pp=proxyAddr?`&proxy=${encodeURIComponent(proxyAddr)}`:'';return `${relayUrl}/fetch?url=${encodeURIComponent(r)}${pp}`}
 
-    // Images: proxy through relay OR strip entirely
+    // Scripts: ALWAYS proxy through relay (critical for SPAs like nalog.ru)
+    html=html.replace(/(<script\s[^>]*?src\s*=\s*)(["'])([^"']*?)\2/gi,(m,pre,q,src)=>`${pre}${q}${rfor(src)}${q}`);
+
+    // Images
     if(optImages){
         html=html.replace(/(<img\s[^>]*?src\s*=\s*)(["'])([^"']*?)\2/gi,(m,pre,q,src)=>`${pre}${q}${rfor(src)}${q}`);
         html=html.replace(/(background(?:-image)?\s*:[^;]*?url\s*\(\s*['"]?)([^)'"]+)(['"]?\s*\))/gi,(m,pre,src,post)=>src.startsWith('data:')?m:`${pre}${rfor(src)}${post}`);
+        // srcset
+        html=html.replace(/(<img\s[^>]*?srcset\s*=\s*)(["'])([^"']*?)\2/gi,(m,pre,q,srcset)=>{
+            const rewritten=srcset.split(',').map(s=>{const parts=s.trim().split(/\s+/);parts[0]=rfor(parts[0]);return parts.join(' ')}).join(', ');
+            return `${pre}${q}${rewritten}${q}`;
+        });
     } else {
-        // Remove images entirely for speed
         html=html.replace(/<img\s[^>]*>/gi,'');
         html=html.replace(/(background(?:-image)?\s*:[^;]*?url\s*\([^)]*\))/gi,'background:none');
     }
 
-    // CSS: proxy through relay OR strip
+    // CSS
     if(optCSS){
         html=html.replace(/(<link\s[^>]*?href\s*=\s*)(["'])([^"']*?)\2/gi,(m,pre,q,h)=>`${pre}${q}${rfor(h)}${q}`);
         html=html.replace(/url\(\s*(['"]?)([^)'"]+)\1\s*\)/gi,(m,q,src)=>src.startsWith('data:')?m:`url(${q}${rfor(src)}${q})`);
     } else {
-        // Strip external stylesheets
         html=html.replace(/<link\s[^>]*rel\s*=\s*["']stylesheet["'][^>]*>/gi,'');
     }
 
-    // Videos: strip if disabled
+    // Videos
     if(!optVideos){
         html=html.replace(/<video\s[^>]*>[\s\S]*?<\/video>/gi,'');
         html=html.replace(/<iframe\s[^>]*(?:youtube|vimeo|dailymotion)[^>]*>[\s\S]*?<\/iframe>/gi,'');
     }
+
+    // Favicon / manifest / other link tags with href
+    html=html.replace(/(<link\s[^>]*?href\s*=\s*)(["'])([^"']*?)\2/gi,(m,pre,q,h)=>{
+        if(m.includes('stylesheet'))return m; // already handled above
+        return `${pre}${q}${rfor(h)}${q}`;
+    });
 
     return html;
 }

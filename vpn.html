@@ -594,6 +594,96 @@ async function navigate(){
     else html=base+html;
     xlog('net','Rewriting resource URLs...');html=proxyResources(html,url,px?.address);
 
+    // Inject runtime interceptor for dynamic resource loads (SPAs)
+    const proxyParam = px ? `&proxy=${encodeURIComponent(px.address)}` : '';
+    const interceptor = `<script>
+(function(){
+  var RELAY='${relayUrl}';
+  var PROXY='${proxyParam}';
+  var BASE='${url}';
+  var baseUrl=new URL(BASE);
+
+  function toRelay(u){
+    if(!u||u.startsWith('data:')||u.startsWith('blob:')||u.startsWith('javascript:'))return u;
+    try{
+      var resolved=u;
+      if(u.startsWith('//'))resolved=baseUrl.protocol+u;
+      else if(u.startsWith('/'))resolved=baseUrl.protocol+'//'+baseUrl.host+u;
+      else if(!/^https?:\\/\\//i.test(u))resolved=baseUrl.protocol+'//'+baseUrl.host+baseUrl.pathname.replace(/\\/[^/]*$/,'/')+u;
+      return RELAY+'/fetch?url='+encodeURIComponent(resolved)+PROXY;
+    }catch(e){return u}
+  }
+
+  // Intercept fetch()
+  var origFetch=window.fetch;
+  window.fetch=function(input,init){
+    if(typeof input==='string')input=toRelay(input);
+    else if(input&&input.url)input=new Request(toRelay(input.url),input);
+    return origFetch.call(this,input,init);
+  };
+
+  // Intercept XMLHttpRequest
+  var origOpen=XMLHttpRequest.prototype.open;
+  XMLHttpRequest.prototype.open=function(method,url){
+    arguments[1]=toRelay(url);
+    return origOpen.apply(this,arguments);
+  };
+
+  // Intercept createElement for script/img/link
+  var origCreate=document.createElement.bind(document);
+  document.createElement=function(tag){
+    var el=origCreate(tag);
+    var t=tag.toLowerCase();
+    if(t==='script'||t==='img'||t==='link'){
+      var origSet=Object.getOwnPropertyDescriptor(HTMLElement.prototype,'setAttribute')||
+                  Object.getOwnPropertyDescriptor(Element.prototype,'setAttribute');
+      var prop=t==='link'?'href':'src';
+      try{
+        Object.defineProperty(el,prop,{
+          set:function(v){this.setAttribute(prop,toRelay(v))},
+          get:function(){return this.getAttribute(prop)},
+          configurable:true
+        });
+      }catch(e){}
+    }
+    return el;
+  };
+
+  // Intercept direct .src assignment on existing elements
+  ['HTMLScriptElement','HTMLImageElement'].forEach(function(cls){
+    var proto=window[cls]&&window[cls].prototype;
+    if(!proto)return;
+    var desc=Object.getOwnPropertyDescriptor(proto,'src');
+    if(desc&&desc.set){
+      Object.defineProperty(proto,'src',{
+        set:function(v){desc.set.call(this,toRelay(v))},
+        get:desc.get,
+        configurable:true
+      });
+    }
+  });
+
+  // Intercept link.href for stylesheets
+  var linkDesc=Object.getOwnPropertyDescriptor(HTMLLinkElement.prototype,'href');
+  if(linkDesc&&linkDesc.set){
+    Object.defineProperty(HTMLLinkElement.prototype,'href',{
+      set:function(v){linkDesc.set.call(this,toRelay(v))},
+      get:linkDesc.get,
+      configurable:true
+    });
+  }
+
+  console.log('[TunnelX] Resource interceptor active — routing through relay');
+})();
+<\/script>`;
+
+    // Inject interceptor as the FIRST script in <head>
+    if(html.includes('<head>')){
+      html=html.replace('<head>',`<head>${interceptor}`);
+    } else {
+      html=interceptor+html;
+    }
+
     if(optCache){if(pageCache.size>=MAX_CACHE)pageCache.delete(pageCache.keys().next().value);
     pageCache.set(ck,{html,ts:Date.now()});updateCacheCount()}
 

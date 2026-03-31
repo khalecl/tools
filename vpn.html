@@ -938,10 +938,11 @@ async function navigate() {
         const fetchMethods = [];
 
         if (relayUrl) {
+            const proxyParam = proxy ? `&proxy=${encodeURIComponent(proxy.address)}` : '';
             fetchMethods.push({
-                name: 'worker',
+                name: proxy ? `relay→${proxy.address}` : 'relay-direct',
                 fn: () => fetch(
-                    `${relayUrl}/fetch?url=${encodeURIComponent(url)}`,
+                    `${relayUrl}/fetch?url=${encodeURIComponent(url)}${proxyParam}`,
                     { cache: 'no-store', headers: { 'Accept': 'text/html,*/*' } }
                 )
             });

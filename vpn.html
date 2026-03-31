@@ -611,15 +611,25 @@ export default {
       const target = url.searchParams.get('url');
       if (!target) return json({ error: 'Missing url' }, 400);
       try { new URL(target); } catch { return json({ error: 'Invalid url' }, 400); }
-
+    
+      const front = url.searchParams.get('front');
       const t0 = Date.now();
       try {
-        const r = await fetch(target, {
+        let fetchUrl = target;
+        let headers = {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120.0.0.0 Safari/537.36',
+          'Accept': 'text/html,*/*',
+          'Accept-Language': 'en-US,en;q=0.9',
+        };
+        if (front) {
+          const targetUrl = new URL(target);
+          headers['Host'] = targetUrl.hostname;
+          targetUrl.hostname = front;
+          fetchUrl = targetUrl.toString();
+        }
+        const r = await fetch(fetchUrl, {
           signal: AbortSignal.timeout(15000), redirect: 'follow',
-          headers: {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120.0.0.0 Safari/537.36',
-            'Accept': 'text/html,*/*', 'Accept-Language': 'en-US,en;q=0.9',
-          },
+          headers,
         });
         const ct = r.headers.get('content-type') || '';
         if (ct.includes('text/') || !ct) {

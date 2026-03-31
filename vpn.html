@@ -7,7 +7,6 @@
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-
         :root {
             --bg-deep: #06080f;
             --bg-base: #0b0f1a;
@@ -26,6 +25,8 @@
             --yellow-dim: rgba(234, 179, 8, 0.12);
             --purple: #a855f7;
             --purple-dim: rgba(168, 85, 247, 0.12);
+            --cyan: #06b6d4;
+            --cyan-dim: rgba(6, 182, 212, 0.12);
             --text-1: #e8ecf4;
             --text-2: #94a3b8;
             --text-3: #64748b;
@@ -34,7 +35,6 @@
             --radius: 8px;
             --radius-lg: 12px;
         }
-
         html, body {
             width: 100%; height: 100%;
             font-family: 'DM Sans', system-ui, sans-serif;
@@ -47,332 +47,357 @@
 
         /* ── TOP BAR ── */
         .topbar {
-            display: flex; align-items: center; gap: 16px;
-            padding: 10px 20px;
+            display: flex; align-items: center; gap: 12px;
+            padding: 8px 16px;
             background: var(--bg-base);
             border-bottom: 1px solid var(--border);
             flex-shrink: 0; z-index: 10;
         }
         .topbar-brand {
-            display: flex; align-items: center; gap: 10px;
+            display: flex; align-items: center; gap: 8px;
             font-family: 'JetBrains Mono', monospace;
-            font-weight: 700; font-size: 15px;
-            color: var(--accent-bright);
-            letter-spacing: -0.5px; white-space: nowrap;
+            font-weight: 700; font-size: 14px;
+            color: var(--accent-bright); white-space: nowrap;
         }
-        .topbar-brand svg { flex-shrink: 0; }
-        .topbar-stats {
-            display: flex; gap: 16px; margin-left: auto;
-            font-family: 'JetBrains Mono', monospace; font-size: 11px;
-        }
-        .topbar-stat { display: flex; align-items: center; gap: 5px; }
-        .topbar-stat .dot { width: 7px; height: 7px; border-radius: 50%; }
-        .dot-total { background: var(--accent); }
-        .dot-alive { background: var(--green); }
-        .dot-dead { background: var(--red); }
-        .dot-pending { background: var(--yellow); }
-
         .relay-badge {
-            display: flex; align-items: center; gap: 6px;
-            padding: 4px 10px; border-radius: 20px;
+            display: flex; align-items: center; gap: 5px;
+            padding: 3px 10px; border-radius: 20px;
             font-size: 10px; font-weight: 600; cursor: pointer;
             transition: all .2s; border: 1px solid;
         }
-        .relay-badge.connected {
-            background: var(--green-dim); border-color: rgba(34,197,94,.3); color: var(--green);
-        }
-        .relay-badge.disconnected {
-            background: var(--yellow-dim); border-color: rgba(234,179,8,.3); color: var(--yellow);
-        }
+        .relay-badge.on { background: var(--green-dim); border-color: rgba(34,197,94,.3); color: var(--green); }
+        .relay-badge.off { background: var(--yellow-dim); border-color: rgba(234,179,8,.3); color: var(--yellow); }
         .relay-badge:hover { filter: brightness(1.2); }
 
-        /* ── MAIN LAYOUT ── */
-        .main-layout { display: flex; flex: 1; overflow: hidden; }
+        .topbar-stats {
+            display: flex; gap: 12px; margin-left: auto;
+            font-family: 'JetBrains Mono', monospace; font-size: 10px;
+        }
+        .topbar-stat { display: flex; align-items: center; gap: 4px; }
+        .topbar-stat .d { width: 6px; height: 6px; border-radius: 50%; }
+
+        /* ── LAYOUT ── */
+        .layout { display: flex; flex: 1; overflow: hidden; }
 
         /* ── SIDEBAR ── */
         .sidebar {
-            width: 380px; min-width: 300px; max-width: 45vw;
+            width: 360px; min-width: 280px; max-width: 45vw;
             display: flex; flex-direction: column;
             background: var(--bg-base);
             border-right: 1px solid var(--border);
         }
-        .input-area { padding: 16px; border-bottom: 1px solid var(--border); }
+        .input-area { padding: 12px; border-bottom: 1px solid var(--border); }
         .input-area label {
-            display: block; font-size: 10px; font-weight: 600;
+            display: block; font-size: 9px; font-weight: 600;
             text-transform: uppercase; letter-spacing: 1px;
-            color: var(--text-3); margin-bottom: 8px;
+            color: var(--text-3); margin-bottom: 6px;
         }
         textarea {
             width: 100%; background: var(--bg-surface);
             border: 1px solid var(--border); border-radius: var(--radius);
-            padding: 12px; color: var(--text-1);
+            padding: 10px; color: var(--text-1);
             font-family: 'JetBrains Mono', monospace;
-            font-size: 11px; line-height: 1.6;
-            resize: vertical; min-height: 90px; transition: border-color .2s;
+            font-size: 11px; line-height: 1.5;
+            resize: vertical; min-height: 80px;
         }
-        textarea:focus {
-            outline: none; border-color: var(--accent);
-            box-shadow: 0 0 0 3px var(--accent-glow);
-        }
+        textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
         textarea::placeholder { color: var(--text-3); }
-        .btn-row { display: flex; gap: 8px; margin-top: 10px; }
+        .btn-row { display: flex; gap: 6px; margin-top: 8px; }
 
         /* ── BUTTONS ── */
         .btn {
-            display: inline-flex; align-items: center; justify-content: center; gap: 6px;
-            padding: 9px 14px; border: 1px solid transparent;
-            border-radius: var(--radius); font-family: 'DM Sans', sans-serif;
-            font-size: 12px; font-weight: 600; cursor: pointer;
-            transition: all .2s; white-space: nowrap;
+            display: inline-flex; align-items: center; justify-content: center; gap: 5px;
+            padding: 7px 12px; border: 1px solid transparent;
+            border-radius: 6px; font-family: 'DM Sans', sans-serif;
+            font-size: 11px; font-weight: 600; cursor: pointer;
+            transition: all .15s; white-space: nowrap;
         }
         .btn:active { transform: scale(0.97); }
-        .btn:disabled { opacity: .45; pointer-events: none; }
-        .btn-accent { background: var(--accent); color: #fff; border-color: var(--accent); }
-        .btn-accent:hover { background: #4f8ff7; box-shadow: 0 4px 12px var(--accent-glow-strong); }
+        .btn:disabled { opacity: .4; pointer-events: none; }
+        .btn-accent { background: var(--accent); color: #fff; }
+        .btn-accent:hover { background: #4f8ff7; }
         .btn-ghost { background: transparent; color: var(--text-2); border-color: var(--border); }
-        .btn-ghost:hover { border-color: var(--accent); color: var(--text-1); background: var(--accent-glow); }
-        .btn-green { background: var(--green); color: #000; border-color: var(--green); }
-        .btn-green:hover { background: #34d369; }
-        .btn-sm { padding: 6px 10px; font-size: 11px; }
+        .btn-ghost:hover { border-color: var(--accent); color: var(--text-1); }
+        .btn-green { background: var(--green); color: #000; }
+        .btn-sm { padding: 5px 8px; font-size: 10px; }
         .btn-fill { flex: 1; }
 
         /* ── TOOLBAR ── */
         .toolbar {
-            display: flex; align-items: center; gap: 8px;
-            padding: 10px 16px; background: var(--bg-surface);
+            display: flex; align-items: center; gap: 6px;
+            padding: 8px 12px; background: var(--bg-surface);
             border-bottom: 1px solid var(--border); flex-shrink: 0;
+            flex-wrap: wrap;
         }
-        .toolbar .sep { width: 1px; height: 20px; background: var(--border); }
-        .rotate-indicator {
-            display: flex; align-items: center; gap: 5px;
-            font-size: 11px; color: var(--text-3); margin-left: auto; cursor: pointer;
+        .toolbar .sep { width: 1px; height: 18px; background: var(--border); }
+        .filter-badge {
+            display: flex; align-items: center; gap: 4px;
+            padding: 3px 8px; border-radius: 4px;
+            font-size: 9px; font-weight: 700; cursor: pointer;
+            border: 1px solid var(--border); color: var(--text-3);
+            transition: all .15s; text-transform: uppercase; letter-spacing: .5px;
         }
-        .rotate-indicator.active { color: var(--green); }
+        .filter-badge.active { border-color: var(--cyan); color: var(--cyan); background: var(--cyan-dim); }
+        .rotate-ind {
+            display: flex; align-items: center; gap: 4px;
+            font-size: 10px; color: var(--text-3); margin-left: auto; cursor: pointer;
+        }
+        .rotate-ind.active { color: var(--green); }
 
         /* ── PROXY LIST ── */
         .proxy-list {
-            flex: 1; overflow-y: auto; padding: 8px;
-            display: flex; flex-direction: column; gap: 4px;
+            flex: 1; overflow-y: auto; padding: 6px;
+            display: flex; flex-direction: column; gap: 3px;
         }
-        .proxy-list::-webkit-scrollbar { width: 5px; }
-        .proxy-list::-webkit-scrollbar-track { background: transparent; }
-        .proxy-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+        .proxy-list::-webkit-scrollbar { width: 4px; }
+        .proxy-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
 
-        .proxy-card {
-            display: flex; align-items: center; gap: 10px;
-            padding: 10px 12px; background: var(--bg-surface);
-            border: 1px solid var(--border); border-radius: var(--radius);
-            cursor: pointer; transition: all .15s;
+        .pcard {
+            display: flex; align-items: center; gap: 8px;
+            padding: 8px 10px; background: var(--bg-surface);
+            border: 1px solid var(--border); border-radius: 6px;
+            cursor: pointer; transition: all .12s; font-size: 11px;
         }
-        .proxy-card:hover { border-color: var(--border-light); background: var(--bg-raised); }
-        .proxy-card.selected {
-            border-color: var(--accent); background: var(--accent-glow);
-            box-shadow: 0 0 0 2px var(--accent-glow);
-        }
-        .proxy-card .pip {
-            width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
-            background: var(--text-3);
-        }
-        .proxy-card .pip.alive { background: var(--green); box-shadow: 0 0 6px var(--green); }
-        .proxy-card .pip.dead { background: var(--red); }
-        .proxy-card .pip.testing { background: var(--yellow); animation: blink 1s infinite; }
-        @keyframes blink { 50% { opacity: .4; } }
-
-        .proxy-card .addr {
+        .pcard:hover { border-color: var(--border-light); background: var(--bg-raised); }
+        .pcard.sel { border-color: var(--accent); background: var(--accent-glow); }
+        .pcard.hidden { display: none; }
+        .pcard .pip { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; background: var(--text-3); }
+        .pcard .pip.alive { background: var(--green); box-shadow: 0 0 5px var(--green); }
+        .pcard .pip.dead { background: var(--red); }
+        .pcard .pip.testing { background: var(--yellow); animation: blink .8s infinite; }
+        @keyframes blink { 50% { opacity: .3; } }
+        .pcard .addr {
             flex: 1; min-width: 0;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 11px; color: var(--text-1);
+            font-family: 'JetBrains Mono', monospace; font-size: 10px;
             white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
         }
-        .proxy-card .badge {
-            font-size: 9px; font-weight: 700; text-transform: uppercase;
-            letter-spacing: .5px; padding: 2px 6px; border-radius: 4px; flex-shrink: 0;
+        .pcard .badge {
+            font-size: 8px; font-weight: 700; text-transform: uppercase;
+            padding: 2px 5px; border-radius: 3px; flex-shrink: 0;
         }
         .b-http { background: rgba(59,130,246,.15); color: var(--accent-bright); }
         .b-https { background: var(--green-dim); color: var(--green); }
         .b-socks4 { background: var(--yellow-dim); color: var(--yellow); }
         .b-socks5 { background: var(--purple-dim); color: var(--purple); }
-
-        .proxy-card .ms {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 10px; color: var(--text-3); flex-shrink: 0;
+        .pcard .ms { font-family: 'JetBrains Mono', monospace; font-size: 9px; color: var(--text-3); flex-shrink: 0; }
+        .pcard .port-tag {
+            font-family: 'JetBrains Mono', monospace; font-size: 9px;
+            padding: 1px 4px; border-radius: 3px; flex-shrink: 0;
         }
-        .proxy-card .tbtn {
-            padding: 4px 8px; font-size: 10px;
+        .port-safe { background: var(--green-dim); color: var(--green); }
+        .port-risky { background: var(--red-dim); color: var(--red); }
+        .pcard .tbtn {
+            padding: 3px 7px; font-size: 9px;
             background: var(--bg-overlay); color: var(--text-2);
-            border: 1px solid var(--border); border-radius: 4px;
-            cursor: pointer; transition: all .15s; flex-shrink: 0;
+            border: 1px solid var(--border); border-radius: 3px;
+            cursor: pointer; flex-shrink: 0;
         }
-        .proxy-card .tbtn:hover { border-color: var(--accent); color: var(--accent-bright); }
+        .pcard .tbtn:hover { border-color: var(--accent); color: var(--accent-bright); }
 
         .empty-state {
             flex: 1; display: flex; flex-direction: column;
             align-items: center; justify-content: center;
-            color: var(--text-3); text-align: center; padding: 40px 20px;
+            color: var(--text-3); text-align: center; padding: 30px;
         }
-        .empty-state h3 { font-size: 14px; color: var(--text-2); margin: 12px 0 6px; }
-        .empty-state p { font-size: 12px; line-height: 1.5; max-width: 240px; }
+        .empty-state h3 { font-size: 13px; color: var(--text-2); margin: 10px 0 4px; }
+        .empty-state p { font-size: 11px; line-height: 1.5; max-width: 220px; }
 
         /* ── MAIN PANEL ── */
         .main-panel { flex: 1; display: flex; flex-direction: column; background: var(--bg-deep); overflow: hidden; }
 
-        /* ── BROWSER BAR ── */
-        .browser-bar {
-            display: flex; align-items: center; gap: 8px;
-            padding: 10px 16px; background: var(--bg-base);
+        /* ── TABS ── */
+        .main-tabs {
+            display: flex; background: var(--bg-base);
             border-bottom: 1px solid var(--border); flex-shrink: 0;
         }
-        .nav-btns { display: flex; gap: 4px; }
+        .main-tab {
+            padding: 10px 20px; font-size: 12px; font-weight: 600;
+            color: var(--text-3); cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all .15s;
+        }
+        .main-tab:hover { color: var(--text-2); }
+        .main-tab.active { color: var(--accent-bright); border-bottom-color: var(--accent); }
+        .tab-badge {
+            display: inline-flex; align-items: center; justify-content: center;
+            min-width: 16px; height: 16px; padding: 0 4px;
+            border-radius: 8px; font-size: 9px; font-weight: 700;
+            margin-left: 6px; background: var(--accent-glow); color: var(--accent-bright);
+        }
+
+        .tab-panel { display: none; flex: 1; flex-direction: column; overflow: hidden; }
+        .tab-panel.active { display: flex; }
+
+        /* ── BROWSER TAB ── */
+        .browser-bar {
+            display: flex; align-items: center; gap: 6px;
+            padding: 8px 12px; background: var(--bg-base);
+            border-bottom: 1px solid var(--border); flex-shrink: 0;
+        }
+        .nav-btns { display: flex; gap: 3px; }
         .nav-btns button {
-            width: 30px; height: 30px;
+            width: 28px; height: 28px;
             display: flex; align-items: center; justify-content: center;
             background: var(--bg-surface); border: 1px solid var(--border);
-            border-radius: 6px; color: var(--text-2); cursor: pointer;
-            font-size: 14px; transition: all .15s;
+            border-radius: 5px; color: var(--text-2); cursor: pointer; font-size: 13px;
         }
         .nav-btns button:hover { border-color: var(--accent); color: var(--text-1); }
-
         .url-bar {
             flex: 1; display: flex; align-items: center;
             background: var(--bg-surface); border: 1px solid var(--border);
-            border-radius: var(--radius); overflow: hidden; transition: border-color .2s;
+            border-radius: 6px; overflow: hidden;
         }
-        .url-bar:focus-within {
-            border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow);
-        }
-        .url-bar .lock { padding: 0 10px; font-size: 12px; color: var(--text-3); }
+        .url-bar:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
+        .url-bar .lock { padding: 0 8px; font-size: 11px; color: var(--text-3); }
         .url-bar input {
             flex: 1; border: none; background: transparent;
-            padding: 8px 12px 8px 0; color: var(--text-1);
-            font-family: 'JetBrains Mono', monospace; font-size: 12px;
+            padding: 7px 10px 7px 0; color: var(--text-1);
+            font-family: 'JetBrains Mono', monospace; font-size: 11px;
         }
         .url-bar input:focus { outline: none; }
-        .url-bar input::placeholder { color: var(--text-3); }
-
         .proxy-tag {
-            display: flex; align-items: center; gap: 5px;
-            padding: 4px 10px; font-size: 10px; font-weight: 600;
-            border-radius: 4px; white-space: nowrap;
-            background: var(--green-dim); color: var(--green);
-            margin-left: 8px; flex-shrink: 0;
+            display: flex; align-items: center; gap: 4px;
+            padding: 3px 8px; font-size: 9px; font-weight: 600;
+            border-radius: 4px; white-space: nowrap; flex-shrink: 0;
         }
-        .proxy-tag.none { background: var(--red-dim); color: var(--red); }
+        .proxy-tag.ok { background: var(--green-dim); color: var(--green); }
+        .proxy-tag.no { background: var(--red-dim); color: var(--red); }
 
-        /* ── RENDER FRAME ── */
         .render-area { flex: 1; position: relative; overflow: hidden; background: var(--bg-deep); }
         .render-frame { width: 100%; height: 100%; border: none; background: #fff; }
         .render-placeholder {
             position: absolute; inset: 0;
             display: flex; flex-direction: column;
             align-items: center; justify-content: center;
-            text-align: center; color: var(--text-3); padding: 40px;
+            text-align: center; color: var(--text-3); padding: 30px;
         }
-        .render-placeholder h2 { font-size: 18px; color: var(--text-2); margin: 16px 0 8px; }
-        .render-placeholder p { font-size: 13px; line-height: 1.5; max-width: 380px; }
+        .render-placeholder h2 { font-size: 16px; color: var(--text-2); margin: 12px 0 6px; }
+        .render-placeholder p { font-size: 12px; line-height: 1.6; max-width: 360px; }
         .render-overlay {
             position: absolute; inset: 0; display: none;
             align-items: center; justify-content: center;
             background: rgba(6, 8, 15, .85); z-index: 5;
         }
-        .render-overlay.visible { display: flex; }
-        .spinner {
-            width: 36px; height: 36px;
-            border: 3px solid var(--border); border-top-color: var(--accent);
-            border-radius: 50%; animation: spin .8s linear infinite;
-        }
+        .render-overlay.show { display: flex; }
+        .spinner { width: 32px; height: 32px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin .7s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ── LOG TAB (Psiphon-style) ── */
+        .log-panel {
+            flex: 1; display: flex; flex-direction: column; overflow: hidden;
+        }
+        .log-toolbar {
+            display: flex; align-items: center; gap: 6px;
+            padding: 8px 12px; background: var(--bg-base);
+            border-bottom: 1px solid var(--border); flex-shrink: 0;
+        }
+        .log-filter {
+            padding: 3px 8px; border-radius: 4px; font-size: 9px;
+            font-weight: 700; cursor: pointer; border: 1px solid var(--border);
+            color: var(--text-3); text-transform: uppercase; letter-spacing: .5px;
+        }
+        .log-filter.active { border-color: var(--accent); color: var(--accent-bright); background: var(--accent-glow); }
+        .log-scroll {
+            flex: 1; overflow-y: auto; padding: 0;
+            background: var(--bg-deep);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px; line-height: 1.7;
+        }
+        .log-scroll::-webkit-scrollbar { width: 5px; }
+        .log-scroll::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+        .log-entry {
+            display: flex; gap: 0; padding: 2px 12px;
+            border-bottom: 1px solid rgba(30, 41, 59, 0.4);
+            transition: background .1s;
+        }
+        .log-entry:hover { background: rgba(59, 130, 246, 0.04); }
+        .log-ts {
+            width: 70px; flex-shrink: 0; color: var(--text-3);
+            font-size: 10px; padding-top: 1px;
+        }
+        .log-icon { width: 22px; flex-shrink: 0; text-align: center; font-size: 11px; }
+        .log-msg { flex: 1; word-break: break-word; }
+
+        .log-entry.info .log-msg { color: var(--text-2); }
+        .log-entry.success .log-msg { color: var(--green); }
+        .log-entry.error .log-msg { color: var(--red); }
+        .log-entry.warn .log-msg { color: var(--yellow); }
+        .log-entry.net .log-msg { color: var(--cyan); }
+        .log-entry.proxy .log-msg { color: var(--purple); }
+        .log-entry.nav .log-msg { color: var(--accent-bright); }
+
+        .log-counter {
+            padding: 8px 12px; font-size: 10px; color: var(--text-3);
+            background: var(--bg-base); border-top: 1px solid var(--border);
+            display: flex; justify-content: space-between; flex-shrink: 0;
+        }
 
         /* ── STATUS BAR ── */
         .statusbar {
-            display: flex; align-items: center; gap: 16px;
-            padding: 6px 16px; background: var(--bg-base);
+            display: flex; align-items: center; gap: 12px;
+            padding: 5px 12px; background: var(--bg-base);
             border-top: 1px solid var(--border);
             font-family: 'JetBrains Mono', monospace;
-            font-size: 10px; color: var(--text-3); flex-shrink: 0;
+            font-size: 9px; color: var(--text-3); flex-shrink: 0;
         }
         .statusbar .msg { flex: 1; }
 
         /* ── TOASTS ── */
-        .toast-container {
-            position: fixed; top: 60px; right: 20px;
-            z-index: 100; display: flex; flex-direction: column; gap: 8px;
-        }
+        .toast-box { position: fixed; top: 50px; right: 16px; z-index: 100; display: flex; flex-direction: column; gap: 6px; }
         .toast {
-            padding: 10px 16px; border-radius: var(--radius);
-            font-size: 12px; font-weight: 500; animation: slideIn .3s;
-            backdrop-filter: blur(8px); border: 1px solid;
+            padding: 8px 14px; border-radius: 6px; font-size: 11px; font-weight: 500;
+            animation: tIn .25s; backdrop-filter: blur(8px); border: 1px solid;
         }
-        .toast-info { background: rgba(59,130,246,.15); border-color: rgba(59,130,246,.3); color: var(--accent-bright); }
-        .toast-success { background: var(--green-dim); border-color: rgba(34,197,94,.3); color: var(--green); }
-        .toast-error { background: var(--red-dim); border-color: rgba(239,68,68,.3); color: var(--red); }
-        .toast-warn { background: var(--yellow-dim); border-color: rgba(234,179,8,.3); color: var(--yellow); }
-        @keyframes slideIn { from { opacity: 0; transform: translateX(30px); } }
+        .toast-info { background: rgba(59,130,246,.12); border-color: rgba(59,130,246,.25); color: var(--accent-bright); }
+        .toast-success { background: var(--green-dim); border-color: rgba(34,197,94,.25); color: var(--green); }
+        .toast-error { background: var(--red-dim); border-color: rgba(239,68,68,.25); color: var(--red); }
+        .toast-warn { background: var(--yellow-dim); border-color: rgba(234,179,8,.25); color: var(--yellow); }
+        @keyframes tIn { from { opacity: 0; transform: translateX(20px); } }
 
         /* ── MODALS ── */
-        .modal-backdrop {
-            position: fixed; inset: 0; background: rgba(0,0,0,.6);
+        .modal-bg {
+            position: fixed; inset: 0; background: rgba(0,0,0,.55);
             z-index: 50; display: none; align-items: center; justify-content: center;
         }
-        .modal-backdrop.visible { display: flex; }
+        .modal-bg.vis { display: flex; }
         .modal {
             background: var(--bg-surface); border: 1px solid var(--border);
-            border-radius: var(--radius-lg); padding: 24px;
-            width: 520px; max-width: 90vw; max-height: 80vh; overflow-y: auto;
+            border-radius: var(--radius-lg); padding: 20px;
+            width: 500px; max-width: 92vw; max-height: 80vh; overflow-y: auto;
         }
-        .modal h3 { font-size: 15px; margin-bottom: 16px; color: var(--accent-bright); }
+        .modal h3 { font-size: 14px; margin-bottom: 14px; color: var(--accent-bright); }
         .modal pre {
             background: var(--bg-deep); border: 1px solid var(--border);
-            border-radius: var(--radius); padding: 12px;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 11px; color: var(--text-2);
-            white-space: pre-wrap; word-break: break-all;
-            max-height: 300px; overflow-y: auto;
+            border-radius: 6px; padding: 10px;
+            font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text-2);
+            white-space: pre-wrap; word-break: break-all; max-height: 250px; overflow-y: auto;
         }
-        .modal .field { margin-bottom: 16px; }
-        .modal .field label {
-            display: block; font-size: 11px; font-weight: 600;
-            color: var(--text-2); margin-bottom: 6px; text-transform: uppercase;
-            letter-spacing: .5px;
-        }
+        .modal .field { margin-bottom: 14px; }
+        .modal .field label { display: block; font-size: 10px; font-weight: 600; color: var(--text-2); margin-bottom: 5px; text-transform: uppercase; letter-spacing: .5px; }
         .modal .field input {
-            width: 100%; padding: 10px 12px;
-            background: var(--bg-deep); border: 1px solid var(--border);
-            border-radius: var(--radius); color: var(--text-1);
-            font-family: 'JetBrains Mono', monospace; font-size: 12px;
+            width: 100%; padding: 8px 10px; background: var(--bg-deep);
+            border: 1px solid var(--border); border-radius: 6px; color: var(--text-1);
+            font-family: 'JetBrains Mono', monospace; font-size: 11px;
         }
-        .modal .field input:focus {
-            outline: none; border-color: var(--accent);
-            box-shadow: 0 0 0 3px var(--accent-glow);
-        }
-        .modal .hint {
-            font-size: 11px; color: var(--text-3); margin-top: 6px; line-height: 1.5;
-        }
-        .modal-footer {
-            margin-top: 20px; display: flex; gap: 8px; justify-content: flex-end;
-        }
-
+        .modal .field input:focus { outline: none; border-color: var(--accent); }
+        .modal .hint { font-size: 10px; color: var(--text-3); margin-top: 4px; line-height: 1.4; }
+        .modal-footer { margin-top: 16px; display: flex; gap: 6px; justify-content: flex-end; }
         .setup-steps {
             background: var(--bg-deep); border: 1px solid var(--border);
-            border-radius: var(--radius); padding: 16px; margin: 16px 0;
-            font-size: 12px; line-height: 1.8; color: var(--text-2);
+            border-radius: 6px; padding: 12px; margin: 12px 0; font-size: 11px; line-height: 1.8; color: var(--text-2);
         }
-        .setup-steps .step {
-            display: flex; gap: 10px; padding: 4px 0;
+        .setup-steps .step { display: flex; gap: 8px; padding: 3px 0; }
+        .setup-steps .sn {
+            width: 20px; height: 20px; border-radius: 50%; background: var(--accent-glow);
+            color: var(--accent-bright); display: flex; align-items: center; justify-content: center;
+            font-size: 10px; font-weight: 700; flex-shrink: 0;
         }
-        .setup-steps .step-num {
-            width: 22px; height: 22px; border-radius: 50%;
-            background: var(--accent-glow); color: var(--accent-bright);
-            display: flex; align-items: center; justify-content: center;
-            font-size: 11px; font-weight: 700; flex-shrink: 0;
-        }
-        .setup-steps code {
-            background: var(--bg-overlay); padding: 1px 6px;
-            border-radius: 3px; font-size: 11px; color: var(--green);
-        }
+        .setup-steps code { background: var(--bg-overlay); padding: 1px 5px; border-radius: 3px; font-size: 10px; color: var(--green); }
 
         @media (max-width: 768px) {
-            .main-layout { flex-direction: column; }
-            .sidebar { width: 100%; max-width: 100%; height: 45%; border-right: none; border-bottom: 1px solid var(--border); }
+            .layout { flex-direction: column; }
+            .sidebar { width: 100%; max-width: 100%; height: 40%; border-right: none; border-bottom: 1px solid var(--border); }
             .topbar-stats { display: none; }
         }
     </style>
@@ -382,90 +407,106 @@
 <!-- TOP BAR -->
 <div class="topbar">
     <div class="topbar-brand">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-        </svg>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
         TunnelX
     </div>
-    <div class="relay-badge disconnected" id="relayBadge" onclick="showSettings()" title="Click to configure relay">
-        <span id="relayStatus">⚙ No Relay</span>
+    <div class="relay-badge off" id="relayBadge" onclick="showSettings()">
+        <span id="relayLabel">⚙ No Relay</span>
     </div>
     <div class="topbar-stats">
-        <div class="topbar-stat"><div class="dot dot-total"></div> <span id="sTotal">0</span></div>
-        <div class="topbar-stat"><div class="dot dot-alive"></div> <span id="sAlive">0</span></div>
-        <div class="topbar-stat"><div class="dot dot-dead"></div> <span id="sDead">0</span></div>
-        <div class="topbar-stat"><div class="dot dot-pending"></div> <span id="sPending">0</span></div>
+        <div class="topbar-stat"><div class="d" style="background:var(--accent)"></div><span id="sT">0</span></div>
+        <div class="topbar-stat"><div class="d" style="background:var(--green)"></div><span id="sA">0</span></div>
+        <div class="topbar-stat"><div class="d" style="background:var(--red)"></div><span id="sD">0</span></div>
+        <div class="topbar-stat"><div class="d" style="background:var(--yellow)"></div><span id="sP">0</span></div>
     </div>
 </div>
 
-<!-- MAIN LAYOUT -->
-<div class="main-layout">
+<div class="layout">
     <!-- SIDEBAR -->
     <div class="sidebar">
         <div class="input-area">
-            <label>Paste proxies, tables, or raw text</label>
-            <textarea id="inputBox" placeholder="socks5://1.2.3.4:1080&#10;http://5.6.7.8:8080&#10;192.168.1.1:443&#10;&#10;Or paste HTML tables, CSV, anything..."></textarea>
+            <label>Paste proxies (any format)</label>
+            <textarea id="inputBox" placeholder="socks5://1.2.3.4:443&#10;http://5.6.7.8:80&#10;192.168.1.1:443&#10;&#10;Tables, CSV, raw text..."></textarea>
             <div class="btn-row">
-                <button class="btn btn-accent btn-fill" onclick="parseInput()">Extract Proxies</button>
-                <button class="btn btn-ghost" onclick="importFromStorage()">↑ Load</button>
+                <button class="btn btn-accent btn-fill" onclick="parseInput()">Extract</button>
+                <button class="btn btn-ghost" onclick="importStorage()">↑ Load</button>
                 <button class="btn btn-ghost" onclick="clearAll()">✕</button>
             </div>
         </div>
 
         <div class="toolbar">
             <button class="btn btn-green btn-sm" onclick="testAll()" id="testAllBtn">▶ Test All</button>
-            <button class="btn btn-ghost btn-sm" onclick="stopTests()">■ Stop</button>
+            <button class="btn btn-ghost btn-sm" onclick="stopTests()">■</button>
             <div class="sep"></div>
-            <button class="btn btn-ghost btn-sm" onclick="exportAlive()">↓ Export</button>
-            <button class="btn btn-ghost btn-sm" onclick="showLog()">◉ Log</button>
-            <div class="rotate-indicator" id="rotateIndicator" onclick="toggleRotate()">
-                <span>⟳</span>
-                <span id="rotateLabel">Rotate: OFF</span>
+            <div class="filter-badge active" id="filterSafe" onclick="toggleFilter()" title="Show only port 80/443 (firewall-safe)">🔒 80/443</div>
+            <div class="sep"></div>
+            <button class="btn btn-ghost btn-sm" onclick="exportAlive()">↓</button>
+            <div class="rotate-ind" id="rotateInd" onclick="toggleRotate()">
+                <span>⟳</span><span id="rotateLabel">OFF</span>
             </div>
         </div>
 
         <div class="proxy-list" id="proxyList">
             <div class="empty-state">
-                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 8v4m0 4h.01"/></svg>
+                <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 8v4m0 4h.01"/></svg>
                 <h3>No proxies loaded</h3>
-                <p>Paste a proxy list above and click Extract to begin</p>
+                <p>Paste a list above and click Extract</p>
             </div>
         </div>
     </div>
 
     <!-- MAIN PANEL -->
     <div class="main-panel">
-        <div class="browser-bar">
-            <div class="nav-btns">
-                <button onclick="navBack()" title="Back">←</button>
-                <button onclick="navForward()" title="Forward">→</button>
-                <button onclick="navReload()" title="Reload">↻</button>
-            </div>
-            <div class="url-bar">
-                <span class="lock" id="lockIcon">🔓</span>
-                <input type="text" id="urlInput" placeholder="Enter URL to fetch through proxy tunnel..."
-                    onkeydown="if(event.key==='Enter')navigate()">
-            </div>
-            <button class="btn btn-accent btn-sm" onclick="navigate()">Go</button>
-            <div class="proxy-tag none" id="proxyTag"><span>No proxy</span></div>
+        <div class="main-tabs">
+            <div class="main-tab active" onclick="switchTab('browser')">🌐 Browser</div>
+            <div class="main-tab" onclick="switchTab('log')">📡 Live Log <span class="tab-badge" id="logBadge">0</span></div>
         </div>
 
-        <div class="render-area">
-            <iframe id="renderFrame" class="render-frame" sandbox="allow-scripts allow-forms" style="display:none;"></iframe>
-            <div class="render-placeholder" id="renderPlaceholder">
-                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" opacity=".3">
-                    <rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/>
-                </svg>
-                <h2>Tunnel Browser</h2>
-                <p>1. Click <b>⚙ No Relay</b> above to set up your free Cloudflare Worker<br>
-                   2. Extract & test proxies<br>
-                   3. Select a working proxy and browse through the tunnel</p>
-            </div>
-            <div class="render-overlay" id="loadingOverlay">
-                <div style="text-align:center;">
-                    <div class="spinner"></div>
-                    <div style="margin-top:12px; font-size:12px; color:var(--text-2);" id="loadMsg">Fetching...</div>
+        <!-- BROWSER TAB -->
+        <div class="tab-panel active" id="tab-browser">
+            <div class="browser-bar">
+                <div class="nav-btns">
+                    <button onclick="navBack()">←</button>
+                    <button onclick="navForward()">→</button>
+                    <button onclick="navReload()">↻</button>
                 </div>
+                <div class="url-bar">
+                    <span class="lock" id="lockIcon">🔓</span>
+                    <input type="text" id="urlInput" placeholder="Enter URL..." onkeydown="if(event.key==='Enter')navigate()">
+                </div>
+                <button class="btn btn-accent btn-sm" onclick="navigate()">Go</button>
+                <div class="proxy-tag no" id="proxyTag"><span>No proxy</span></div>
+            </div>
+            <div class="render-area">
+                <iframe id="renderFrame" class="render-frame" sandbox="allow-scripts allow-forms" style="display:none;"></iframe>
+                <div class="render-placeholder" id="renderPlaceholder">
+                    <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" opacity=".25"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+                    <h2>Tunnel Browser</h2>
+                    <p>Configure relay → Extract proxies → Test → Select a working one → Browse</p>
+                </div>
+                <div class="render-overlay" id="loadingOverlay">
+                    <div style="text-align:center"><div class="spinner"></div>
+                    <div style="margin-top:10px;font-size:11px;color:var(--text-2)" id="loadMsg">Fetching...</div></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- LOG TAB -->
+        <div class="tab-panel" id="tab-log">
+            <div class="log-toolbar">
+                <div class="log-filter active" data-f="all" onclick="setLogFilter('all')">All</div>
+                <div class="log-filter" data-f="net" onclick="setLogFilter('net')">Network</div>
+                <div class="log-filter" data-f="proxy" onclick="setLogFilter('proxy')">Proxy</div>
+                <div class="log-filter" data-f="nav" onclick="setLogFilter('nav')">Navigation</div>
+                <div class="log-filter" data-f="error" onclick="setLogFilter('error')">Errors</div>
+                <div style="flex:1"></div>
+                <button class="btn btn-ghost btn-sm" onclick="copyLogs()">Copy</button>
+                <button class="btn btn-ghost btn-sm" onclick="clearLogs()">Clear</button>
+            </div>
+            <div class="log-scroll" id="logScroll"></div>
+            <div class="log-counter">
+                <span id="logCount">0 entries</span>
+                <span id="logAutoScroll" style="cursor:pointer" onclick="toggleAutoScroll()">Auto-scroll: ON</span>
             </div>
         </div>
     </div>
@@ -473,579 +514,426 @@
 
 <!-- STATUS BAR -->
 <div class="statusbar">
-    <span class="msg" id="statusMsg">Ready — configure your relay to get started</span>
-    <span id="statusProxy">No active proxy</span>
+    <span class="msg" id="statusMsg">Ready</span>
+    <span id="statusProxy">No proxy</span>
 </div>
 
-<!-- TOASTS -->
-<div class="toast-container" id="toasts"></div>
+<div class="toast-box" id="toasts"></div>
 
 <!-- SETTINGS MODAL -->
-<div class="modal-backdrop" id="settingsModal">
+<div class="modal-bg" id="settingsModal">
     <div class="modal">
-        <h3>⚡ Relay Backend Setup</h3>
-        <p style="font-size: 12px; color: var(--text-2); line-height: 1.6; margin-bottom: 16px;">
-            TunnelX uses a Cloudflare Worker as a relay to test proxies and fetch pages.
-            It's free (100K requests/day) and takes 2 minutes to set up.
+        <h3>⚡ Relay Setup</h3>
+        <p style="font-size:11px;color:var(--text-2);line-height:1.5;margin-bottom:12px">
+            Set up a Cloudflare Worker (free) or point to your local Node.js relay.
         </p>
-
         <div class="setup-steps">
-            <div class="step"><span class="step-num">1</span> Go to <a href="https://workers.cloudflare.com" target="_blank" style="color:var(--accent-bright)">workers.cloudflare.com</a> → Sign up free</div>
-            <div class="step"><span class="step-num">2</span> Dashboard → Workers & Pages → <b>Create Worker</b></div>
-            <div class="step"><span class="step-num">3</span> Name it <code>tunnelx-relay</code> → click Deploy</div>
-            <div class="step"><span class="step-num">4</span> Click <b>Edit Code</b> → paste the Worker script → Save & Deploy</div>
-            <div class="step"><span class="step-num">5</span> Copy your Worker URL below</div>
+            <div class="step"><span class="sn">1</span> <a href="https://workers.cloudflare.com" target="_blank" style="color:var(--accent-bright)">workers.cloudflare.com</a> → Sign up free</div>
+            <div class="step"><span class="sn">2</span> Create Worker → name it <code>tunnelx-relay</code></div>
+            <div class="step"><span class="sn">3</span> Paste the Worker script → Deploy</div>
+            <div class="step"><span class="sn">4</span> Or run <code>node tunnelx-server.js</code> locally</div>
         </div>
-
-        <div style="margin: 12px 0;">
-            <button class="btn btn-ghost btn-sm" onclick="copyWorkerScript()">📋 Copy Worker Script to Clipboard</button>
-        </div>
-
         <div class="field">
-            <label>Your Worker URL</label>
-            <input type="text" id="relayUrlInput" placeholder="https://tunnelx-relay.your-name.workers.dev">
-            <div class="hint">This is the URL from step 5. It looks like <code>https://tunnelx-relay.xxxxx.workers.dev</code></div>
+            <label>Relay URL</label>
+            <input type="text" id="relayUrlInput" placeholder="http://localhost:3000 or https://tunnelx-relay.xxx.workers.dev">
+            <div class="hint">Local relay supports SOCKS. Cloudflare Worker supports HTTP/HTTPS proxies only.</div>
         </div>
-
         <div class="modal-footer">
-            <button class="btn btn-ghost" onclick="closeSettings()">Cancel</button>
-            <button class="btn btn-accent" onclick="saveRelay()">Connect & Test</button>
-        </div>
-    </div>
-</div>
-
-<!-- LOG MODAL -->
-<div class="modal-backdrop" id="logModal">
-    <div class="modal">
-        <h3>Activity Log</h3>
-        <pre id="logContent">No activity yet</pre>
-        <div class="modal-footer">
-            <button class="btn btn-ghost btn-sm" onclick="copyLog()">Copy</button>
-            <button class="btn btn-accent btn-sm" onclick="closeModal('logModal')">Close</button>
+            <button class="btn btn-ghost" onclick="closeModal('settingsModal')">Cancel</button>
+            <button class="btn btn-accent" onclick="saveRelay()">Connect</button>
         </div>
     </div>
 </div>
 
 <!-- EXPORT MODAL -->
-<div class="modal-backdrop" id="exportModal">
+<div class="modal-bg" id="exportModal">
     <div class="modal">
         <h3>Export Working Proxies</h3>
         <pre id="exportContent"></pre>
         <div class="modal-footer">
-            <button class="btn btn-ghost btn-sm" onclick="copyExport()">Copy</button>
-            <button class="btn btn-ghost btn-sm" onclick="downloadExport()">Download .txt</button>
+            <button class="btn btn-ghost btn-sm" onclick="navigator.clipboard.writeText(document.getElementById('exportContent').textContent);toast('Copied','success')">Copy</button>
+            <button class="btn btn-ghost btn-sm" onclick="dlExport()">Download</button>
             <button class="btn btn-accent btn-sm" onclick="closeModal('exportModal')">Close</button>
         </div>
     </div>
 </div>
 
-
 <script>
 // ━━━ STATE ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 let proxies = [];
 let selected = -1;
-let logs = [];
 let testAbort = null;
 let autoRotate = false;
-let rotateIndex = 0;
-let navHistory = [];
-let navPos = -1;
+let rotateIdx = 0;
+let navHist = [], navPos = -1;
+let filterSafe = true;  // Only show port 80/443
 
-// ━━━ RELAY CONFIG ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-let relayUrl = '';
-try { relayUrl = localStorage.getItem('tunnelx_relay') || ''; } catch(e) {}
-let relayConnected = false;
+// ━━━ LOG STATE ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+let logEntries = [];
+let logFilter = 'all';
+let logAutoScroll = true;
+let logCount = 0;
 
-// Fallback CORS relays (used when no Worker is configured)
-const CORS_FALLBACKS = [
-    url => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
-    url => `https://corsproxy.io/?${encodeURIComponent(url)}`,
-    url => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
+// ━━━ RELAY ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+let relayUrl = ''; try { relayUrl = localStorage.getItem('tunnelx_relay') || ''; } catch(e){}
+let relayOk = false;
+
+const CORS_FB = [
+    u => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,
+    u => `https://corsproxy.io/?${encodeURIComponent(u)}`,
 ];
 
-// ━━━ WORKER SCRIPT (embedded for copy button) ━━━
-const WORKER_SCRIPT = `// TunnelX Cloudflare Worker Relay
-// Paste this entire script into your Cloudflare Worker editor
+const SAFE_PORTS = new Set([80, 443, 8080, 8443]);
 
-const CORS = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type',
-  'Access-Control-Max-Age': '86400',
-};
+// ━━━ PSIPHON-STYLE LOGGING ━━━━━━━━━━━━━━━━━━━━
+function xlog(type, msg) {
+    const ts = new Date().toLocaleTimeString('en-GB', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    const icons = { info: 'ℹ', success: '✓', error: '✗', warn: '⚠', net: '↔', proxy: '⬡', nav: '→' };
+    const entry = { ts, type, msg, icon: icons[type] || '·' };
+    logEntries.push(entry);
+    logCount++;
 
-export default {
-  async fetch(request) {
-    if (request.method === 'OPTIONS')
-      return new Response(null, { status: 204, headers: CORS });
+    // Update badge
+    document.getElementById('logBadge').textContent = logCount;
 
-    const url = new URL(request.url);
+    // Render to log panel
+    const scroll = document.getElementById('logScroll');
+    if (logFilter === 'all' || logFilter === type) {
+        const div = document.createElement('div');
+        div.className = `log-entry ${type}`;
+        div.innerHTML = `<span class="log-ts">${ts}</span><span class="log-icon">${entry.icon}</span><span class="log-msg">${escHtml(msg)}</span>`;
+        scroll.appendChild(div);
 
-    if (url.pathname === '/health')
-      return json({ status: 'ok', time: new Date().toISOString() });
-
-    if (url.pathname === '/test') {
-      const host = url.searchParams.get('host');
-      const port = url.searchParams.get('port') || '80';
-      const proto = (url.searchParams.get('proto') || 'http').toLowerCase();
-      if (!host) return json({ error: 'Missing host' }, 400);
-
-      const t0 = Date.now();
-      let status = 'dead', httpStatus = 0, error = null;
-      try {
-        const r = await fetch(
-          \\\`\\\${proto === 'https' ? 'https' : 'http'}://\\\${host}:\\\${port}/\\\`,
-          { method: 'HEAD', signal: AbortSignal.timeout(7000), redirect: 'manual',
-            headers: { 'User-Agent': 'TunnelX/1.0' } }
-        );
-        httpStatus = r.status;
-        status = 'alive';
-      } catch (e) {
-        error = e.message;
-        if (/ssl|tls|cert/i.test(error)) { status = 'alive'; error = 'TLS (port open)'; }
-      }
-      return json({ host, port: +port, proto, status, latency: Date.now() - t0, httpStatus, error });
+        if (logAutoScroll) scroll.scrollTop = scroll.scrollHeight;
     }
 
-    if (url.pathname === '/fetch') {
-      const target = url.searchParams.get('url');
-      if (!target) return json({ error: 'Missing url' }, 400);
-      try { new URL(target); } catch { return json({ error: 'Invalid url' }, 400); }
-    
-      const front = url.searchParams.get('front');
-      const t0 = Date.now();
-      try {
-        let fetchUrl = target;
-        let headers = {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120.0.0.0 Safari/537.36',
-          'Accept': 'text/html,*/*',
-          'Accept-Language': 'en-US,en;q=0.9',
-        };
-        if (front) {
-          const targetUrl = new URL(target);
-          headers['Host'] = targetUrl.hostname;
-          targetUrl.hostname = front;
-          fetchUrl = targetUrl.toString();
-        }
-        const r = await fetch(fetchUrl, {
-          signal: AbortSignal.timeout(15000), redirect: 'follow',
-          headers,
-        });
-        const ct = r.headers.get('content-type') || '';
-        if (ct.includes('text/') || !ct) {
-          return new Response(await r.text(), {
-            status: r.status,
-            headers: { ...CORS, 'Content-Type': ct || 'text/html', 'X-Latency': String(Date.now() - t0) },
-          });
-        }
-        return new Response(await r.arrayBuffer(), {
-          status: r.status,
-          headers: { ...CORS, 'Content-Type': ct, 'X-Latency': String(Date.now() - t0) },
-        });
-      } catch (e) {
-        return json({ error: e.message, url: target, latency: Date.now() - t0 }, 502);
-      }
-    }
+    // Update counter
+    document.getElementById('logCount').textContent = `${logEntries.length} entries`;
 
-    return new Response('<h1>TunnelX Relay</h1><p>Endpoints: /health, /test, /fetch</p>',
-      { headers: { ...CORS, 'Content-Type': 'text/html' } });
-  }
-};
-
-function json(data, s = 200) {
-  return new Response(JSON.stringify(data), {
-    status: s, headers: { ...CORS, 'Content-Type': 'application/json' },
-  });
-}`;
-
-// ━━━ LOGGING ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-function log(msg) {
-    const ts = new Date().toLocaleTimeString('en-GB', { hour12: false });
-    logs.push(`[${ts}] ${msg}`);
-    if (logs.length > 500) logs.shift();
+    // Status bar
     document.getElementById('statusMsg').textContent = msg;
 }
 
+function escHtml(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
+function setLogFilter(f) {
+    logFilter = f;
+    document.querySelectorAll('.log-filter').forEach(el => el.classList.toggle('active', el.dataset.f === f));
+    rerenderLog();
+}
+
+function rerenderLog() {
+    const scroll = document.getElementById('logScroll');
+    scroll.innerHTML = '';
+    const filtered = logFilter === 'all' ? logEntries : logEntries.filter(e => e.type === logFilter);
+    filtered.forEach(e => {
+        const div = document.createElement('div');
+        div.className = `log-entry ${e.type}`;
+        div.innerHTML = `<span class="log-ts">${e.ts}</span><span class="log-icon">${e.icon}</span><span class="log-msg">${escHtml(e.msg)}</span>`;
+        scroll.appendChild(div);
+    });
+    if (logAutoScroll) scroll.scrollTop = scroll.scrollHeight;
+}
+
+function toggleAutoScroll() {
+    logAutoScroll = !logAutoScroll;
+    document.getElementById('logAutoScroll').textContent = `Auto-scroll: ${logAutoScroll ? 'ON' : 'OFF'}`;
+}
+
+function copyLogs() {
+    const txt = logEntries.map(e => `[${e.ts}] ${e.icon} ${e.msg}`).join('\n');
+    navigator.clipboard.writeText(txt); toast('Copied', 'success');
+}
+
+function clearLogs() {
+    logEntries = []; logCount = 0;
+    document.getElementById('logScroll').innerHTML = '';
+    document.getElementById('logBadge').textContent = '0';
+    document.getElementById('logCount').textContent = '0 entries';
+}
+
+// ━━━ TOAST ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 function toast(msg, type = 'info') {
     const el = document.createElement('div');
     el.className = `toast toast-${type}`;
     el.textContent = msg;
     document.getElementById('toasts').appendChild(el);
-    setTimeout(() => el.remove(), 4000);
+    setTimeout(() => el.remove(), 3500);
 }
 
-// ━━━ RELAY MANAGEMENT ━━━━━━━━━━━━━━━━━━━━━━━━━
-function showSettings() {
-    document.getElementById('relayUrlInput').value = relayUrl;
-    document.getElementById('settingsModal').classList.add('visible');
+// ━━━ TABS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function switchTab(name) {
+    document.querySelectorAll('.main-tab').forEach((t, i) => t.classList.toggle('active', (i === 0 && name === 'browser') || (i === 1 && name === 'log')));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.getElementById(`tab-${name}`).classList.add('active');
+    if (name === 'log') { logCount = 0; document.getElementById('logBadge').textContent = '0'; }
 }
 
-function closeSettings() { closeModal('settingsModal'); }
+// ━━━ RELAY ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function showSettings() { document.getElementById('relayUrlInput').value = relayUrl; document.getElementById('settingsModal').classList.add('vis'); }
 
 async function saveRelay() {
-    let url = document.getElementById('relayUrlInput').value.trim();
-    url = url.replace(/\/+$/, '');
-
+    let url = document.getElementById('relayUrlInput').value.trim().replace(/\/+$/, '');
     if (!url) {
-        relayUrl = '';
-        relayConnected = false;
-        try { localStorage.removeItem('tunnelx_relay'); } catch(e) {}
-        updateRelayBadge();
-        toast('Relay cleared — using public CORS fallbacks', 'warn');
-        closeSettings();
-        return;
+        relayUrl = ''; relayOk = false;
+        try { localStorage.removeItem('tunnelx_relay'); } catch(e){}
+        updateBadge(); toast('Relay cleared', 'warn');
+        xlog('info', 'Relay disconnected — using CORS fallbacks');
+        closeModal('settingsModal'); return;
     }
 
-    // Validate URL format
-    if (!/^https?:\/\//i.test(url)) {
-        toast('URL must start with https://', 'error');
-        return;
-    }
-
-    toast('Testing relay connection...', 'info');
+    xlog('net', `Connecting to relay: ${url}`);
     try {
-        const resp = await fetch(`${url}/health`, {
-            cache: 'no-store',
-            mode: 'cors'
-        });
-        const data = await resp.json();
-        if (data.status === 'ok') {
-            relayUrl = url;
-            relayConnected = true;
-            try { localStorage.setItem('tunnelx_relay', url); } catch(e) {}
-            updateRelayBadge();
+        const r = await fetch(`${url}/health`, { cache: 'no-store', mode: 'cors' });
+        const d = await r.json();
+        if (d.status === 'ok') {
+            relayUrl = url; relayOk = true;
+            try { localStorage.setItem('tunnelx_relay', url); } catch(e){}
+            updateBadge();
+            xlog('success', `Relay connected: ${url} (type: ${d.type || 'worker'})`);
             toast('Relay connected!', 'success');
-            log(`Relay connected: ${url}`);
-            closeSettings();
-        } else {
-            throw new Error('Unexpected response from /health');
-        }
+            closeModal('settingsModal');
+        } else throw new Error('Bad response');
     } catch (e) {
-        // If CORS error from file:// origin, still save — the Worker is likely fine
         if (location.protocol === 'file:') {
-            relayUrl = url;
-            relayConnected = true;
-            try { localStorage.setItem('tunnelx_relay', url); } catch(e2) {}
-            updateRelayBadge();
-            toast('Relay saved (CORS check skipped — open from a web server for full features)', 'warn');
-            log(`Relay saved (file:// mode): ${url}`);
-            closeSettings();
+            relayUrl = url; relayOk = true;
+            try { localStorage.setItem('tunnelx_relay', url); } catch(e2){}
+            updateBadge();
+            xlog('warn', `Relay saved (file:// mode, CORS check skipped): ${url}`);
+            toast('Relay saved', 'warn'); closeModal('settingsModal');
         } else {
-            toast(`Connection failed: ${e.message}`, 'error');
-            log(`Relay test failed: ${e.message}`);
+            xlog('error', `Relay connection failed: ${e.message}`);
+            toast('Connection failed', 'error');
         }
     }
 }
 
-function updateRelayBadge() {
-    const badge = document.getElementById('relayBadge');
-    const label = document.getElementById('relayStatus');
-    if (relayConnected) {
-        badge.className = 'relay-badge connected';
-        label.textContent = '⚡ Relay Active';
-    } else if (relayUrl) {
-        badge.className = 'relay-badge disconnected';
-        label.textContent = '⚠ Relay Set (untested)';
-    } else {
-        badge.className = 'relay-badge disconnected';
-        label.textContent = '⚙ No Relay';
-    }
-}
-
-function copyWorkerScript() {
-    // Clean the template literal escapes for actual deployment
-    const clean = WORKER_SCRIPT.replace(/\\\\\\\`/g, '`').replace(/\\\\\$/g, '$');
-    navigator.clipboard.writeText(clean).then(() => {
-        toast('Worker script copied! Paste it into Cloudflare.', 'success');
-    });
+function updateBadge() {
+    const b = document.getElementById('relayBadge');
+    const l = document.getElementById('relayLabel');
+    if (relayOk) { b.className = 'relay-badge on'; l.textContent = '⚡ Relay Active'; }
+    else if (relayUrl) { b.className = 'relay-badge off'; l.textContent = '⚠ Relay Set'; }
+    else { b.className = 'relay-badge off'; l.textContent = '⚙ No Relay'; }
 }
 
 // ━━━ PARSING ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 function parseInput() {
     const raw = document.getElementById('inputBox').value.trim();
-    if (!raw) { toast('Paste some content first', 'warn'); return; }
+    if (!raw) { toast('Paste content first', 'warn'); return; }
 
     const seen = new Set(proxies.map(p => p.address));
     let added = 0;
-    log('Parsing input...');
+    xlog('info', 'Parsing input...');
 
     const text = raw.replace(/<[^>]*>/g, ' ');
+    let m;
 
     // Protocol://host:port
-    let m;
     const r1 = /\b(socks5|socks4|https?):\/\/([a-zA-Z0-9._-]+):(\d{2,5})\b/gi;
     while ((m = r1.exec(raw)) !== null) {
         const addr = `${m[1].toLowerCase()}://${m[2]}:${m[3]}`;
-        if (!seen.has(addr)) { addProxy(m[1].toLowerCase(), m[2], m[3], addr); seen.add(addr); added++; }
-    }
-
-    // user:pass@host:port (auth proxies)
-    const r1a = /\b(socks5|socks4|https?):\/\/([^:]+):([^@]+)@([a-zA-Z0-9._-]+):(\d{2,5})\b/gi;
-    while ((m = r1a.exec(raw)) !== null) {
-        const addr = `${m[1].toLowerCase()}://${m[4]}:${m[5]}`;
-        if (!seen.has(addr)) {
-            const p = addProxy(m[1].toLowerCase(), m[4], m[5], addr);
-            if (p) { p.auth = { user: m[2], pass: m[3] }; }
-            seen.add(addr); added++;
-        }
+        if (!seen.has(addr)) { addPx(m[1].toLowerCase(), m[2], m[3], addr); seen.add(addr); added++; }
     }
 
     // Bare IP:port
     const r2 = /\b((?:(?:25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}(?:25[0-5]|2[0-4]\d|[01]?\d\d?)):(\d{2,5})\b/g;
     while ((m = r2.exec(text)) !== null) {
         const addr = `http://${m[1]}:${m[2]}`;
-        if (!seen.has(addr)) { addProxy('http', m[1], m[2], addr); seen.add(addr); added++; }
+        if (!seen.has(addr)) { addPx('http', m[1], m[2], addr); seen.add(addr); added++; }
     }
 
-    // Table-style: IP  Port  Protocol
+    // Table: IP  Port  Proto
     const r3 = /\b((?:\d{1,3}\.){3}\d{1,3})\s+(\d{2,5})\s+(SOCKS[45]|HTTPS?)/gi;
     while ((m = r3.exec(text)) !== null) {
-        const proto = m[3].toLowerCase();
-        const addr = `${proto}://${m[1]}:${m[2]}`;
-        if (!seen.has(addr)) { addProxy(proto, m[1], m[2], addr); seen.add(addr); added++; }
+        const p = m[3].toLowerCase();
+        const addr = `${p}://${m[1]}:${m[2]}`;
+        if (!seen.has(addr)) { addPx(p, m[1], m[2], addr); seen.add(addr); added++; }
     }
 
-    if (added === 0) toast('No new proxies found', 'warn');
-    else { toast(`Extracted ${added} proxies`, 'success'); log(`Extracted ${added} new proxies`); }
+    if (added === 0) { toast('No new proxies found', 'warn'); xlog('warn', 'No proxies extracted'); }
+    else {
+        const safe = proxies.filter(p => SAFE_PORTS.has(p.port)).length;
+        xlog('success', `Extracted ${added} proxies (${safe} on firewall-safe ports 80/443/8080/8443)`);
+        toast(`${added} proxies extracted`, 'success');
+    }
+    render(); saveStorage();
+}
 
+function addPx(proto, host, port, address) {
+    proxies.push({ protocol: proto, host, port: parseInt(port), address, status: 'untested', latency: null, lastTest: null, fails: 0 });
+}
+
+// ━━━ PORT FILTER ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function toggleFilter() {
+    filterSafe = !filterSafe;
+    document.getElementById('filterSafe').classList.toggle('active', filterSafe);
+    xlog('info', filterSafe ? 'Filter ON — showing only port 80/443/8080/8443' : 'Filter OFF — showing all ports');
     render();
-    saveToStorage();
 }
 
-function addProxy(proto, host, port, address) {
-    const p = {
-        protocol: proto, host, port: parseInt(port), address,
-        status: 'untested', latency: null, lastTest: null, fails: 0, auth: null
-    };
-    proxies.push(p);
-    return p;
-}
-
-// ━━━ HEALTH CHECKING ━━━━━━━━━━━━━━━━━━━━━━━━━━
+// ━━━ HEALTH CHECK ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 async function testProxy(idx) {
     const p = proxies[idx];
-    p.status = 'testing';
-    p.latency = null;
+    p.status = 'testing'; p.latency = null;
     render();
-    log(`Testing ${p.address}...`);
-
-    const start = performance.now();
+    xlog('proxy', `Testing ${p.address}...`);
 
     try {
         if (relayUrl) {
-            // ── USE WORKER BACKEND (real server-side test) ──
-            const resp = await fetch(
-                `${relayUrl}/test?host=${p.host}&port=${p.port}&proto=${p.protocol}`,
-                { cache: 'no-store' }
-            );
-            const data = await resp.json();
+            xlog('net', `→ ${relayUrl}/test?host=${p.host}&port=${p.port}&proto=${p.protocol}`);
+            const r = await fetch(`${relayUrl}/test?host=${p.host}&port=${p.port}&proto=${p.protocol}`, { cache: 'no-store' });
+            const d = await r.json();
+            xlog('net', `← Response: status=${d.status} latency=${d.latency}ms http=${d.httpStatus || '-'} ${d.error ? 'err=' + d.error : ''} ${d.detail || ''}`);
 
-            if (data.status === 'alive') {
-                p.status = 'alive';
-                p.latency = data.latency;
-                p.fails = 0;
-                log(`✓ ${p.address} — ${data.latency}ms` + (data.httpStatus ? ` (HTTP ${data.httpStatus})` : '') + (data.error ? ` [${data.error}]` : ''));
-            } else {
-                throw new Error(data.error || 'Dead');
-            }
+            if (d.status === 'alive') {
+                p.status = 'alive'; p.latency = d.latency; p.fails = 0;
+                xlog('success', `✓ ${p.address} — ALIVE (${d.latency}ms)${d.detail ? ' [' + d.detail + ']' : ''}`);
+            } else throw new Error(d.error || 'Dead');
         } else {
-            // ── FALLBACK: Browser-level probe ──
-            if (p.protocol === 'http' || p.protocol === 'https') {
-                const relayFn = CORS_FALLBACKS[0];
-                const resp = await fetch(relayFn(`${p.protocol}://${p.host}:${p.port}/`), {
-                    cache: 'no-store',
-                    signal: AbortSignal.timeout(8000)
-                });
-                p.status = 'alive';
-                p.latency = Math.round(performance.now() - start);
-                p.fails = 0;
-                log(`✓ ${p.address} — ${p.latency}ms (fallback)`);
-            } else {
-                // SOCKS: Image timing probe
-                const open = await probePort(p.host, p.port);
-                if (open) {
-                    p.status = 'alive';
-                    p.latency = Math.round(performance.now() - start);
-                    p.fails = 0;
-                    log(`✓ ${p.address} — port open (~${p.latency}ms)`);
-                } else {
-                    throw new Error('Port closed');
-                }
-            }
+            xlog('net', `→ CORS probe to ${p.protocol}://${p.host}:${p.port}/`);
+            const t0 = performance.now();
+            const r = await fetch(CORS_FB[0](`${p.protocol}://${p.host}:${p.port}/`), { cache: 'no-store', signal: AbortSignal.timeout(8000) });
+            const ms = Math.round(performance.now() - t0);
+            xlog('net', `← CORS response: HTTP ${r.status} (${ms}ms)`);
+            p.status = 'alive'; p.latency = ms; p.fails = 0;
+            xlog('success', `✓ ${p.address} — ALIVE (${ms}ms, CORS fallback)`);
         }
     } catch (e) {
-        p.status = 'dead';
-        p.fails++;
-        log(`✗ ${p.address} — ${e.message || 'failed'}`);
+        p.status = 'dead'; p.fails++;
+        xlog('error', `✗ ${p.address} — DEAD: ${e.message}`);
     }
 
     p.lastTest = new Date();
-    render();
-    saveToStorage();
-}
-
-function probePort(host, port) {
-    return new Promise(resolve => {
-        const timer = setTimeout(() => resolve(false), 5000);
-        const img = new Image();
-        const t0 = performance.now();
-        img.onload = img.onerror = () => {
-            clearTimeout(timer);
-            resolve(performance.now() - t0 < 4000);
-        };
-        img.src = `http://${host}:${port}/?_=${Date.now()}`;
-    });
+    render(); saveStorage();
 }
 
 async function testAll() {
-    if (proxies.length === 0) { toast('Load proxies first', 'warn'); return; }
-    log('Batch test started');
-    toast('Testing all proxies...', 'info');
-    document.getElementById('testAllBtn').disabled = true;
-    testAbort = new AbortController();
+    const toTest = filterSafe ? proxies.filter(p => SAFE_PORTS.has(p.port)) : proxies;
+    if (toTest.length === 0) { toast('No proxies to test', 'warn'); return; }
 
-    for (let i = 0; i < proxies.length; i++) {
-        if (testAbort.signal.aborted) break;
-        await testProxy(i);
-        await new Promise(r => setTimeout(r, 100));
+    xlog('info', `━━━ Batch test: ${toTest.length} proxies ━━━`);
+    document.getElementById('testAllBtn').disabled = true;
+    testAbort = { stopped: false };
+
+    for (const p of toTest) {
+        if (testAbort.stopped) break;
+        const idx = proxies.indexOf(p);
+        await testProxy(idx);
+        await new Promise(r => setTimeout(r, 80));
     }
 
-    const alive = proxies.filter(p => p.status === 'alive').length;
-    toast(`Done — ${alive}/${proxies.length} alive`, alive > 0 ? 'success' : 'error');
-    log(`Batch complete: ${alive} alive`);
+    const alive = toTest.filter(p => p.status === 'alive').length;
+    xlog('info', `━━━ Batch complete: ${alive}/${toTest.length} alive ━━━`);
+    toast(`${alive}/${toTest.length} alive`, alive > 0 ? 'success' : 'error');
     document.getElementById('testAllBtn').disabled = false;
 }
 
 function stopTests() {
-    if (testAbort) testAbort.abort();
-    toast('Stopped', 'warn');
-    log('Tests stopped');
+    if (testAbort) testAbort.stopped = true;
+    xlog('warn', 'Tests stopped by user');
     document.getElementById('testAllBtn').disabled = false;
 }
 
-// ━━━ TUNNELED BROWSING ━━━━━━━━━━━━━━━━━━━━━━━━
+// ━━━ NAVIGATE ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 async function navigate() {
     let url = document.getElementById('urlInput').value.trim();
     if (!url) { toast('Enter a URL', 'warn'); return; }
     if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
     document.getElementById('urlInput').value = url;
 
-    const proxy = selected >= 0 ? proxies[selected] : null;
+    const px = selected >= 0 ? proxies[selected] : null;
 
     document.getElementById('renderPlaceholder').style.display = 'none';
-    document.getElementById('loadingOverlay').classList.add('visible');
-    document.getElementById('loadMsg').textContent = proxy
-        ? `Tunneling via ${proxy.address}...`
-        : 'Fetching via relay...';
+    document.getElementById('loadingOverlay').classList.add('show');
+    document.getElementById('loadMsg').textContent = px ? `Tunneling via ${px.address}...` : 'Fetching...';
 
-    log(`Navigate: ${url}` + (proxy ? ` via ${proxy.address}` : ''));
+    xlog('nav', `Navigate: ${url}${px ? ' via ' + px.address : ''}`);
 
-    try {
-        let html = null;
-        let source = '';
-
-        // Strategy: Try Worker first, then CORS fallbacks
-        const fetchMethods = [];
-
-        if (relayUrl) {
-            const proxyParam = proxy ? `&proxy=${encodeURIComponent(proxy.address)}` : '';
-            fetchMethods.push({
-                name: proxy ? `relay→${proxy.address}` : 'relay-direct',
-                fn: () => fetch(
-                    `${relayUrl}/fetch?url=${encodeURIComponent(url)}${proxyParam}`,
-                    { cache: 'no-store', headers: { 'Accept': 'text/html,*/*' } }
-                )
-            });
-        }
-
-        // Always add CORS fallbacks as backup
-        CORS_FALLBACKS.forEach((buildUrl, i) => {
-            fetchMethods.push({
-                name: `cors-${i}`,
-                fn: () => fetch(buildUrl(url), {
-                    cache: 'no-store', headers: { 'Accept': 'text/html,*/*' }
-                })
-            });
+    // Build fetch methods
+    const methods = [];
+    if (relayUrl) {
+        const proxyParam = px ? `&proxy=${encodeURIComponent(px.address)}` : '';
+        methods.push({ name: px ? `relay→${px.host}:${px.port}` : 'relay-direct',
+            fn: () => fetch(`${relayUrl}/fetch?url=${encodeURIComponent(url)}${proxyParam}`, { cache: 'no-store' })
         });
+    }
+    CORS_FB.forEach((f, i) => methods.push({ name: `cors-${i}`, fn: () => fetch(f(url), { cache: 'no-store' }) }));
 
-        for (const method of fetchMethods) {
-            try {
-                document.getElementById('loadMsg').textContent = `Trying ${method.name}...`;
-                const resp = await method.fn();
+    let html = null, source = '';
 
-                if (resp.status === 429) {
-                    log(`⚠ ${method.name}: 429 rate limited — target site is blocking, trying next...`);
-                    continue;
-                }
+    for (const m of methods) {
+        try {
+            xlog('net', `→ Trying ${m.name}...`);
+            document.getElementById('loadMsg').textContent = `Trying ${m.name}...`;
+            const r = await m.fn();
 
-                if (resp.ok) {
-                    html = await resp.text();
-                    source = method.name;
-                    break;
-                } else {
-                    log(`⚠ ${method.name}: HTTP ${resp.status}`);
-                }
-            } catch (e) {
-                log(`⚠ ${method.name} failed: ${e.message}`);
+            if (r.status === 429) {
+                xlog('warn', `← ${m.name}: HTTP 429 — rate limited by target, skipping`);
+                continue;
             }
-        }
+            if (r.status === 530) {
+                xlog('warn', `← ${m.name}: HTTP 530 — target unreachable from relay (geo-block?), skipping`);
+                continue;
+            }
+            if (!r.ok) {
+                xlog('warn', `← ${m.name}: HTTP ${r.status}`);
+                continue;
+            }
 
-        if (!html) throw new Error('All fetch methods failed — target may be blocking automated requests');
-
-        // Inject <base> for relative URLs
-        const base = `<base href="${url}">`;
-        if (html.includes('<head>')) html = html.replace('<head>', `<head>${base}`);
-        else if (html.includes('<html')) html = html.replace(/<html[^>]*>/, `$&<head>${base}</head>`);
-        else html = base + html;
-
-        const frame = document.getElementById('renderFrame');
-        frame.srcdoc = html;
-        frame.style.display = 'block';
-
-        navHistory = navHistory.slice(0, navPos + 1);
-        navHistory.push(url);
-        navPos = navHistory.length - 1;
-
-        document.getElementById('lockIcon').textContent = url.startsWith('https') ? '🔒' : '🔓';
-        log(`✓ Rendered ${url} via ${source}`);
-        toast('Page loaded', 'success');
-
-    } catch (e) {
-        toast('Failed: ' + e.message, 'error');
-        log(`✗ Navigation failed: ${e.message}`);
-
-        if (autoRotate && proxies.some(p => p.status === 'alive')) {
-            rotateProxy();
-            toast('Rotating to next proxy...', 'info');
+            const latency = r.headers.get('X-Latency') || r.headers.get('x-latency') || '?';
+            const size = r.headers.get('content-length') || '?';
+            html = await r.text();
+            source = m.name;
+            xlog('success', `← ${m.name}: OK (${latency}ms, ${Math.round(html.length/1024)}KB)`);
+            break;
+        } catch (e) {
+            xlog('error', `← ${m.name}: ${e.message}`);
         }
     }
 
-    document.getElementById('loadingOverlay').classList.remove('visible');
+    if (!html) {
+        xlog('error', `Navigation failed — all methods exhausted for ${url}`);
+        toast('Failed to load page', 'error');
+        if (autoRotate && proxies.some(p => p.status === 'alive')) { rotateProxy(); xlog('info', 'Auto-rotating to next proxy...'); }
+        document.getElementById('loadingOverlay').classList.remove('show');
+        return;
+    }
+
+    // Inject base tag
+    const base = `<base href="${url}">`;
+    if (html.includes('<head>')) html = html.replace('<head>', `<head>${base}`);
+    else if (html.includes('<html')) html = html.replace(/<html[^>]*>/, `$&<head>${base}</head>`);
+    else html = base + html;
+
+    const frame = document.getElementById('renderFrame');
+    frame.srcdoc = html;
+    frame.style.display = 'block';
+
+    navHist = navHist.slice(0, navPos + 1);
+    navHist.push(url); navPos = navHist.length - 1;
+
+    document.getElementById('lockIcon').textContent = url.startsWith('https') ? '🔒' : '🔓';
+    xlog('nav', `✓ Rendered ${url} via ${source}`);
+    toast('Page loaded', 'success');
+    document.getElementById('loadingOverlay').classList.remove('show');
 }
 
-function navBack() {
-    if (navPos > 0) { navPos--; document.getElementById('urlInput').value = navHistory[navPos]; navigate(); }
-}
-function navForward() {
-    if (navPos < navHistory.length - 1) { navPos++; document.getElementById('urlInput').value = navHistory[navPos]; navigate(); }
-}
-function navReload() {
-    if (navHistory.length > 0) navigate();
-}
+function navBack() { if (navPos > 0) { navPos--; document.getElementById('urlInput').value = navHist[navPos]; navigate(); } }
+function navForward() { if (navPos < navHist.length - 1) { navPos++; document.getElementById('urlInput').value = navHist[navPos]; navigate(); } }
+function navReload() { if (navHist.length > 0) navigate(); }
 
 // ━━━ ROTATION ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 function toggleRotate() {
     autoRotate = !autoRotate;
-    document.getElementById('rotateLabel').textContent = `Rotate: ${autoRotate ? 'ON' : 'OFF'}`;
-    document.getElementById('rotateIndicator').classList.toggle('active', autoRotate);
-    toast(`Auto-rotate ${autoRotate ? 'ON' : 'OFF'}`, 'info');
+    document.getElementById('rotateLabel').textContent = autoRotate ? 'ON' : 'OFF';
+    document.getElementById('rotateInd').classList.toggle('active', autoRotate);
+    xlog('info', `Auto-rotate: ${autoRotate ? 'ON' : 'OFF'}`);
 }
-
 function rotateProxy() {
     const alive = proxies.map((p, i) => ({ ...p, idx: i })).filter(p => p.status === 'alive');
-    if (alive.length === 0) return;
-    rotateIndex = (rotateIndex + 1) % alive.length;
-    selectProxy(alive[rotateIndex].idx);
+    if (!alive.length) return;
+    rotateIdx = (rotateIdx + 1) % alive.length;
+    selectProxy(alive[rotateIdx].idx);
 }
 
 // ━━━ SELECTION ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -1053,127 +941,104 @@ function selectProxy(idx) {
     selected = idx;
     const p = proxies[idx];
     const tag = document.getElementById('proxyTag');
-    tag.className = 'proxy-tag' + (p.status === 'alive' ? '' : ' none');
+    tag.className = 'proxy-tag ' + (p.status === 'alive' ? 'ok' : 'no');
     tag.innerHTML = `<span>${p.protocol.toUpperCase()} ${p.host}:${p.port}</span>`;
     document.getElementById('statusProxy').textContent = `Proxy: ${p.address}`;
+    xlog('proxy', `Selected: ${p.address}`);
     render();
 }
 
 // ━━━ RENDER ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 function render() {
     const list = document.getElementById('proxyList');
-
     if (proxies.length === 0) {
-        list.innerHTML = `<div class="empty-state">
-            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 8v4m0 4h.01"/></svg>
-            <h3>No proxies loaded</h3><p>Paste a proxy list above and click Extract to begin</p></div>`;
+        list.innerHTML = `<div class="empty-state"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 8v4m0 4h.01"/></svg><h3>No proxies loaded</h3><p>Paste a list above and click Extract</p></div>`;
     } else {
         list.innerHTML = proxies.map((p, i) => {
-            const sel = i === selected ? ' selected' : '';
+            const sel = i === selected ? ' sel' : '';
             const pip = p.status === 'alive' ? 'alive' : p.status === 'dead' ? 'dead' : p.status === 'testing' ? 'testing' : '';
             const ms = p.latency ? `${p.latency}ms` : '';
-            return `<div class="proxy-card${sel}" onclick="selectProxy(${i})">
+            const safe = SAFE_PORTS.has(p.port);
+            const hidden = filterSafe && !safe ? ' hidden' : '';
+            return `<div class="pcard${sel}${hidden}" onclick="selectProxy(${i})">
                 <div class="pip ${pip}"></div>
                 <span class="addr">${p.host}:${p.port}</span>
                 <span class="badge b-${p.protocol}">${p.protocol}</span>
+                <span class="port-tag ${safe ? 'port-safe' : 'port-risky'}">${p.port}</span>
                 <span class="ms">${ms}</span>
                 <button class="tbtn" onclick="event.stopPropagation();testProxy(${i})">Test</button>
             </div>`;
         }).join('');
     }
 
-    document.getElementById('sTotal').textContent = proxies.length;
-    document.getElementById('sAlive').textContent = proxies.filter(p => p.status === 'alive').length;
-    document.getElementById('sDead').textContent = proxies.filter(p => p.status === 'dead').length;
-    document.getElementById('sPending').textContent = proxies.filter(p => p.status === 'testing').length;
+    const vis = filterSafe ? proxies.filter(p => SAFE_PORTS.has(p.port)) : proxies;
+    document.getElementById('sT').textContent = vis.length;
+    document.getElementById('sA').textContent = vis.filter(p => p.status === 'alive').length;
+    document.getElementById('sD').textContent = vis.filter(p => p.status === 'dead').length;
+    document.getElementById('sP').textContent = vis.filter(p => p.status === 'testing').length;
 }
 
-// ━━━ EXPORT / IMPORT ━━━━━━━━━━━━━━━━━━━━━━━━━━
-function exportAlive() {
-    const alive = proxies.filter(p => p.status === 'alive');
-    if (alive.length === 0) { toast('No working proxies to export', 'warn'); return; }
-    document.getElementById('exportContent').textContent = alive.map(p => p.address).join('\n');
-    document.getElementById('exportModal').classList.add('visible');
-}
-
-function copyExport() {
-    navigator.clipboard.writeText(document.getElementById('exportContent').textContent);
-    toast('Copied', 'success');
-}
-
-function downloadExport() {
-    const blob = new Blob([document.getElementById('exportContent').textContent], { type: 'text/plain' });
-    const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
-    a.download = `proxies_alive_${new Date().toISOString().slice(0, 10)}.txt`;
-    a.click(); toast('Downloading', 'success');
-}
-
-function saveToStorage() {
-    try { localStorage.setItem('tunnelx_proxies', JSON.stringify(proxies)); } catch (e) {}
-}
-
-function importFromStorage() {
+// ━━━ STORAGE ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function saveStorage() { try { localStorage.setItem('tunnelx_px', JSON.stringify(proxies)); } catch(e){} }
+function importStorage() {
     try {
-        const data = JSON.parse(localStorage.getItem('tunnelx_proxies') || '[]');
-        if (data.length > 0) {
+        const d = JSON.parse(localStorage.getItem('tunnelx_px') || '[]');
+        if (d.length) {
             const seen = new Set(proxies.map(p => p.address));
-            let added = 0;
-            data.forEach(p => { if (!seen.has(p.address)) { proxies.push(p); seen.add(p.address); added++; } });
-            toast(`Loaded ${added} proxies from storage`, 'success');
-            render();
+            let n = 0; d.forEach(p => { if (!seen.has(p.address)) { proxies.push(p); seen.add(p.address); n++; } });
+            toast(`Loaded ${n}`, 'success'); xlog('info', `Loaded ${n} proxies from storage`); render();
         } else toast('No saved proxies', 'warn');
-    } catch (e) { toast('Failed to load', 'error'); }
+    } catch(e) { toast('Load failed', 'error'); }
 }
 
 function clearAll() {
     proxies = []; selected = -1;
     document.getElementById('inputBox').value = '';
-    document.getElementById('proxyTag').className = 'proxy-tag none';
+    document.getElementById('proxyTag').className = 'proxy-tag no';
     document.getElementById('proxyTag').innerHTML = '<span>No proxy</span>';
-    document.getElementById('statusProxy').textContent = 'No active proxy';
-    render(); saveToStorage(); toast('Cleared', 'info');
+    document.getElementById('statusProxy').textContent = 'No proxy';
+    render(); saveStorage(); xlog('info', 'Cleared all proxies');
 }
 
-// ━━━ LOG ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-function showLog() {
-    document.getElementById('logContent').textContent = logs.length ? logs.join('\n') : 'No activity yet';
-    document.getElementById('logModal').classList.add('visible');
+function exportAlive() {
+    const a = proxies.filter(p => p.status === 'alive');
+    if (!a.length) { toast('No alive proxies', 'warn'); return; }
+    document.getElementById('exportContent').textContent = a.map(p => p.address).join('\n');
+    document.getElementById('exportModal').classList.add('vis');
 }
 
-function copyLog() {
-    navigator.clipboard.writeText(logs.join('\n')); toast('Log copied', 'success');
+function dlExport() {
+    const b = new Blob([document.getElementById('exportContent').textContent], { type: 'text/plain' });
+    const a = document.createElement('a'); a.href = URL.createObjectURL(b);
+    a.download = `proxies_${new Date().toISOString().slice(0,10)}.txt`; a.click();
 }
 
-function closeModal(id) { document.getElementById(id).classList.remove('visible'); }
+function closeModal(id) { document.getElementById(id).classList.remove('vis'); }
 
 // ━━━ INIT ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-(async function init() {
-    log('TunnelX ready');
+(async function() {
+    xlog('info', '═══ TunnelX started ═══');
+    xlog('info', `Firewall-safe filter: ON (ports ${[...SAFE_PORTS].join(', ')})`);
     render();
 
-    // Test saved relay
     if (relayUrl) {
-        log(`Testing saved relay: ${relayUrl}`);
+        xlog('net', `Reconnecting to saved relay: ${relayUrl}`);
         try {
-            const resp = await fetch(`${relayUrl}/health`, { cache: 'no-store' });
-            const data = await resp.json();
-            if (data.status === 'ok') {
-                relayConnected = true;
-                log('Relay connected');
-                toast('Relay reconnected', 'success');
+            const r = await fetch(`${relayUrl}/health`, { cache: 'no-store' });
+            const d = await r.json();
+            if (d.status === 'ok') {
+                relayOk = true;
+                xlog('success', `Relay reconnected (type: ${d.type || 'worker'})`);
             }
-        } catch (e) {
-            log(`Saved relay unreachable: ${e.message}`);
+        } catch(e) {
+            xlog('warn', `Saved relay unreachable: ${e.message}`);
         }
+    } else {
+        xlog('info', 'No relay configured — click ⚙ badge to set up');
     }
-    updateRelayBadge();
+    updateBadge();
 
-    // Close modals on backdrop click
-    document.querySelectorAll('.modal-backdrop').forEach(el => {
-        el.addEventListener('click', e => { if (e.target === el) el.classList.remove('visible'); });
-    });
-
-    // Ctrl+Enter to navigate
+    document.querySelectorAll('.modal-bg').forEach(el => el.addEventListener('click', e => { if (e.target === el) el.classList.remove('vis'); }));
     document.addEventListener('keydown', e => { if (e.ctrlKey && e.key === 'Enter') navigate(); });
 })();
 </script>

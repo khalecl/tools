@@ -154,6 +154,19 @@
         .modal .hint{font-size:9px;color:var(--text-3);margin-top:3px;line-height:1.4}
         .modal-footer{margin-top:14px;display:flex;gap:5px;justify-content:flex-end}
 
+        /* ── SETTINGS STRIP ── */
+        .settings-strip{display:flex;align-items:center;gap:10px;padding:5px 12px;background:var(--bg-surface);border-bottom:1px solid var(--border);flex-shrink:0;flex-wrap:wrap;font-size:10px}
+        .setting{display:flex;align-items:center;gap:5px;color:var(--text-2)}
+        .setting label{cursor:pointer;user-select:none;font-size:9px;font-weight:600;letter-spacing:.3px}
+        .toggle{position:relative;width:32px;height:18px;flex-shrink:0}
+        .toggle input{opacity:0;width:0;height:0}
+        .toggle .slider{position:absolute;inset:0;background:var(--border);border-radius:9px;cursor:pointer;transition:.2s}
+        .toggle .slider::before{content:'';position:absolute;width:14px;height:14px;left:2px;bottom:2px;background:var(--text-3);border-radius:50%;transition:.2s}
+        .toggle input:checked+.slider{background:var(--accent)}
+        .toggle input:checked+.slider::before{transform:translateX(14px);background:#fff}
+        .settings-sep{width:1px;height:14px;background:var(--border)}
+        .cache-count{font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--text-3);padding:2px 6px;background:var(--bg-deep);border-radius:3px}
+
         /* ── MOBILE ── */
         @media(max-width:768px){
             .menu-btn{display:flex}
@@ -231,6 +244,28 @@
                 </div>
                 <button class="btn btn-accent btn-sm" onclick="navigate()">Go</button>
                 <div class="proxy-tag no" id="proxyTag"><span>No proxy</span></div>
+            </div>
+            <div class="settings-strip">
+                <div class="setting">
+                    <div class="toggle"><input type="checkbox" id="optImages" checked onchange="onSettingChange()"><span class="slider"></span></div>
+                    <label for="optImages">🖼 Images</label>
+                </div>
+                <div class="setting">
+                    <div class="toggle"><input type="checkbox" id="optCSS" checked onchange="onSettingChange()"><span class="slider"></span></div>
+                    <label for="optCSS">🎨 CSS</label>
+                </div>
+                <div class="setting">
+                    <div class="toggle"><input type="checkbox" id="optVideos" onchange="onSettingChange()"><span class="slider"></span></div>
+                    <label for="optVideos">🎬 Video</label>
+                </div>
+                <div class="settings-sep"></div>
+                <div class="setting">
+                    <div class="toggle"><input type="checkbox" id="optCache" checked onchange="onSettingChange()"><span class="slider"></span></div>
+                    <label for="optCache">💾 Cache</label>
+                </div>
+                <span class="cache-count" id="cacheCount">0 pages</span>
+                <div class="settings-sep"></div>
+                <button class="btn btn-ghost btn-sm" onclick="clearCache();updateCacheCount();toast('Cache cleared','success')">🗑 Clear</button>
             </div>
             <div class="render-area">
                 <iframe id="renderFrame" class="render-frame" sandbox="allow-scripts allow-forms" style="display:none"></iframe>
@@ -347,6 +382,26 @@ const CORS_FB = [
 ];
 const SAFE_PORTS = new Set([80, 443, 8080, 8443]);
 
+// ━━━ USER SETTINGS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+let optImages = true;
+let optCSS = true;
+let optVideos = false;
+let optCache = true;
+
+function onSettingChange() {
+    optImages = document.getElementById('optImages').checked;
+    optCSS = document.getElementById('optCSS').checked;
+    optVideos = document.getElementById('optVideos').checked;
+    const newCache = document.getElementById('optCache').checked;
+    if (optCache && !newCache) { clearCache(); updateCacheCount(); }
+    optCache = newCache;
+    xlog('info', `Settings: images=${optImages} css=${optCSS} video=${optVideos} cache=${optCache}`);
+}
+
+function updateCacheCount() {
+    document.getElementById('cacheCount').textContent = `${pageCache.size} pages`;
+}
+
 // ━━━ SIDEBAR TOGGLE ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 function toggleSidebar() {
     sidebarOpen = !sidebarOpen;
@@ -432,9 +487,32 @@ function proxyResources(html,baseUrl,proxyAddr){
     if(!relayUrl)return html;const base=new URL(baseUrl);
     function resolve(s){if(!s||s.startsWith('data:')||s.startsWith('blob:')||s.startsWith('javascript:'))return s;try{if(s.startsWith('//'))return base.protocol+s;if(s.startsWith('/'))return `${base.protocol}//${base.host}${s}`;if(!/^https?:\/\//i.test(s))return `${base.protocol}//${base.host}${base.pathname.replace(/\/[^/]*$/,'/')}${s}`;return s}catch{return s}}
     function rfor(s){const r=resolve(s);if(!r||r.startsWith('data:'))return r;const pp=proxyAddr?`&proxy=${encodeURIComponent(proxyAddr)}`:'';return `${relayUrl}/fetch?url=${encodeURIComponent(r)}${pp}`}
-    html=html.replace(/(<img\s[^>]*?src\s*=\s*)(["'])([^"']*?)\2/gi,(m,pre,q,src)=>`${pre}${q}${rfor(src)}${q}`);
-    html=html.replace(/url\(\s*(['"]?)([^)'"]+)\1\s*\)/gi,(m,q,src)=>src.startsWith('data:')?m:`url(${q}${rfor(src)}${q})`);
-    html=html.replace(/(<link\s[^>]*?href\s*=\s*)(["'])([^"']*?)\2/gi,(m,pre,q,h)=>`${pre}${q}${rfor(h)}${q}`);
+
+    // Images: proxy through relay OR strip entirely
+    if(optImages){
+        html=html.replace(/(<img\s[^>]*?src\s*=\s*)(["'])([^"']*?)\2/gi,(m,pre,q,src)=>`${pre}${q}${rfor(src)}${q}`);
+        html=html.replace(/(background(?:-image)?\s*:[^;]*?url\s*\(\s*['"]?)([^)'"]+)(['"]?\s*\))/gi,(m,pre,src,post)=>src.startsWith('data:')?m:`${pre}${rfor(src)}${post}`);
+    } else {
+        // Remove images entirely for speed
+        html=html.replace(/<img\s[^>]*>/gi,'');
+        html=html.replace(/(background(?:-image)?\s*:[^;]*?url\s*\([^)]*\))/gi,'background:none');
+    }
+
+    // CSS: proxy through relay OR strip
+    if(optCSS){
+        html=html.replace(/(<link\s[^>]*?href\s*=\s*)(["'])([^"']*?)\2/gi,(m,pre,q,h)=>`${pre}${q}${rfor(h)}${q}`);
+        html=html.replace(/url\(\s*(['"]?)([^)'"]+)\1\s*\)/gi,(m,q,src)=>src.startsWith('data:')?m:`url(${q}${rfor(src)}${q})`);
+    } else {
+        // Strip external stylesheets
+        html=html.replace(/<link\s[^>]*rel\s*=\s*["']stylesheet["'][^>]*>/gi,'');
+    }
+
+    // Videos: strip if disabled
+    if(!optVideos){
+        html=html.replace(/<video\s[^>]*>[\s\S]*?<\/video>/gi,'');
+        html=html.replace(/<iframe\s[^>]*(?:youtube|vimeo|dailymotion)[^>]*>[\s\S]*?<\/iframe>/gi,'');
+    }
+
     return html;
 }
 
@@ -472,7 +550,7 @@ async function navigate(){
     document.getElementById('loadMsg').textContent=px?`Via ${px.host}:${px.port}...`:'Fetching...';
     xlog('nav',`Navigate: ${url}${px?' via '+px.address:''}`);
 
-    if(pageCache.has(ck)){const c=pageCache.get(ck);const age=Math.round((Date.now()-c.ts)/1000);
+    if(optCache && pageCache.has(ck)){const c=pageCache.get(ck);const age=Math.round((Date.now()-c.ts)/1000);
         xlog('success',`⚡ Cache hit (${age}s, ${Math.round(c.html.length/1024)}KB)`);
         const f=document.getElementById('renderFrame');f.srcdoc=c.html;f.style.display='block';
         navHist=navHist.slice(0,navPos+1);navHist.push(url);navPos=navHist.length-1;
@@ -504,8 +582,8 @@ async function navigate(){
     else html=base+html;
     xlog('net','Rewriting resource URLs...');html=proxyResources(html,url,px?.address);
 
-    if(pageCache.size>=MAX_CACHE)pageCache.delete(pageCache.keys().next().value);
-    pageCache.set(ck,{html,ts:Date.now()});
+    if(optCache){if(pageCache.size>=MAX_CACHE)pageCache.delete(pageCache.keys().next().value);
+    pageCache.set(ck,{html,ts:Date.now()});updateCacheCount()}
 
     const f=document.getElementById('renderFrame');f.srcdoc=html;f.style.display='block';
     navHist=navHist.slice(0,navPos+1);navHist.push(url);navPos=navHist.length-1;

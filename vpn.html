@@ -2,417 +2,181 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>TunnelX — Proxy Tunnel & Browser</title>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-        :root {
-            --bg-deep: #06080f;
-            --bg-base: #0b0f1a;
-            --bg-surface: #111627;
-            --bg-raised: #171d33;
-            --bg-overlay: #1c2340;
-            --accent: #3b82f6;
-            --accent-bright: #60a5fa;
-            --accent-glow: rgba(59, 130, 246, 0.15);
-            --accent-glow-strong: rgba(59, 130, 246, 0.3);
-            --green: #22c55e;
-            --green-dim: rgba(34, 197, 94, 0.12);
-            --red: #ef4444;
-            --red-dim: rgba(239, 68, 68, 0.12);
-            --yellow: #eab308;
-            --yellow-dim: rgba(234, 179, 8, 0.12);
-            --purple: #a855f7;
-            --purple-dim: rgba(168, 85, 247, 0.12);
-            --cyan: #06b6d4;
-            --cyan-dim: rgba(6, 182, 212, 0.12);
-            --text-1: #e8ecf4;
-            --text-2: #94a3b8;
-            --text-3: #64748b;
-            --border: #1e293b;
-            --border-light: #2d3a50;
-            --radius: 8px;
-            --radius-lg: 12px;
+        *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+        :root{
+            --bg-deep:#06080f;--bg-base:#0b0f1a;--bg-surface:#111627;--bg-raised:#171d33;--bg-overlay:#1c2340;
+            --accent:#3b82f6;--accent-bright:#60a5fa;--accent-glow:rgba(59,130,246,.15);--accent-glow-strong:rgba(59,130,246,.3);
+            --green:#22c55e;--green-dim:rgba(34,197,94,.12);--red:#ef4444;--red-dim:rgba(239,68,68,.12);
+            --yellow:#eab308;--yellow-dim:rgba(234,179,8,.12);--purple:#a855f7;--purple-dim:rgba(168,85,247,.12);
+            --cyan:#06b6d4;--cyan-dim:rgba(6,182,212,.12);
+            --text-1:#e8ecf4;--text-2:#94a3b8;--text-3:#64748b;
+            --border:#1e293b;--border-light:#2d3a50;--radius:8px;--radius-lg:12px;
+            --sidebar-w:340px;
         }
-        html, body {
-            width: 100%; height: 100%;
-            font-family: 'DM Sans', system-ui, sans-serif;
-            background: var(--bg-deep);
-            color: var(--text-1);
-            overflow: hidden;
-            -webkit-font-smoothing: antialiased;
-        }
-        body { display: flex; flex-direction: column; }
+        html,body{width:100%;height:100%;font-family:'DM Sans',system-ui,sans-serif;background:var(--bg-deep);color:var(--text-1);overflow:hidden;-webkit-font-smoothing:antialiased}
+        body{display:flex;flex-direction:column}
 
-        /* ── TOP BAR ── */
-        .topbar {
-            display: flex; align-items: center; gap: 12px;
-            padding: 8px 16px;
-            background: var(--bg-base);
-            border-bottom: 1px solid var(--border);
-            flex-shrink: 0; z-index: 10;
-        }
-        .topbar-brand {
-            display: flex; align-items: center; gap: 8px;
-            font-family: 'JetBrains Mono', monospace;
-            font-weight: 700; font-size: 14px;
-            color: var(--accent-bright); white-space: nowrap;
-        }
-        .relay-badge {
-            display: flex; align-items: center; gap: 5px;
-            padding: 3px 10px; border-radius: 20px;
-            font-size: 10px; font-weight: 600; cursor: pointer;
-            transition: all .2s; border: 1px solid;
-        }
-        .relay-badge.on { background: var(--green-dim); border-color: rgba(34,197,94,.3); color: var(--green); }
-        .relay-badge.off { background: var(--yellow-dim); border-color: rgba(234,179,8,.3); color: var(--yellow); }
-        .relay-badge:hover { filter: brightness(1.2); }
-
-        .topbar-stats {
-            display: flex; gap: 12px; margin-left: auto;
-            font-family: 'JetBrains Mono', monospace; font-size: 10px;
-        }
-        .topbar-stat { display: flex; align-items: center; gap: 4px; }
-        .topbar-stat .d { width: 6px; height: 6px; border-radius: 50%; }
+        /* ── TOPBAR ── */
+        .topbar{display:flex;align-items:center;gap:10px;padding:7px 12px;background:var(--bg-base);border-bottom:1px solid var(--border);flex-shrink:0;z-index:20}
+        .menu-btn{display:none;width:34px;height:34px;border:1px solid var(--border);border-radius:6px;background:var(--bg-surface);color:var(--text-2);cursor:pointer;font-size:18px;align-items:center;justify-content:center}
+        .topbar-brand{display:flex;align-items:center;gap:7px;font-family:'JetBrains Mono',monospace;font-weight:700;font-size:13px;color:var(--accent-bright);white-space:nowrap}
+        .relay-badge{display:flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-size:9px;font-weight:600;cursor:pointer;border:1px solid;transition:all .2s}
+        .relay-badge.on{background:var(--green-dim);border-color:rgba(34,197,94,.3);color:var(--green)}
+        .relay-badge.off{background:var(--yellow-dim);border-color:rgba(234,179,8,.3);color:var(--yellow)}
+        .topbar-stats{display:flex;gap:10px;margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:10px}
+        .topbar-stat{display:flex;align-items:center;gap:3px}
+        .topbar-stat .d{width:6px;height:6px;border-radius:50%}
 
         /* ── LAYOUT ── */
-        .layout { display: flex; flex: 1; overflow: hidden; }
+        .layout{display:flex;flex:1;overflow:hidden;position:relative}
 
         /* ── SIDEBAR ── */
-        .sidebar {
-            width: 360px; min-width: 280px; max-width: 45vw;
-            display: flex; flex-direction: column;
-            background: var(--bg-base);
-            border-right: 1px solid var(--border);
-        }
-        .input-area { padding: 12px; border-bottom: 1px solid var(--border); }
-        .input-area label {
-            display: block; font-size: 9px; font-weight: 600;
-            text-transform: uppercase; letter-spacing: 1px;
-            color: var(--text-3); margin-bottom: 6px;
-        }
-        textarea {
-            width: 100%; background: var(--bg-surface);
-            border: 1px solid var(--border); border-radius: var(--radius);
-            padding: 10px; color: var(--text-1);
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 11px; line-height: 1.5;
-            resize: vertical; min-height: 80px;
-        }
-        textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
-        textarea::placeholder { color: var(--text-3); }
-        .btn-row { display: flex; gap: 6px; margin-top: 8px; }
+        .sidebar{width:var(--sidebar-w);min-width:280px;max-width:45vw;display:flex;flex-direction:column;background:var(--bg-base);border-right:1px solid var(--border);flex-shrink:0;z-index:15;transition:transform .3s ease}
+        .sidebar-overlay{display:none;position:absolute;inset:0;background:rgba(0,0,0,.5);z-index:14}
+        .input-area{padding:10px;border-bottom:1px solid var(--border)}
+        .input-area label{display:block;font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--text-3);margin-bottom:5px}
+        textarea{width:100%;background:var(--bg-surface);border:1px solid var(--border);border-radius:var(--radius);padding:8px;color:var(--text-1);font-family:'JetBrains Mono',monospace;font-size:10px;line-height:1.5;resize:vertical;min-height:60px}
+        textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-glow)}
+        textarea::placeholder{color:var(--text-3)}
+        .btn-row{display:flex;gap:5px;margin-top:7px;flex-wrap:wrap}
 
         /* ── BUTTONS ── */
-        .btn {
-            display: inline-flex; align-items: center; justify-content: center; gap: 5px;
-            padding: 7px 12px; border: 1px solid transparent;
-            border-radius: 6px; font-family: 'DM Sans', sans-serif;
-            font-size: 11px; font-weight: 600; cursor: pointer;
-            transition: all .15s; white-space: nowrap;
-        }
-        .btn:active { transform: scale(0.97); }
-        .btn:disabled { opacity: .4; pointer-events: none; }
-        .btn-accent { background: var(--accent); color: #fff; }
-        .btn-accent:hover { background: #4f8ff7; }
-        .btn-ghost { background: transparent; color: var(--text-2); border-color: var(--border); }
-        .btn-ghost:hover { border-color: var(--accent); color: var(--text-1); }
-        .btn-green { background: var(--green); color: #000; }
-        .btn-sm { padding: 5px 8px; font-size: 10px; }
-        .btn-fill { flex: 1; }
+        .btn{display:inline-flex;align-items:center;justify-content:center;gap:4px;padding:7px 10px;border:1px solid transparent;border-radius:6px;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:600;cursor:pointer;transition:all .15s;white-space:nowrap}
+        .btn:active{transform:scale(.97)}.btn:disabled{opacity:.4;pointer-events:none}
+        .btn-accent{background:var(--accent);color:#fff}.btn-accent:hover{background:#4f8ff7}
+        .btn-ghost{background:transparent;color:var(--text-2);border-color:var(--border)}.btn-ghost:hover{border-color:var(--accent);color:var(--text-1)}
+        .btn-green{background:var(--green);color:#000}
+        .btn-sm{padding:5px 7px;font-size:10px}.btn-fill{flex:1}
 
         /* ── TOOLBAR ── */
-        .toolbar {
-            display: flex; align-items: center; gap: 6px;
-            padding: 8px 12px; background: var(--bg-surface);
-            border-bottom: 1px solid var(--border); flex-shrink: 0;
-            flex-wrap: wrap;
-        }
-        .toolbar .sep { width: 1px; height: 18px; background: var(--border); }
-        .filter-badge {
-            display: flex; align-items: center; gap: 4px;
-            padding: 3px 8px; border-radius: 4px;
-            font-size: 9px; font-weight: 700; cursor: pointer;
-            border: 1px solid var(--border); color: var(--text-3);
-            transition: all .15s; text-transform: uppercase; letter-spacing: .5px;
-        }
-        .filter-badge.active { border-color: var(--cyan); color: var(--cyan); background: var(--cyan-dim); }
-        .rotate-ind {
-            display: flex; align-items: center; gap: 4px;
-            font-size: 10px; color: var(--text-3); margin-left: auto; cursor: pointer;
-        }
-        .rotate-ind.active { color: var(--green); }
+        .toolbar{display:flex;align-items:center;gap:5px;padding:7px 10px;background:var(--bg-surface);border-bottom:1px solid var(--border);flex-shrink:0;flex-wrap:wrap}
+        .toolbar .sep{width:1px;height:16px;background:var(--border)}
+        .filter-badge{display:flex;align-items:center;gap:3px;padding:2px 7px;border-radius:4px;font-size:8px;font-weight:700;cursor:pointer;border:1px solid var(--border);color:var(--text-3);text-transform:uppercase;letter-spacing:.5px}
+        .filter-badge.active{border-color:var(--cyan);color:var(--cyan);background:var(--cyan-dim)}
+        .rotate-ind{display:flex;align-items:center;gap:3px;font-size:9px;color:var(--text-3);margin-left:auto;cursor:pointer}
+        .rotate-ind.active{color:var(--green)}
 
         /* ── PROXY LIST ── */
-        .proxy-list {
-            flex: 1; overflow-y: auto; padding: 6px;
-            display: flex; flex-direction: column; gap: 3px;
-        }
-        .proxy-list::-webkit-scrollbar { width: 4px; }
-        .proxy-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
-
-        .pcard {
-            display: flex; align-items: center; gap: 8px;
-            padding: 8px 10px; background: var(--bg-surface);
-            border: 1px solid var(--border); border-radius: 6px;
-            cursor: pointer; transition: all .12s; font-size: 11px;
-        }
-        .pcard:hover { border-color: var(--border-light); background: var(--bg-raised); }
-        .pcard.sel { border-color: var(--accent); background: var(--accent-glow); }
-        .pcard.hidden { display: none; }
-        .pcard .pip { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; background: var(--text-3); }
-        .pcard .pip.alive { background: var(--green); box-shadow: 0 0 5px var(--green); }
-        .pcard .pip.dead { background: var(--red); }
-        .pcard .pip.testing { background: var(--yellow); animation: blink .8s infinite; }
-        @keyframes blink { 50% { opacity: .3; } }
-        .pcard .addr {
-            flex: 1; min-width: 0;
-            font-family: 'JetBrains Mono', monospace; font-size: 10px;
-            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-        }
-        .pcard .badge {
-            font-size: 8px; font-weight: 700; text-transform: uppercase;
-            padding: 2px 5px; border-radius: 3px; flex-shrink: 0;
-        }
-        .b-http { background: rgba(59,130,246,.15); color: var(--accent-bright); }
-        .b-https { background: var(--green-dim); color: var(--green); }
-        .b-socks4 { background: var(--yellow-dim); color: var(--yellow); }
-        .b-socks5 { background: var(--purple-dim); color: var(--purple); }
-        .pcard .ms { font-family: 'JetBrains Mono', monospace; font-size: 9px; color: var(--text-3); flex-shrink: 0; }
-        .pcard .port-tag {
-            font-family: 'JetBrains Mono', monospace; font-size: 9px;
-            padding: 1px 4px; border-radius: 3px; flex-shrink: 0;
-        }
-        .port-safe { background: var(--green-dim); color: var(--green); }
-        .port-risky { background: var(--red-dim); color: var(--red); }
-        .pcard .tbtn {
-            padding: 3px 7px; font-size: 9px;
-            background: var(--bg-overlay); color: var(--text-2);
-            border: 1px solid var(--border); border-radius: 3px;
-            cursor: pointer; flex-shrink: 0;
-        }
-        .pcard .tbtn:hover { border-color: var(--accent); color: var(--accent-bright); }
-
-        .empty-state {
-            flex: 1; display: flex; flex-direction: column;
-            align-items: center; justify-content: center;
-            color: var(--text-3); text-align: center; padding: 30px;
-        }
-        .empty-state h3 { font-size: 13px; color: var(--text-2); margin: 10px 0 4px; }
-        .empty-state p { font-size: 11px; line-height: 1.5; max-width: 220px; }
+        .proxy-list{flex:1;overflow-y:auto;padding:5px;display:flex;flex-direction:column;gap:3px}
+        .proxy-list::-webkit-scrollbar{width:4px}.proxy-list::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+        .pcard{display:flex;align-items:center;gap:6px;padding:7px 8px;background:var(--bg-surface);border:1px solid var(--border);border-radius:6px;cursor:pointer;transition:all .12s;font-size:10px}
+        .pcard:hover{border-color:var(--border-light);background:var(--bg-raised)}
+        .pcard.sel{border-color:var(--accent);background:var(--accent-glow)}
+        .pcard.hidden{display:none}
+        .pcard .pip{width:7px;height:7px;border-radius:50%;flex-shrink:0;background:var(--text-3)}
+        .pcard .pip.alive{background:var(--green);box-shadow:0 0 5px var(--green)}
+        .pcard .pip.dead{background:var(--red)}
+        .pcard .pip.testing{background:var(--yellow);animation:blink .8s infinite}
+        @keyframes blink{50%{opacity:.3}}
+        .pcard .addr{flex:1;min-width:0;font-family:'JetBrains Mono',monospace;font-size:9px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+        .pcard .badge{font-size:7px;font-weight:700;text-transform:uppercase;padding:2px 4px;border-radius:3px;flex-shrink:0}
+        .b-http{background:rgba(59,130,246,.15);color:var(--accent-bright)}.b-https{background:var(--green-dim);color:var(--green)}
+        .b-socks4{background:var(--yellow-dim);color:var(--yellow)}.b-socks5{background:var(--purple-dim);color:var(--purple)}
+        .pcard .port-tag{font-family:'JetBrains Mono',monospace;font-size:8px;padding:1px 3px;border-radius:3px;flex-shrink:0}
+        .port-safe{background:var(--green-dim);color:var(--green)}.port-risky{background:var(--red-dim);color:var(--red)}
+        .pcard .ms{font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--text-3);flex-shrink:0}
+        .pcard .tbtn{padding:3px 6px;font-size:8px;background:var(--bg-overlay);color:var(--text-2);border:1px solid var(--border);border-radius:3px;cursor:pointer;flex-shrink:0}
+        .pcard .tbtn:hover{border-color:var(--accent);color:var(--accent-bright)}
+        .empty-state{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--text-3);text-align:center;padding:20px}
+        .empty-state h3{font-size:12px;color:var(--text-2);margin:8px 0 3px}.empty-state p{font-size:10px;line-height:1.4;max-width:200px}
 
         /* ── MAIN PANEL ── */
-        .main-panel { flex: 1; display: flex; flex-direction: column; background: var(--bg-deep); overflow: hidden; }
+        .main-panel{flex:1;display:flex;flex-direction:column;background:var(--bg-deep);overflow:hidden}
+        .main-tabs{display:flex;background:var(--bg-base);border-bottom:1px solid var(--border);flex-shrink:0}
+        .main-tab{padding:8px 16px;font-size:11px;font-weight:600;color:var(--text-3);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s}
+        .main-tab:hover{color:var(--text-2)}.main-tab.active{color:var(--accent-bright);border-bottom-color:var(--accent)}
+        .tab-badge{display:inline-flex;align-items:center;justify-content:center;min-width:14px;height:14px;padding:0 3px;border-radius:7px;font-size:8px;font-weight:700;margin-left:4px;background:var(--accent-glow);color:var(--accent-bright)}
+        .tab-panel{display:none;flex:1;flex-direction:column;overflow:hidden}.tab-panel.active{display:flex}
 
-        /* ── TABS ── */
-        .main-tabs {
-            display: flex; background: var(--bg-base);
-            border-bottom: 1px solid var(--border); flex-shrink: 0;
-        }
-        .main-tab {
-            padding: 10px 20px; font-size: 12px; font-weight: 600;
-            color: var(--text-3); cursor: pointer;
-            border-bottom: 2px solid transparent;
-            transition: all .15s;
-        }
-        .main-tab:hover { color: var(--text-2); }
-        .main-tab.active { color: var(--accent-bright); border-bottom-color: var(--accent); }
-        .tab-badge {
-            display: inline-flex; align-items: center; justify-content: center;
-            min-width: 16px; height: 16px; padding: 0 4px;
-            border-radius: 8px; font-size: 9px; font-weight: 700;
-            margin-left: 6px; background: var(--accent-glow); color: var(--accent-bright);
-        }
+        /* ── BROWSER ── */
+        .browser-bar{display:flex;align-items:center;gap:5px;padding:7px 10px;background:var(--bg-base);border-bottom:1px solid var(--border);flex-shrink:0}
+        .nav-btns{display:flex;gap:2px}
+        .nav-btns button{width:26px;height:26px;display:flex;align-items:center;justify-content:center;background:var(--bg-surface);border:1px solid var(--border);border-radius:5px;color:var(--text-2);cursor:pointer;font-size:12px}
+        .nav-btns button:hover{border-color:var(--accent);color:var(--text-1)}
+        .url-bar{flex:1;display:flex;align-items:center;background:var(--bg-surface);border:1px solid var(--border);border-radius:6px;overflow:hidden;min-width:0}
+        .url-bar:focus-within{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-glow)}
+        .url-bar .lock{padding:0 6px;font-size:10px;color:var(--text-3);flex-shrink:0}
+        .url-bar input{flex:1;border:none;background:transparent;padding:6px 8px 6px 0;color:var(--text-1);font-family:'JetBrains Mono',monospace;font-size:11px;min-width:0}
+        .url-bar input:focus{outline:none}
+        .proxy-tag{display:flex;align-items:center;gap:3px;padding:3px 7px;font-size:8px;font-weight:600;border-radius:4px;white-space:nowrap;flex-shrink:0}
+        .proxy-tag.ok{background:var(--green-dim);color:var(--green)}.proxy-tag.no{background:var(--red-dim);color:var(--red)}
+        .render-area{flex:1;position:relative;overflow:hidden;background:var(--bg-deep)}
+        .render-frame{width:100%;height:100%;border:none;background:#fff}
+        .render-placeholder{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:var(--text-3);padding:20px}
+        .render-placeholder h2{font-size:15px;color:var(--text-2);margin:10px 0 5px}.render-placeholder p{font-size:11px;line-height:1.5;max-width:320px}
+        .render-overlay{position:absolute;inset:0;display:none;align-items:center;justify-content:center;background:rgba(6,8,15,.85);z-index:5}
+        .render-overlay.show{display:flex}
+        .spinner{width:30px;height:30px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite}
+        @keyframes spin{to{transform:rotate(360deg)}}
 
-        .tab-panel { display: none; flex: 1; flex-direction: column; overflow: hidden; }
-        .tab-panel.active { display: flex; }
+        /* ── LOG ── */
+        .log-toolbar{display:flex;align-items:center;gap:5px;padding:7px 10px;background:var(--bg-base);border-bottom:1px solid var(--border);flex-shrink:0;flex-wrap:wrap}
+        .log-filter{padding:2px 7px;border-radius:4px;font-size:8px;font-weight:700;cursor:pointer;border:1px solid var(--border);color:var(--text-3);text-transform:uppercase;letter-spacing:.5px}
+        .log-filter.active{border-color:var(--accent);color:var(--accent-bright);background:var(--accent-glow)}
+        .log-scroll{flex:1;overflow-y:auto;background:var(--bg-deep);font-family:'JetBrains Mono',monospace;font-size:10px;line-height:1.6}
+        .log-scroll::-webkit-scrollbar{width:4px}.log-scroll::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+        .log-entry{display:flex;gap:0;padding:1px 10px;border-bottom:1px solid rgba(30,41,59,.3)}
+        .log-entry:hover{background:rgba(59,130,246,.03)}
+        .log-ts{width:58px;flex-shrink:0;color:var(--text-3);font-size:9px;padding-top:1px}
+        .log-icon{width:18px;flex-shrink:0;text-align:center;font-size:10px}
+        .log-msg{flex:1;word-break:break-word}
+        .log-entry.info .log-msg{color:var(--text-2)}.log-entry.success .log-msg{color:var(--green)}.log-entry.error .log-msg{color:var(--red)}
+        .log-entry.warn .log-msg{color:var(--yellow)}.log-entry.net .log-msg{color:var(--cyan)}.log-entry.proxy .log-msg{color:var(--purple)}.log-entry.nav .log-msg{color:var(--accent-bright)}
+        .log-counter{padding:5px 10px;font-size:9px;color:var(--text-3);background:var(--bg-base);border-top:1px solid var(--border);display:flex;justify-content:space-between;flex-shrink:0}
 
-        /* ── BROWSER TAB ── */
-        .browser-bar {
-            display: flex; align-items: center; gap: 6px;
-            padding: 8px 12px; background: var(--bg-base);
-            border-bottom: 1px solid var(--border); flex-shrink: 0;
-        }
-        .nav-btns { display: flex; gap: 3px; }
-        .nav-btns button {
-            width: 28px; height: 28px;
-            display: flex; align-items: center; justify-content: center;
-            background: var(--bg-surface); border: 1px solid var(--border);
-            border-radius: 5px; color: var(--text-2); cursor: pointer; font-size: 13px;
-        }
-        .nav-btns button:hover { border-color: var(--accent); color: var(--text-1); }
-        .url-bar {
-            flex: 1; display: flex; align-items: center;
-            background: var(--bg-surface); border: 1px solid var(--border);
-            border-radius: 6px; overflow: hidden;
-        }
-        .url-bar:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
-        .url-bar .lock { padding: 0 8px; font-size: 11px; color: var(--text-3); }
-        .url-bar input {
-            flex: 1; border: none; background: transparent;
-            padding: 7px 10px 7px 0; color: var(--text-1);
-            font-family: 'JetBrains Mono', monospace; font-size: 11px;
-        }
-        .url-bar input:focus { outline: none; }
-        .proxy-tag {
-            display: flex; align-items: center; gap: 4px;
-            padding: 3px 8px; font-size: 9px; font-weight: 600;
-            border-radius: 4px; white-space: nowrap; flex-shrink: 0;
-        }
-        .proxy-tag.ok { background: var(--green-dim); color: var(--green); }
-        .proxy-tag.no { background: var(--red-dim); color: var(--red); }
-
-        .render-area { flex: 1; position: relative; overflow: hidden; background: var(--bg-deep); }
-        .render-frame { width: 100%; height: 100%; border: none; background: #fff; }
-        .render-placeholder {
-            position: absolute; inset: 0;
-            display: flex; flex-direction: column;
-            align-items: center; justify-content: center;
-            text-align: center; color: var(--text-3); padding: 30px;
-        }
-        .render-placeholder h2 { font-size: 16px; color: var(--text-2); margin: 12px 0 6px; }
-        .render-placeholder p { font-size: 12px; line-height: 1.6; max-width: 360px; }
-        .render-overlay {
-            position: absolute; inset: 0; display: none;
-            align-items: center; justify-content: center;
-            background: rgba(6, 8, 15, .85); z-index: 5;
-        }
-        .render-overlay.show { display: flex; }
-        .spinner { width: 32px; height: 32px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin .7s linear infinite; }
-        @keyframes spin { to { transform: rotate(360deg); } }
-
-        /* ── LOG TAB (Psiphon-style) ── */
-        .log-panel {
-            flex: 1; display: flex; flex-direction: column; overflow: hidden;
-        }
-        .log-toolbar {
-            display: flex; align-items: center; gap: 6px;
-            padding: 8px 12px; background: var(--bg-base);
-            border-bottom: 1px solid var(--border); flex-shrink: 0;
-        }
-        .log-filter {
-            padding: 3px 8px; border-radius: 4px; font-size: 9px;
-            font-weight: 700; cursor: pointer; border: 1px solid var(--border);
-            color: var(--text-3); text-transform: uppercase; letter-spacing: .5px;
-        }
-        .log-filter.active { border-color: var(--accent); color: var(--accent-bright); background: var(--accent-glow); }
-        .log-scroll {
-            flex: 1; overflow-y: auto; padding: 0;
-            background: var(--bg-deep);
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 11px; line-height: 1.7;
-        }
-        .log-scroll::-webkit-scrollbar { width: 5px; }
-        .log-scroll::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
-
-        .log-entry {
-            display: flex; gap: 0; padding: 2px 12px;
-            border-bottom: 1px solid rgba(30, 41, 59, 0.4);
-            transition: background .1s;
-        }
-        .log-entry:hover { background: rgba(59, 130, 246, 0.04); }
-        .log-ts {
-            width: 70px; flex-shrink: 0; color: var(--text-3);
-            font-size: 10px; padding-top: 1px;
-        }
-        .log-icon { width: 22px; flex-shrink: 0; text-align: center; font-size: 11px; }
-        .log-msg { flex: 1; word-break: break-word; }
-
-        .log-entry.info .log-msg { color: var(--text-2); }
-        .log-entry.success .log-msg { color: var(--green); }
-        .log-entry.error .log-msg { color: var(--red); }
-        .log-entry.warn .log-msg { color: var(--yellow); }
-        .log-entry.net .log-msg { color: var(--cyan); }
-        .log-entry.proxy .log-msg { color: var(--purple); }
-        .log-entry.nav .log-msg { color: var(--accent-bright); }
-
-        .log-counter {
-            padding: 8px 12px; font-size: 10px; color: var(--text-3);
-            background: var(--bg-base); border-top: 1px solid var(--border);
-            display: flex; justify-content: space-between; flex-shrink: 0;
-        }
-
-        /* ── STATUS BAR ── */
-        .statusbar {
-            display: flex; align-items: center; gap: 12px;
-            padding: 5px 12px; background: var(--bg-base);
-            border-top: 1px solid var(--border);
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 9px; color: var(--text-3); flex-shrink: 0;
-        }
-        .statusbar .msg { flex: 1; }
+        /* ── STATUS ── */
+        .statusbar{display:flex;align-items:center;gap:10px;padding:4px 10px;background:var(--bg-base);border-top:1px solid var(--border);font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--text-3);flex-shrink:0}
+        .statusbar .msg{flex:1}
 
         /* ── TOASTS ── */
-        .toast-box { position: fixed; top: 50px; right: 16px; z-index: 100; display: flex; flex-direction: column; gap: 6px; }
-        .toast {
-            padding: 8px 14px; border-radius: 6px; font-size: 11px; font-weight: 500;
-            animation: tIn .25s; backdrop-filter: blur(8px); border: 1px solid;
-        }
-        .toast-info { background: rgba(59,130,246,.12); border-color: rgba(59,130,246,.25); color: var(--accent-bright); }
-        .toast-success { background: var(--green-dim); border-color: rgba(34,197,94,.25); color: var(--green); }
-        .toast-error { background: var(--red-dim); border-color: rgba(239,68,68,.25); color: var(--red); }
-        .toast-warn { background: var(--yellow-dim); border-color: rgba(234,179,8,.25); color: var(--yellow); }
-        @keyframes tIn { from { opacity: 0; transform: translateX(20px); } }
+        .toast-box{position:fixed;top:46px;right:12px;z-index:100;display:flex;flex-direction:column;gap:5px}
+        .toast{padding:7px 12px;border-radius:6px;font-size:10px;font-weight:500;animation:tIn .25s;backdrop-filter:blur(8px);border:1px solid}
+        .toast-info{background:rgba(59,130,246,.12);border-color:rgba(59,130,246,.25);color:var(--accent-bright)}
+        .toast-success{background:var(--green-dim);border-color:rgba(34,197,94,.25);color:var(--green)}
+        .toast-error{background:var(--red-dim);border-color:rgba(239,68,68,.25);color:var(--red)}
+        .toast-warn{background:var(--yellow-dim);border-color:rgba(234,179,8,.25);color:var(--yellow)}
+        @keyframes tIn{from{opacity:0;transform:translateX(16px)}}
 
         /* ── MODALS ── */
-        .modal-bg {
-            position: fixed; inset: 0; background: rgba(0,0,0,.55);
-            z-index: 50; display: none; align-items: center; justify-content: center;
-        }
-        .modal-bg.vis { display: flex; }
-        .modal {
-            background: var(--bg-surface); border: 1px solid var(--border);
-            border-radius: var(--radius-lg); padding: 20px;
-            width: 500px; max-width: 92vw; max-height: 80vh; overflow-y: auto;
-        }
-        .modal h3 { font-size: 14px; margin-bottom: 14px; color: var(--accent-bright); }
-        .modal pre {
-            background: var(--bg-deep); border: 1px solid var(--border);
-            border-radius: 6px; padding: 10px;
-            font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text-2);
-            white-space: pre-wrap; word-break: break-all; max-height: 250px; overflow-y: auto;
-        }
-        .modal .field { margin-bottom: 14px; }
-        .modal .field label { display: block; font-size: 10px; font-weight: 600; color: var(--text-2); margin-bottom: 5px; text-transform: uppercase; letter-spacing: .5px; }
-        .modal .field input {
-            width: 100%; padding: 8px 10px; background: var(--bg-deep);
-            border: 1px solid var(--border); border-radius: 6px; color: var(--text-1);
-            font-family: 'JetBrains Mono', monospace; font-size: 11px;
-        }
-        .modal .field input:focus { outline: none; border-color: var(--accent); }
-        .modal .hint { font-size: 10px; color: var(--text-3); margin-top: 4px; line-height: 1.4; }
-        .modal-footer { margin-top: 16px; display: flex; gap: 6px; justify-content: flex-end; }
-        .setup-steps {
-            background: var(--bg-deep); border: 1px solid var(--border);
-            border-radius: 6px; padding: 12px; margin: 12px 0; font-size: 11px; line-height: 1.8; color: var(--text-2);
-        }
-        .setup-steps .step { display: flex; gap: 8px; padding: 3px 0; }
-        .setup-steps .sn {
-            width: 20px; height: 20px; border-radius: 50%; background: var(--accent-glow);
-            color: var(--accent-bright); display: flex; align-items: center; justify-content: center;
-            font-size: 10px; font-weight: 700; flex-shrink: 0;
-        }
-        .setup-steps code { background: var(--bg-overlay); padding: 1px 5px; border-radius: 3px; font-size: 10px; color: var(--green); }
+        .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:50;display:none;align-items:center;justify-content:center;padding:16px}
+        .modal-bg.vis{display:flex}
+        .modal{background:var(--bg-surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:18px;width:480px;max-width:100%;max-height:80vh;overflow-y:auto}
+        .modal h3{font-size:13px;margin-bottom:12px;color:var(--accent-bright)}
+        .modal pre{background:var(--bg-deep);border:1px solid var(--border);border-radius:6px;padding:8px;font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--text-2);white-space:pre-wrap;word-break:break-all;max-height:200px;overflow-y:auto}
+        .modal .field{margin-bottom:12px}
+        .modal .field label{display:block;font-size:9px;font-weight:600;color:var(--text-2);margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px}
+        .modal .field input{width:100%;padding:7px 9px;background:var(--bg-deep);border:1px solid var(--border);border-radius:6px;color:var(--text-1);font-family:'JetBrains Mono',monospace;font-size:10px}
+        .modal .field input:focus{outline:none;border-color:var(--accent)}
+        .modal .hint{font-size:9px;color:var(--text-3);margin-top:3px;line-height:1.4}
+        .modal-footer{margin-top:14px;display:flex;gap:5px;justify-content:flex-end}
 
-        @media (max-width: 768px) {
-            .layout { flex-direction: column; }
-            .sidebar { width: 100%; max-width: 100%; height: 40%; border-right: none; border-bottom: 1px solid var(--border); }
-            .topbar-stats { display: none; }
+        /* ── MOBILE ── */
+        @media(max-width:768px){
+            .menu-btn{display:flex}
+            .sidebar{position:absolute;top:0;bottom:0;left:0;width:85vw;max-width:340px;transform:translateX(-100%);z-index:16;box-shadow:4px 0 20px rgba(0,0,0,.5)}
+            .sidebar.open{transform:translateX(0)}
+            .sidebar-overlay.open{display:block;z-index:15}
+            .topbar-stats{gap:6px}.topbar-stat{font-size:9px}
+            .browser-bar{flex-wrap:wrap;gap:4px}
+            .url-bar{order:10;flex-basis:100%}
+            .proxy-tag{order:11}
         }
     </style>
 </head>
 <body>
 
-<!-- TOP BAR -->
+<!-- TOPBAR -->
 <div class="topbar">
+    <button class="menu-btn" onclick="toggleSidebar()">☰</button>
     <div class="topbar-brand">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
         TunnelX
     </div>
-    <div class="relay-badge off" id="relayBadge" onclick="showSettings()">
-        <span id="relayLabel">⚙ No Relay</span>
-    </div>
+    <div class="relay-badge off" id="relayBadge" onclick="showSettings()"><span id="relayLabel">⚙ No Relay</span></div>
     <div class="topbar-stats">
         <div class="topbar-stat"><div class="d" style="background:var(--accent)"></div><span id="sT">0</span></div>
         <div class="topbar-stat"><div class="d" style="background:var(--green)"></div><span id="sA">0</span></div>
@@ -422,48 +186,38 @@
 </div>
 
 <div class="layout">
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
     <!-- SIDEBAR -->
-    <div class="sidebar">
+    <div class="sidebar" id="sidebar">
         <div class="input-area">
             <label>Paste proxies (any format)</label>
-            <textarea id="inputBox" placeholder="socks5://1.2.3.4:443&#10;http://5.6.7.8:80&#10;192.168.1.1:443&#10;&#10;Tables, CSV, raw text..."></textarea>
+            <textarea id="inputBox" placeholder="socks5://1.2.3.4:1080&#10;http://5.6.7.8:80&#10;or paste tables, CSV..."></textarea>
             <div class="btn-row">
                 <button class="btn btn-accent btn-fill" onclick="parseInput()">Extract</button>
                 <button class="btn btn-ghost" onclick="importStorage()">↑ Load</button>
                 <button class="btn btn-ghost" onclick="clearAll()">✕</button>
             </div>
         </div>
-
         <div class="toolbar">
-            <button class="btn btn-green btn-sm" onclick="testAll()" id="testAllBtn">▶ Test All</button>
+            <button class="btn btn-green btn-sm" onclick="testAll()" id="testAllBtn">▶ Test</button>
             <button class="btn btn-ghost btn-sm" onclick="stopTests()">■</button>
             <div class="sep"></div>
-            <div class="filter-badge active" id="filterSafe" onclick="toggleFilter()" title="Show only port 80/443 (firewall-safe)">🔒 80/443</div>
+            <div class="filter-badge active" id="filterSafe" onclick="toggleFilter()">🔒 80/443</div>
             <div class="sep"></div>
             <button class="btn btn-ghost btn-sm" onclick="exportAlive()">↓</button>
-            <button class="btn btn-ghost btn-sm" onclick="clearCache();toast('Cache cleared','success')" title="Clear page cache">🗑</button>
-            <div class="rotate-ind" id="rotateInd" onclick="toggleRotate()">
-                <span>⟳</span><span id="rotateLabel">OFF</span>
-            </div>
+            <button class="btn btn-ghost btn-sm" onclick="clearCache();toast('Cache cleared','success')" title="Clear cache">🗑</button>
+            <div class="rotate-ind" id="rotateInd" onclick="toggleRotate()"><span>⟳</span><span id="rotateLabel">OFF</span></div>
         </div>
-
-        <div class="proxy-list" id="proxyList">
-            <div class="empty-state">
-                <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 8v4m0 4h.01"/></svg>
-                <h3>No proxies loaded</h3>
-                <p>Paste a list above and click Extract</p>
-            </div>
-        </div>
+        <div class="proxy-list" id="proxyList"><div class="empty-state"><h3>Loading...</h3></div></div>
     </div>
 
-    <!-- MAIN PANEL -->
+    <!-- MAIN -->
     <div class="main-panel">
         <div class="main-tabs">
             <div class="main-tab active" onclick="switchTab('browser')">🌐 Browser</div>
-            <div class="main-tab" onclick="switchTab('log')">📡 Live Log <span class="tab-badge" id="logBadge">0</span></div>
+            <div class="main-tab" onclick="switchTab('log')">📡 Log <span class="tab-badge" id="logBadge">0</span></div>
         </div>
-
-        <!-- BROWSER TAB -->
         <div class="tab-panel active" id="tab-browser">
             <div class="browser-bar">
                 <div class="nav-btns">
@@ -479,65 +233,46 @@
                 <div class="proxy-tag no" id="proxyTag"><span>No proxy</span></div>
             </div>
             <div class="render-area">
-                <iframe id="renderFrame" class="render-frame" sandbox="allow-scripts allow-forms" style="display:none;"></iframe>
+                <iframe id="renderFrame" class="render-frame" sandbox="allow-scripts allow-forms" style="display:none"></iframe>
                 <div class="render-placeholder" id="renderPlaceholder">
-                    <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" opacity=".25"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" opacity=".25"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
                     <h2>Tunnel Browser</h2>
-                    <p>Configure relay → Extract proxies → Test → Select a working one → Browse</p>
+                    <p>Select a proxy → Test it → Enter a URL → Go</p>
                 </div>
                 <div class="render-overlay" id="loadingOverlay">
                     <div style="text-align:center"><div class="spinner"></div>
-                    <div style="margin-top:10px;font-size:11px;color:var(--text-2)" id="loadMsg">Fetching...</div></div>
+                    <div style="margin-top:8px;font-size:10px;color:var(--text-2)" id="loadMsg">Fetching...</div></div>
                 </div>
             </div>
         </div>
-
-        <!-- LOG TAB -->
         <div class="tab-panel" id="tab-log">
             <div class="log-toolbar">
                 <div class="log-filter active" data-f="all" onclick="setLogFilter('all')">All</div>
-                <div class="log-filter" data-f="net" onclick="setLogFilter('net')">Network</div>
+                <div class="log-filter" data-f="net" onclick="setLogFilter('net')">Net</div>
                 <div class="log-filter" data-f="proxy" onclick="setLogFilter('proxy')">Proxy</div>
-                <div class="log-filter" data-f="nav" onclick="setLogFilter('nav')">Navigation</div>
-                <div class="log-filter" data-f="error" onclick="setLogFilter('error')">Errors</div>
+                <div class="log-filter" data-f="nav" onclick="setLogFilter('nav')">Nav</div>
+                <div class="log-filter" data-f="error" onclick="setLogFilter('error')">Err</div>
                 <div style="flex:1"></div>
                 <button class="btn btn-ghost btn-sm" onclick="copyLogs()">Copy</button>
                 <button class="btn btn-ghost btn-sm" onclick="clearLogs()">Clear</button>
             </div>
             <div class="log-scroll" id="logScroll"></div>
-            <div class="log-counter">
-                <span id="logCount">0 entries</span>
-                <span id="logAutoScroll" style="cursor:pointer" onclick="toggleAutoScroll()">Auto-scroll: ON</span>
-            </div>
+            <div class="log-counter"><span id="logCount">0</span><span id="logAutoScroll" style="cursor:pointer" onclick="toggleAutoScroll()">Auto-scroll: ON</span></div>
         </div>
     </div>
 </div>
 
-<!-- STATUS BAR -->
-<div class="statusbar">
-    <span class="msg" id="statusMsg">Ready</span>
-    <span id="statusProxy">No proxy</span>
-</div>
-
+<div class="statusbar"><span class="msg" id="statusMsg">Ready</span><span id="statusProxy">No proxy</span></div>
 <div class="toast-box" id="toasts"></div>
 
 <!-- SETTINGS MODAL -->
 <div class="modal-bg" id="settingsModal">
     <div class="modal">
         <h3>⚡ Relay Setup</h3>
-        <p style="font-size:11px;color:var(--text-2);line-height:1.5;margin-bottom:12px">
-            Set up a Cloudflare Worker (free) or point to your local Node.js relay.
-        </p>
-        <div class="setup-steps">
-            <div class="step"><span class="sn">1</span> <a href="https://workers.cloudflare.com" target="_blank" style="color:var(--accent-bright)">workers.cloudflare.com</a> → Sign up free</div>
-            <div class="step"><span class="sn">2</span> Create Worker → name it <code>tunnelx-relay</code></div>
-            <div class="step"><span class="sn">3</span> Paste the Worker script → Deploy</div>
-            <div class="step"><span class="sn">4</span> Or run <code>node tunnelx-server.js</code> locally</div>
-        </div>
         <div class="field">
             <label>Relay URL</label>
-            <input type="text" id="relayUrlInput" placeholder="http://localhost:3000 or https://tunnelx-relay.xxx.workers.dev">
-            <div class="hint">Local relay supports SOCKS. Cloudflare Worker supports HTTP/HTTPS proxies only.</div>
+            <input type="text" id="relayUrlInput" placeholder="https://your-relay.onrender.com">
+            <div class="hint">Deploy tunnelx-relay on Render.com (free) or run locally with <code>node tunnelx-server.mjs</code></div>
         </div>
         <div class="modal-footer">
             <button class="btn btn-ghost" onclick="closeModal('settingsModal')">Cancel</button>
@@ -560,6 +295,31 @@
 </div>
 
 <script>
+// ━━━ BUNDLED DEFAULTS ━━━━━━━━━━━━━━━━━━━━━━━━━
+const DEFAULT_RELAY = 'https://tunnelx-relay.khaled-mohamed-rady.workers.dev';
+const DEFAULT_PROXIES = `socks5://94.233.120.194:1080
+socks5://217.173.31.28:1080
+socks5://46.146.220.247:1080
+socks5://195.19.49.8:1080
+socks5://195.19.50.44:1080
+socks5://46.146.210.123:1080
+socks5://195.19.48.215:1080
+socks5://147.45.240.36:1080
+socks5://5.42.103.183:1080
+socks5://109.95.23.146:1080
+http://95.164.1.87:443
+http://95.213.206.11:8008
+http://95.213.206.11:8009
+http://92.242.41.77:443
+http://185.108.4.61:443
+http://81.25.50.12:8481
+http://81.25.50.12:8480
+http://109.70.24.168:443
+http://91.233.223.147:3128
+http://95.213.217.168:52004
+http://46.161.6.165:8080
+http://37.220.84.251:12062`;
+
 // ━━━ STATE ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 let proxies = [];
 let selected = -1;
@@ -567,20 +327,17 @@ let testAbort = null;
 let autoRotate = false;
 let rotateIdx = 0;
 let navHist = [], navPos = -1;
-let filterSafe = true;  // Only show port 80/443
+let filterSafe = true;
+let sidebarOpen = false;
 
-// ━━━ PAGE CACHE (cleared on reload/reconnect) ━━━
-const pageCache = new Map(); // url → { html, timestamp }
-const imageCache = new Map(); // url → blob URL
+const pageCache = new Map();
 const MAX_CACHE = 50;
 
-// ━━━ LOG STATE ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 let logEntries = [];
 let logFilter = 'all';
 let logAutoScroll = true;
 let logCount = 0;
 
-// ━━━ RELAY ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 let relayUrl = ''; try { relayUrl = localStorage.getItem('tunnelx_relay') || ''; } catch(e){}
 let relayOk = false;
 
@@ -588,560 +345,256 @@ const CORS_FB = [
     u => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,
     u => `https://corsproxy.io/?${encodeURIComponent(u)}`,
 ];
-
 const SAFE_PORTS = new Set([80, 443, 8080, 8443]);
 
-// ━━━ PSIPHON-STYLE LOGGING ━━━━━━━━━━━━━━━━━━━━
+// ━━━ SIDEBAR TOGGLE ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function toggleSidebar() {
+    sidebarOpen = !sidebarOpen;
+    document.getElementById('sidebar').classList.toggle('open', sidebarOpen);
+    document.getElementById('sidebarOverlay').classList.toggle('open', sidebarOpen);
+}
+
+// ━━━ LOGGING ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 function xlog(type, msg) {
-    const ts = new Date().toLocaleTimeString('en-GB', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
-    const icons = { info: 'ℹ', success: '✓', error: '✗', warn: '⚠', net: '↔', proxy: '⬡', nav: '→' };
-    const entry = { ts, type, msg, icon: icons[type] || '·' };
-    logEntries.push(entry);
-    logCount++;
-
-    // Update badge
+    const ts = new Date().toLocaleTimeString('en-GB',{hour12:false,hour:'2-digit',minute:'2-digit',second:'2-digit'});
+    const icons = {info:'ℹ',success:'✓',error:'✗',warn:'⚠',net:'↔',proxy:'⬡',nav:'→'};
+    const entry = {ts,type,msg,icon:icons[type]||'·'};
+    logEntries.push(entry); logCount++;
     document.getElementById('logBadge').textContent = logCount;
-
-    // Render to log panel
     const scroll = document.getElementById('logScroll');
     if (logFilter === 'all' || logFilter === type) {
         const div = document.createElement('div');
         div.className = `log-entry ${type}`;
-        div.innerHTML = `<span class="log-ts">${ts}</span><span class="log-icon">${entry.icon}</span><span class="log-msg">${escHtml(msg)}</span>`;
+        div.innerHTML = `<span class="log-ts">${ts}</span><span class="log-icon">${entry.icon}</span><span class="log-msg">${esc(msg)}</span>`;
         scroll.appendChild(div);
-
         if (logAutoScroll) scroll.scrollTop = scroll.scrollHeight;
     }
-
-    // Update counter
-    document.getElementById('logCount').textContent = `${logEntries.length} entries`;
-
-    // Status bar
+    document.getElementById('logCount').textContent = logEntries.length;
     document.getElementById('statusMsg').textContent = msg;
 }
-
-function escHtml(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
-
-function setLogFilter(f) {
-    logFilter = f;
-    document.querySelectorAll('.log-filter').forEach(el => el.classList.toggle('active', el.dataset.f === f));
-    rerenderLog();
-}
-
-function rerenderLog() {
-    const scroll = document.getElementById('logScroll');
-    scroll.innerHTML = '';
-    const filtered = logFilter === 'all' ? logEntries : logEntries.filter(e => e.type === logFilter);
-    filtered.forEach(e => {
-        const div = document.createElement('div');
-        div.className = `log-entry ${e.type}`;
-        div.innerHTML = `<span class="log-ts">${e.ts}</span><span class="log-icon">${e.icon}</span><span class="log-msg">${escHtml(e.msg)}</span>`;
-        scroll.appendChild(div);
-    });
-    if (logAutoScroll) scroll.scrollTop = scroll.scrollHeight;
-}
-
-function toggleAutoScroll() {
-    logAutoScroll = !logAutoScroll;
-    document.getElementById('logAutoScroll').textContent = `Auto-scroll: ${logAutoScroll ? 'ON' : 'OFF'}`;
-}
-
-function copyLogs() {
-    const txt = logEntries.map(e => `[${e.ts}] ${e.icon} ${e.msg}`).join('\n');
-    navigator.clipboard.writeText(txt); toast('Copied', 'success');
-}
-
-function clearLogs() {
-    logEntries = []; logCount = 0;
-    document.getElementById('logScroll').innerHTML = '';
-    document.getElementById('logBadge').textContent = '0';
-    document.getElementById('logCount').textContent = '0 entries';
-}
-
-// ━━━ TOAST ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-function toast(msg, type = 'info') {
-    const el = document.createElement('div');
-    el.className = `toast toast-${type}`;
-    el.textContent = msg;
-    document.getElementById('toasts').appendChild(el);
-    setTimeout(() => el.remove(), 3500);
-}
+function esc(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML}
+function setLogFilter(f){logFilter=f;document.querySelectorAll('.log-filter').forEach(el=>el.classList.toggle('active',el.dataset.f===f));rerenderLog()}
+function rerenderLog(){const s=document.getElementById('logScroll');s.innerHTML='';(logFilter==='all'?logEntries:logEntries.filter(e=>e.type===logFilter)).forEach(e=>{const d=document.createElement('div');d.className=`log-entry ${e.type}`;d.innerHTML=`<span class="log-ts">${e.ts}</span><span class="log-icon">${e.icon}</span><span class="log-msg">${esc(e.msg)}</span>`;s.appendChild(d)});if(logAutoScroll)s.scrollTop=s.scrollHeight}
+function toggleAutoScroll(){logAutoScroll=!logAutoScroll;document.getElementById('logAutoScroll').textContent=`Auto-scroll: ${logAutoScroll?'ON':'OFF'}`}
+function copyLogs(){navigator.clipboard.writeText(logEntries.map(e=>`[${e.ts}] ${e.icon} ${e.msg}`).join('\n'));toast('Copied','success')}
+function clearLogs(){logEntries=[];logCount=0;document.getElementById('logScroll').innerHTML='';document.getElementById('logBadge').textContent='0';document.getElementById('logCount').textContent='0'}
+function toast(m,t='info'){const el=document.createElement('div');el.className=`toast toast-${t}`;el.textContent=m;document.getElementById('toasts').appendChild(el);setTimeout(()=>el.remove(),3000)}
 
 // ━━━ TABS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-function switchTab(name) {
-    document.querySelectorAll('.main-tab').forEach((t, i) => t.classList.toggle('active', (i === 0 && name === 'browser') || (i === 1 && name === 'log')));
-    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-    document.getElementById(`tab-${name}`).classList.add('active');
-    if (name === 'log') { logCount = 0; document.getElementById('logBadge').textContent = '0'; }
-}
+function switchTab(n){document.querySelectorAll('.main-tab').forEach((t,i)=>t.classList.toggle('active',(i===0&&n==='browser')||(i===1&&n==='log')));document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));document.getElementById(`tab-${n}`).classList.add('active');if(n==='log'){logCount=0;document.getElementById('logBadge').textContent='0'}}
 
 // ━━━ RELAY ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-function showSettings() { document.getElementById('relayUrlInput').value = relayUrl; document.getElementById('settingsModal').classList.add('vis'); }
-
-async function saveRelay() {
-    let url = document.getElementById('relayUrlInput').value.trim().replace(/\/+$/, '');
-    if (!url) {
-        relayUrl = ''; relayOk = false;
-        try { localStorage.removeItem('tunnelx_relay'); } catch(e){}
-        updateBadge(); toast('Relay cleared', 'warn');
-        xlog('info', 'Relay disconnected — using CORS fallbacks');
-        closeModal('settingsModal'); return;
-    }
-
-    xlog('net', `Connecting to relay: ${url}`);
-    try {
-        const r = await fetch(`${url}/health`, { cache: 'no-store', mode: 'cors' });
-        const d = await r.json();
-        if (d.status === 'ok') {
-            relayUrl = url; relayOk = true;
-            try { localStorage.setItem('tunnelx_relay', url); } catch(e){}
-            updateBadge(); clearCache();
-            xlog('success', `Relay connected: ${url} (type: ${d.type || 'worker'})`);
-            toast('Relay connected!', 'success');
-            closeModal('settingsModal');
-        } else throw new Error('Bad response');
-    } catch (e) {
-        if (location.protocol === 'file:') {
-            relayUrl = url; relayOk = true;
-            try { localStorage.setItem('tunnelx_relay', url); } catch(e2){}
-            updateBadge();
-            xlog('warn', `Relay saved (file:// mode, CORS check skipped): ${url}`);
-            toast('Relay saved', 'warn'); closeModal('settingsModal');
-        } else {
-            xlog('error', `Relay connection failed: ${e.message}`);
-            toast('Connection failed', 'error');
-        }
-    }
+function showSettings(){document.getElementById('relayUrlInput').value=relayUrl;document.getElementById('settingsModal').classList.add('vis')}
+async function saveRelay(){
+    let url=document.getElementById('relayUrlInput').value.trim().replace(/\/+$/,'');
+    if(!url){relayUrl='';relayOk=false;try{localStorage.removeItem('tunnelx_relay')}catch(e){}updateBadge();toast('Relay cleared','warn');xlog('info','Relay disconnected');closeModal('settingsModal');return}
+    xlog('net',`Connecting: ${url}`);
+    try{const r=await fetch(`${url}/health`,{cache:'no-store',mode:'cors'});const d=await r.json();
+    if(d.status==='ok'){relayUrl=url;relayOk=true;try{localStorage.setItem('tunnelx_relay',url)}catch(e){}updateBadge();clearCache();xlog('success',`Relay connected: ${url} (${d.type||'worker'})`);toast('Connected!','success');closeModal('settingsModal')}
+    else throw new Error('Bad response')}
+    catch(e){if(location.protocol==='file:'){relayUrl=url;relayOk=true;try{localStorage.setItem('tunnelx_relay',url)}catch(e2){}updateBadge();xlog('warn',`Relay saved (file:// mode): ${url}`);toast('Saved','warn');closeModal('settingsModal')}
+    else{xlog('error',`Failed: ${e.message}`);toast('Failed','error')}}
 }
-
-function updateBadge() {
-    const b = document.getElementById('relayBadge');
-    const l = document.getElementById('relayLabel');
-    if (relayOk) { b.className = 'relay-badge on'; l.textContent = '⚡ Relay Active'; }
-    else if (relayUrl) { b.className = 'relay-badge off'; l.textContent = '⚠ Relay Set'; }
-    else { b.className = 'relay-badge off'; l.textContent = '⚙ No Relay'; }
-}
+function updateBadge(){const b=document.getElementById('relayBadge'),l=document.getElementById('relayLabel');if(relayOk){b.className='relay-badge on';l.textContent='⚡ Relay'}else if(relayUrl){b.className='relay-badge off';l.textContent='⚠ Set'}else{b.className='relay-badge off';l.textContent='⚙ Setup'}}
 
 // ━━━ PARSING ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-function parseInput() {
-    const raw = document.getElementById('inputBox').value.trim();
-    if (!raw) { toast('Paste content first', 'warn'); return; }
-
-    const seen = new Set(proxies.map(p => p.address));
-    let added = 0;
-    xlog('info', 'Parsing input...');
-
-    const text = raw.replace(/<[^>]*>/g, ' ');
-    let m;
-
-    // Protocol://host:port
-    const r1 = /\b(socks5|socks4|https?):\/\/([a-zA-Z0-9._-]+):(\d{2,5})\b/gi;
-    while ((m = r1.exec(raw)) !== null) {
-        const addr = `${m[1].toLowerCase()}://${m[2]}:${m[3]}`;
-        if (!seen.has(addr)) { addPx(m[1].toLowerCase(), m[2], m[3], addr); seen.add(addr); added++; }
-    }
-
-    // Bare IP:port
-    const r2 = /\b((?:(?:25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}(?:25[0-5]|2[0-4]\d|[01]?\d\d?)):(\d{2,5})\b/g;
-    while ((m = r2.exec(text)) !== null) {
-        const addr = `http://${m[1]}:${m[2]}`;
-        if (!seen.has(addr)) { addPx('http', m[1], m[2], addr); seen.add(addr); added++; }
-    }
-
-    // Table: IP  Port  Proto
-    const r3 = /\b((?:\d{1,3}\.){3}\d{1,3})\s+(\d{2,5})\s+(SOCKS[45]|HTTPS?)/gi;
-    while ((m = r3.exec(text)) !== null) {
-        const p = m[3].toLowerCase();
-        const addr = `${p}://${m[1]}:${m[2]}`;
-        if (!seen.has(addr)) { addPx(p, m[1], m[2], addr); seen.add(addr); added++; }
-    }
-
-    if (added === 0) { toast('No new proxies found', 'warn'); xlog('warn', 'No proxies extracted'); }
-    else {
-        const safe = proxies.filter(p => SAFE_PORTS.has(p.port)).length;
-        xlog('success', `Extracted ${added} proxies (${safe} on firewall-safe ports 80/443/8080/8443)`);
-        toast(`${added} proxies extracted`, 'success');
-    }
-    render(); saveStorage();
+function parseInput(){
+    const raw=document.getElementById('inputBox').value.trim();if(!raw){toast('Paste content','warn');return}
+    const seen=new Set(proxies.map(p=>p.address));let added=0;xlog('info','Parsing...');
+    const text=raw.replace(/<[^>]*>/g,' ');let m;
+    const r1=/\b(socks5|socks4|https?):\/\/([a-zA-Z0-9._-]+):(\d{2,5})\b/gi;
+    while((m=r1.exec(raw))!==null){const a=`${m[1].toLowerCase()}://${m[2]}:${m[3]}`;if(!seen.has(a)){addPx(m[1].toLowerCase(),m[2],m[3],a);seen.add(a);added++}}
+    const r2=/\b((?:(?:25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}(?:25[0-5]|2[0-4]\d|[01]?\d\d?)):(\d{2,5})\b/g;
+    while((m=r2.exec(text))!==null){const a=`http://${m[1]}:${m[2]}`;if(!seen.has(a)){addPx('http',m[1],m[2],a);seen.add(a);added++}}
+    const r3=/\b((?:\d{1,3}\.){3}\d{1,3})\s+(\d{2,5})\s+(SOCKS[45]|HTTPS?)/gi;
+    while((m=r3.exec(text))!==null){const p=m[3].toLowerCase(),a=`${p}://${m[1]}:${m[2]}`;if(!seen.has(a)){addPx(p,m[1],m[2],a);seen.add(a);added++}}
+    if(!added)toast('No new proxies','warn');else{xlog('success',`Extracted ${added} proxies`);toast(`${added} extracted`,'success')}
+    render();saveStorage();
 }
-
-function addPx(proto, host, port, address) {
-    proxies.push({ protocol: proto, host, port: parseInt(port), address, status: 'untested', latency: null, lastTest: null, fails: 0 });
+function parseProxyText(text){
+    const seen=new Set(proxies.map(p=>p.address));let added=0;let m;
+    const r1=/\b(socks5|socks4|https?):\/\/([a-zA-Z0-9._-]+):(\d{2,5})\b/gi;
+    while((m=r1.exec(text))!==null){const a=`${m[1].toLowerCase()}://${m[2]}:${m[3]}`;if(!seen.has(a)){addPx(m[1].toLowerCase(),m[2],m[3],a);seen.add(a);added++}}
+    const r2=/\b((?:(?:25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}(?:25[0-5]|2[0-4]\d|[01]?\d\d?)):(\d{2,5})\b/g;
+    while((m=r2.exec(text))!==null){const a=`http://${m[1]}:${m[2]}`;if(!seen.has(a)){addPx('http',m[1],m[2],a);seen.add(a);added++}}
+    return added;
 }
+function addPx(proto,host,port,address){proxies.push({protocol:proto,host,port:parseInt(port),address,status:'untested',latency:null,lastTest:null,fails:0,exitIp:null})}
 
-// ━━━ PORT FILTER ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-function toggleFilter() {
-    filterSafe = !filterSafe;
-    document.getElementById('filterSafe').classList.toggle('active', filterSafe);
-    xlog('info', filterSafe ? 'Filter ON — showing only port 80/443/8080/8443' : 'Filter OFF — showing all ports');
-    render();
-}
+// ━━━ FILTER ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function toggleFilter(){filterSafe=!filterSafe;document.getElementById('filterSafe').classList.toggle('active',filterSafe);xlog('info',filterSafe?'Filter: safe ports only':'Filter: all ports');render()}
 
-// ━━━ HEALTH CHECK ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-async function testProxy(idx) {
-    const p = proxies[idx];
-    p.status = 'testing'; p.latency = null;
-    render();
-    xlog('proxy', `Testing ${p.address}...`);
+// ━━━ CACHE ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function clearCache(){pageCache.clear();xlog('info','Cache cleared')}
+function getCacheKey(url,pa){return `${url}|${pa||'direct'}`}
 
-    try {
-        if (relayUrl) {
-            xlog('net', `→ ${relayUrl}/test?host=${p.host}&port=${p.port}&proto=${p.protocol}`);
-            const r = await fetch(`${relayUrl}/test?host=${p.host}&port=${p.port}&proto=${p.protocol}`, { cache: 'no-store' });
-            const d = await r.json();
-            xlog('net', `← Response: status=${d.status} latency=${d.latency}ms http=${d.httpStatus || '-'} ${d.error ? 'err=' + d.error : ''} ${d.detail || ''}`);
-
-            if (d.status === 'alive') {
-                p.status = 'alive'; p.latency = d.latency; p.fails = 0;
-                p.exitIp = d.exitIp || null;
-                xlog('success', `✓ ${p.address} — ALIVE (${d.latency}ms)${d.exitIp ? ' exit-ip: ' + d.exitIp : ''}${d.detail ? ' [' + d.detail + ']' : ''}`);
-            } else throw new Error(d.error || 'Dead');
-        } else {
-            xlog('net', `→ CORS probe to ${p.protocol}://${p.host}:${p.port}/`);
-            const t0 = performance.now();
-            const r = await fetch(CORS_FB[0](`${p.protocol}://${p.host}:${p.port}/`), { cache: 'no-store', signal: AbortSignal.timeout(8000) });
-            const ms = Math.round(performance.now() - t0);
-            xlog('net', `← CORS response: HTTP ${r.status} (${ms}ms)`);
-            p.status = 'alive'; p.latency = ms; p.fails = 0;
-            xlog('success', `✓ ${p.address} — ALIVE (${ms}ms, CORS fallback)`);
-        }
-    } catch (e) {
-        p.status = 'dead'; p.fails++;
-        xlog('error', `✗ ${p.address} — DEAD: ${e.message}`);
-    }
-
-    p.lastTest = new Date();
-    render(); saveStorage();
-}
-
-async function testAll() {
-    const toTest = filterSafe ? proxies.filter(p => SAFE_PORTS.has(p.port)) : proxies;
-    if (toTest.length === 0) { toast('No proxies to test', 'warn'); return; }
-
-    xlog('info', `━━━ Batch test: ${toTest.length} proxies ━━━`);
-    document.getElementById('testAllBtn').disabled = true;
-    testAbort = { stopped: false };
-
-    for (const p of toTest) {
-        if (testAbort.stopped) break;
-        const idx = proxies.indexOf(p);
-        await testProxy(idx);
-        await new Promise(r => setTimeout(r, 80));
-    }
-
-    const alive = toTest.filter(p => p.status === 'alive').length;
-    xlog('info', `━━━ Batch complete: ${alive}/${toTest.length} alive ━━━`);
-    toast(`${alive}/${toTest.length} alive`, alive > 0 ? 'success' : 'error');
-    document.getElementById('testAllBtn').disabled = false;
-}
-
-function stopTests() {
-    if (testAbort) testAbort.stopped = true;
-    xlog('warn', 'Tests stopped by user');
-    document.getElementById('testAllBtn').disabled = false;
-}
-
-// ━━━ CACHE HELPERS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-function clearCache() {
-    // Revoke all blob URLs
-    imageCache.forEach(blobUrl => URL.revokeObjectURL(blobUrl));
-    pageCache.clear();
-    imageCache.clear();
-    xlog('info', 'Cache cleared');
-}
-
-function getCacheKey(url, proxyAddr) {
-    return `${url}|${proxyAddr || 'direct'}`;
-}
-
-// Rewrite resource URLs in HTML to go through relay
-function proxyResources(html, baseUrl, proxyAddr) {
-    if (!relayUrl) return html;
-
-    const base = new URL(baseUrl);
-
-    // Resolve a potentially relative URL against base
-    function resolve(src) {
-        if (!src || src.startsWith('data:') || src.startsWith('blob:') || src.startsWith('javascript:')) return src;
-        try {
-            if (src.startsWith('//')) return base.protocol + src;
-            if (src.startsWith('/')) return `${base.protocol}//${base.host}${src}`;
-            if (!/^https?:\/\//i.test(src)) return `${base.protocol}//${base.host}${base.pathname.replace(/\/[^/]*$/, '/')}${src}`;
-            return src;
-        } catch { return src; }
-    }
-
-    // Build relay URL for a resource
-    function relayFor(src) {
-        const resolved = resolve(src);
-        if (!resolved || resolved.startsWith('data:')) return resolved;
-        const proxyParam = proxyAddr ? `&proxy=${encodeURIComponent(proxyAddr)}` : '';
-        return `${relayUrl}/fetch?url=${encodeURIComponent(resolved)}${proxyParam}`;
-    }
-
-    // Rewrite img src, link href (CSS), script src
-    html = html.replace(/(<img\s[^>]*?src\s*=\s*)(["'])([^"']*?)\2/gi, (m, pre, q, src) => {
-        return `${pre}${q}${relayFor(src)}${q}`;
-    });
-
-    // Rewrite CSS url() references
-    html = html.replace(/url\(\s*(['"]?)([^)'"]+)\1\s*\)/gi, (m, q, src) => {
-        if (src.startsWith('data:')) return m;
-        return `url(${q}${relayFor(src)}${q})`;
-    });
-
-    // Rewrite <link rel="stylesheet" href="...">
-    html = html.replace(/(<link\s[^>]*?href\s*=\s*)(["'])([^"']*?)\2/gi, (m, pre, q, href) => {
-        return `${pre}${q}${relayFor(href)}${q}`;
-    });
-
-    // Rewrite background-image inline styles
-    html = html.replace(/(background(?:-image)?\s*:\s*[^;]*?url\s*\(\s*['"]?)([^)'"]+)(['"]?\s*\))/gi, (m, pre, src, post) => {
-        if (src.startsWith('data:')) return m;
-        return `${pre}${relayFor(src)}${post}`;
-    });
-
+function proxyResources(html,baseUrl,proxyAddr){
+    if(!relayUrl)return html;const base=new URL(baseUrl);
+    function resolve(s){if(!s||s.startsWith('data:')||s.startsWith('blob:')||s.startsWith('javascript:'))return s;try{if(s.startsWith('//'))return base.protocol+s;if(s.startsWith('/'))return `${base.protocol}//${base.host}${s}`;if(!/^https?:\/\//i.test(s))return `${base.protocol}//${base.host}${base.pathname.replace(/\/[^/]*$/,'/')}${s}`;return s}catch{return s}}
+    function rfor(s){const r=resolve(s);if(!r||r.startsWith('data:'))return r;const pp=proxyAddr?`&proxy=${encodeURIComponent(proxyAddr)}`:'';return `${relayUrl}/fetch?url=${encodeURIComponent(r)}${pp}`}
+    html=html.replace(/(<img\s[^>]*?src\s*=\s*)(["'])([^"']*?)\2/gi,(m,pre,q,src)=>`${pre}${q}${rfor(src)}${q}`);
+    html=html.replace(/url\(\s*(['"]?)([^)'"]+)\1\s*\)/gi,(m,q,src)=>src.startsWith('data:')?m:`url(${q}${rfor(src)}${q})`);
+    html=html.replace(/(<link\s[^>]*?href\s*=\s*)(["'])([^"']*?)\2/gi,(m,pre,q,h)=>`${pre}${q}${rfor(h)}${q}`);
     return html;
 }
 
+// ━━━ TEST ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+async function testProxy(idx){
+    const p=proxies[idx];p.status='testing';p.latency=null;render();xlog('proxy',`Testing ${p.address}...`);
+    try{if(relayUrl){
+        xlog('net',`→ ${relayUrl}/test?host=${p.host}&port=${p.port}&proto=${p.protocol}`);
+        const r=await fetch(`${relayUrl}/test?host=${p.host}&port=${p.port}&proto=${p.protocol}`,{cache:'no-store'});const d=await r.json();
+        xlog('net',`← status=${d.status} ${d.latency}ms ${d.detail||''} ${d.error?'err='+d.error:''}`);
+        if(d.status==='alive'){p.status='alive';p.latency=d.latency;p.fails=0;p.exitIp=d.exitIp||null;
+        xlog('success',`✓ ${p.address} ALIVE (${d.latency}ms)${d.exitIp?' exit:'+d.exitIp:''}${d.detail?' ['+d.detail+']':''}`)}
+        else throw new Error(d.error||'Dead')
+    }else{xlog('net',`→ CORS probe ${p.protocol}://${p.host}:${p.port}/`);const t0=performance.now();const r=await fetch(CORS_FB[0](`${p.protocol}://${p.host}:${p.port}/`),{cache:'no-store',signal:AbortSignal.timeout(8000)});const ms=Math.round(performance.now()-t0);
+        p.status='alive';p.latency=ms;p.fails=0;xlog('success',`✓ ${p.address} ALIVE (${ms}ms fallback)`)}}
+    catch(e){p.status='dead';p.fails++;xlog('error',`✗ ${p.address} DEAD: ${e.message}`)}
+    p.lastTest=new Date();render();saveStorage();
+}
+async function testAll(){
+    const toTest=filterSafe?proxies.filter(p=>SAFE_PORTS.has(p.port)):proxies;
+    if(!toTest.length){toast('No proxies','warn');return}
+    xlog('info',`━━ Batch: ${toTest.length} proxies ━━`);document.getElementById('testAllBtn').disabled=true;testAbort={stopped:false};
+    for(const p of toTest){if(testAbort.stopped)break;await testProxy(proxies.indexOf(p));await new Promise(r=>setTimeout(r,80))}
+    const alive=toTest.filter(p=>p.status==='alive').length;xlog('info',`━━ Done: ${alive}/${toTest.length} alive ━━`);
+    toast(`${alive}/${toTest.length} alive`,alive?'success':'error');document.getElementById('testAllBtn').disabled=false;
+}
+function stopTests(){if(testAbort)testAbort.stopped=true;xlog('warn','Stopped');document.getElementById('testAllBtn').disabled=false}
+
 // ━━━ NAVIGATE ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-async function navigate() {
-    let url = document.getElementById('urlInput').value.trim();
-    if (!url) { toast('Enter a URL', 'warn'); return; }
-    if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
-    document.getElementById('urlInput').value = url;
+async function navigate(){
+    let url=document.getElementById('urlInput').value.trim();if(!url){toast('Enter URL','warn');return}
+    if(!/^https?:\/\//i.test(url))url='https://'+url;document.getElementById('urlInput').value=url;
+    const px=selected>=0?proxies[selected]:null;const ck=getCacheKey(url,px?.address);
+    document.getElementById('renderPlaceholder').style.display='none';document.getElementById('loadingOverlay').classList.add('show');
+    document.getElementById('loadMsg').textContent=px?`Via ${px.host}:${px.port}...`:'Fetching...';
+    xlog('nav',`Navigate: ${url}${px?' via '+px.address:''}`);
 
-    const px = selected >= 0 ? proxies[selected] : null;
-    const cacheKey = getCacheKey(url, px?.address);
+    if(pageCache.has(ck)){const c=pageCache.get(ck);const age=Math.round((Date.now()-c.ts)/1000);
+        xlog('success',`⚡ Cache hit (${age}s, ${Math.round(c.html.length/1024)}KB)`);
+        const f=document.getElementById('renderFrame');f.srcdoc=c.html;f.style.display='block';
+        navHist=navHist.slice(0,navPos+1);navHist.push(url);navPos=navHist.length-1;
+        document.getElementById('lockIcon').textContent=url.startsWith('https')?'🔒':'🔓';
+        toast('From cache','success');document.getElementById('loadingOverlay').classList.remove('show');return}
 
-    document.getElementById('renderPlaceholder').style.display = 'none';
-    document.getElementById('loadingOverlay').classList.add('show');
-    document.getElementById('loadMsg').textContent = px ? `Tunneling via ${px.address}...` : 'Fetching...';
+    const methods=[];
+    if(relayUrl){const pp=px?`&proxy=${encodeURIComponent(px.address)}`:'';
+        methods.push({name:px?`relay→${px.host}:${px.port}`:'relay-direct',fn:()=>fetch(`${relayUrl}/fetch?url=${encodeURIComponent(url)}${pp}`,{cache:'no-store'})})}
+    CORS_FB.forEach((f,i)=>methods.push({name:`cors-${i}`,fn:()=>fetch(f(url),{cache:'no-store'})}));
 
-    xlog('nav', `Navigate: ${url}${px ? ' via ' + px.address : ''}`);
+    let html=null,source='';
+    for(const m of methods){try{xlog('net',`→ ${m.name}...`);document.getElementById('loadMsg').textContent=m.name;
+        const r=await m.fn();
+        if(r.status===429){xlog('warn',`← ${m.name}: 429`);continue}
+        if(r.status===530){xlog('warn',`← ${m.name}: 530 geo-block`);continue}
+        if(!r.ok){xlog('warn',`← ${m.name}: HTTP ${r.status}`);continue}
+        const lat=r.headers.get('X-Latency')||'?';html=await r.text();source=m.name;
+        xlog('success',`← ${m.name}: OK (${lat}ms, ${Math.round(html.length/1024)}KB)`);break;
+    }catch(e){xlog('error',`← ${m.name}: ${e.message}`)}}
 
-    // Check cache first
-    if (pageCache.has(cacheKey)) {
-        const cached = pageCache.get(cacheKey);
-        const age = Math.round((Date.now() - cached.timestamp) / 1000);
-        xlog('success', `⚡ Cache hit (${age}s old, ${Math.round(cached.html.length/1024)}KB)`);
+    if(!html){xlog('error',`Failed: ${url}`);toast('Failed','error');
+        if(autoRotate&&proxies.some(p=>p.status==='alive')){rotateProxy();xlog('info','Auto-rotating...')}
+        document.getElementById('loadingOverlay').classList.remove('show');return}
 
-        const frame = document.getElementById('renderFrame');
-        frame.srcdoc = cached.html;
-        frame.style.display = 'block';
+    const base=`<base href="${url}">`;
+    if(html.includes('<head>'))html=html.replace('<head>',`<head>${base}`);
+    else if(html.includes('<html'))html=html.replace(/<html[^>]*>/,`$&<head>${base}</head>`);
+    else html=base+html;
+    xlog('net','Rewriting resource URLs...');html=proxyResources(html,url,px?.address);
 
-        navHist = navHist.slice(0, navPos + 1);
-        navHist.push(url); navPos = navHist.length - 1;
-        document.getElementById('lockIcon').textContent = url.startsWith('https') ? '🔒' : '🔓';
-        toast('Loaded from cache', 'success');
-        document.getElementById('loadingOverlay').classList.remove('show');
-        return;
-    }
+    if(pageCache.size>=MAX_CACHE)pageCache.delete(pageCache.keys().next().value);
+    pageCache.set(ck,{html,ts:Date.now()});
 
-    // Build fetch methods
-    const methods = [];
-    if (relayUrl) {
-        const proxyParam = px ? `&proxy=${encodeURIComponent(px.address)}` : '';
-        methods.push({ name: px ? `relay→${px.host}:${px.port}` : 'relay-direct',
-            fn: () => fetch(`${relayUrl}/fetch?url=${encodeURIComponent(url)}${proxyParam}`, { cache: 'no-store' })
-        });
-    }
-    CORS_FB.forEach((f, i) => methods.push({ name: `cors-${i}`, fn: () => fetch(f(url), { cache: 'no-store' }) }));
-
-    let html = null, source = '';
-
-    for (const m of methods) {
-        try {
-            xlog('net', `→ Trying ${m.name}...`);
-            document.getElementById('loadMsg').textContent = `Trying ${m.name}...`;
-            const r = await m.fn();
-
-            if (r.status === 429) {
-                xlog('warn', `← ${m.name}: HTTP 429 — rate limited by target, skipping`);
-                continue;
-            }
-            if (r.status === 530) {
-                xlog('warn', `← ${m.name}: HTTP 530 — target unreachable from relay (geo-block?), skipping`);
-                continue;
-            }
-            if (!r.ok) {
-                xlog('warn', `← ${m.name}: HTTP ${r.status}`);
-                continue;
-            }
-
-            const latency = r.headers.get('X-Latency') || r.headers.get('x-latency') || '?';
-            html = await r.text();
-            source = m.name;
-            xlog('success', `← ${m.name}: OK (${latency}ms, ${Math.round(html.length/1024)}KB)`);
-            break;
-        } catch (e) {
-            xlog('error', `← ${m.name}: ${e.message}`);
-        }
-    }
-
-    if (!html) {
-        xlog('error', `Navigation failed — all methods exhausted for ${url}`);
-        toast('Failed to load page', 'error');
-        if (autoRotate && proxies.some(p => p.status === 'alive')) { rotateProxy(); xlog('info', 'Auto-rotating to next proxy...'); }
-        document.getElementById('loadingOverlay').classList.remove('show');
-        return;
-    }
-
-    // Inject base tag
-    const base = `<base href="${url}">`;
-    if (html.includes('<head>')) html = html.replace('<head>', `<head>${base}`);
-    else if (html.includes('<html')) html = html.replace(/<html[^>]*>/, `$&<head>${base}</head>`);
-    else html = base + html;
-
-    // Proxy images and resources through relay
-    xlog('net', 'Rewriting resource URLs through relay...');
-    html = proxyResources(html, url, px?.address);
-
-    // Cache the processed page
-    if (pageCache.size >= MAX_CACHE) {
-        const oldest = pageCache.keys().next().value;
-        pageCache.delete(oldest);
-    }
-    pageCache.set(cacheKey, { html, timestamp: Date.now() });
-    xlog('info', `Cached (${pageCache.size}/${MAX_CACHE} pages)`);
-
-    const frame = document.getElementById('renderFrame');
-    frame.srcdoc = html;
-    frame.style.display = 'block';
-
-    navHist = navHist.slice(0, navPos + 1);
-    navHist.push(url); navPos = navHist.length - 1;
-
-    document.getElementById('lockIcon').textContent = url.startsWith('https') ? '🔒' : '🔓';
-    xlog('nav', `✓ Rendered ${url} via ${source} (images proxied)`);
-    toast('Page loaded', 'success');
+    const f=document.getElementById('renderFrame');f.srcdoc=html;f.style.display='block';
+    navHist=navHist.slice(0,navPos+1);navHist.push(url);navPos=navHist.length-1;
+    document.getElementById('lockIcon').textContent=url.startsWith('https')?'🔒':'🔓';
+    xlog('nav',`✓ ${url} via ${source}`);toast('Loaded','success');
     document.getElementById('loadingOverlay').classList.remove('show');
 }
+function navBack(){if(navPos>0){navPos--;document.getElementById('urlInput').value=navHist[navPos];navigate()}}
+function navForward(){if(navPos<navHist.length-1){navPos++;document.getElementById('urlInput').value=navHist[navPos];navigate()}}
+function navReload(){if(navHist.length>0){pageCache.delete(getCacheKey(navHist[navPos],selected>=0?proxies[selected]?.address:null));navigate()}}
 
-function navBack() { if (navPos > 0) { navPos--; document.getElementById('urlInput').value = navHist[navPos]; navigate(); } }
-function navForward() { if (navPos < navHist.length - 1) { navPos++; document.getElementById('urlInput').value = navHist[navPos]; navigate(); } }
-function navReload() { if (navHist.length > 0) navigate(); }
-
-// ━━━ ROTATION ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-function toggleRotate() {
-    autoRotate = !autoRotate;
-    document.getElementById('rotateLabel').textContent = autoRotate ? 'ON' : 'OFF';
-    document.getElementById('rotateInd').classList.toggle('active', autoRotate);
-    xlog('info', `Auto-rotate: ${autoRotate ? 'ON' : 'OFF'}`);
-}
-function rotateProxy() {
-    const alive = proxies.map((p, i) => ({ ...p, idx: i })).filter(p => p.status === 'alive');
-    if (!alive.length) return;
-    rotateIdx = (rotateIdx + 1) % alive.length;
-    selectProxy(alive[rotateIdx].idx);
-}
-
-// ━━━ SELECTION ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-function selectProxy(idx) {
-    if (selected !== idx) clearCache();
-    selected = idx;
-    const p = proxies[idx];
-    const tag = document.getElementById('proxyTag');
-    tag.className = 'proxy-tag ' + (p.status === 'alive' ? 'ok' : 'no');
-    tag.innerHTML = `<span>${p.protocol.toUpperCase()} ${p.host}:${p.port}</span>`;
-    document.getElementById('statusProxy').textContent = `Proxy: ${p.address}`;
-    xlog('proxy', `Selected: ${p.address}`);
-    render();
+// ━━━ ROTATION / SELECT ━━━━━━━━━━━━━━━━━━━━━━━━
+function toggleRotate(){autoRotate=!autoRotate;document.getElementById('rotateLabel').textContent=autoRotate?'ON':'OFF';document.getElementById('rotateInd').classList.toggle('active',autoRotate)}
+function rotateProxy(){const a=proxies.map((p,i)=>({...p,idx:i})).filter(p=>p.status==='alive');if(!a.length)return;rotateIdx=(rotateIdx+1)%a.length;selectProxy(a[rotateIdx].idx)}
+function selectProxy(idx){
+    if(selected!==idx)clearCache();selected=idx;const p=proxies[idx];
+    document.getElementById('proxyTag').className='proxy-tag '+(p.status==='alive'?'ok':'no');
+    document.getElementById('proxyTag').innerHTML=`<span>${p.protocol.toUpperCase()} ${p.host}:${p.port}</span>`;
+    document.getElementById('statusProxy').textContent=p.address;
+    xlog('proxy',`Selected: ${p.address}${p.exitIp?' (exit:'+p.exitIp+')':''}`);render();
+    if(window.innerWidth<=768)toggleSidebar();
 }
 
 // ━━━ RENDER ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-function render() {
-    const list = document.getElementById('proxyList');
-    if (proxies.length === 0) {
-        list.innerHTML = `<div class="empty-state"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 8v4m0 4h.01"/></svg><h3>No proxies loaded</h3><p>Paste a list above and click Extract</p></div>`;
-    } else {
-        list.innerHTML = proxies.map((p, i) => {
-            const sel = i === selected ? ' sel' : '';
-            const pip = p.status === 'alive' ? 'alive' : p.status === 'dead' ? 'dead' : p.status === 'testing' ? 'testing' : '';
-            const ms = p.latency ? `${p.latency}ms` : '';
-            const safe = SAFE_PORTS.has(p.port);
-            const hidden = filterSafe && !safe ? ' hidden' : '';
-            return `<div class="pcard${sel}${hidden}" onclick="selectProxy(${i})">
-                <div class="pip ${pip}"></div>
-                <span class="addr">${p.host}:${p.port}</span>
-                <span class="badge b-${p.protocol}">${p.protocol}</span>
-                <span class="port-tag ${safe ? 'port-safe' : 'port-risky'}">${p.port}</span>
-                <span class="ms">${ms}</span>
-                <button class="tbtn" onclick="event.stopPropagation();testProxy(${i})">Test</button>
-            </div>`;
-        }).join('');
-    }
-
-    const vis = filterSafe ? proxies.filter(p => SAFE_PORTS.has(p.port)) : proxies;
-    document.getElementById('sT').textContent = vis.length;
-    document.getElementById('sA').textContent = vis.filter(p => p.status === 'alive').length;
-    document.getElementById('sD').textContent = vis.filter(p => p.status === 'dead').length;
-    document.getElementById('sP').textContent = vis.filter(p => p.status === 'testing').length;
+function render(){
+    const list=document.getElementById('proxyList');
+    if(!proxies.length){list.innerHTML='<div class="empty-state"><h3>No proxies</h3><p>Paste above or wait for defaults to load</p></div>';return}
+    list.innerHTML=proxies.map((p,i)=>{
+        const sel=i===selected?' sel':'';const pip=p.status==='alive'?'alive':p.status==='dead'?'dead':p.status==='testing'?'testing':'';
+        const safe=SAFE_PORTS.has(p.port);const hidden=filterSafe&&!safe?' hidden':'';
+        return `<div class="pcard${sel}${hidden}" onclick="selectProxy(${i})"><div class="pip ${pip}"></div><span class="addr">${p.host}:${p.port}</span><span class="badge b-${p.protocol}">${p.protocol}</span><span class="port-tag ${safe?'port-safe':'port-risky'}">${p.port}</span><span class="ms">${p.latency?p.latency+'ms':''}</span><button class="tbtn" onclick="event.stopPropagation();testProxy(${i})">Test</button></div>`;
+    }).join('');
+    const vis=filterSafe?proxies.filter(p=>SAFE_PORTS.has(p.port)):proxies;
+    document.getElementById('sT').textContent=vis.length;document.getElementById('sA').textContent=vis.filter(p=>p.status==='alive').length;
+    document.getElementById('sD').textContent=vis.filter(p=>p.status==='dead').length;document.getElementById('sP').textContent=vis.filter(p=>p.status==='testing').length;
 }
 
 // ━━━ STORAGE ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-function saveStorage() { try { localStorage.setItem('tunnelx_px', JSON.stringify(proxies)); } catch(e){} }
-function importStorage() {
-    try {
-        const d = JSON.parse(localStorage.getItem('tunnelx_px') || '[]');
-        if (d.length) {
-            const seen = new Set(proxies.map(p => p.address));
-            let n = 0; d.forEach(p => { if (!seen.has(p.address)) { proxies.push(p); seen.add(p.address); n++; } });
-            toast(`Loaded ${n}`, 'success'); xlog('info', `Loaded ${n} proxies from storage`); render();
-        } else toast('No saved proxies', 'warn');
-    } catch(e) { toast('Load failed', 'error'); }
-}
-
-function clearAll() {
-    proxies = []; selected = -1;
-    document.getElementById('inputBox').value = '';
-    document.getElementById('proxyTag').className = 'proxy-tag no';
-    document.getElementById('proxyTag').innerHTML = '<span>No proxy</span>';
-    document.getElementById('statusProxy').textContent = 'No proxy';
-    render(); saveStorage(); xlog('info', 'Cleared all proxies');
-}
-
-function exportAlive() {
-    const a = proxies.filter(p => p.status === 'alive');
-    if (!a.length) { toast('No alive proxies', 'warn'); return; }
-    document.getElementById('exportContent').textContent = a.map(p => p.address).join('\n');
-    document.getElementById('exportModal').classList.add('vis');
-}
-
-function dlExport() {
-    const b = new Blob([document.getElementById('exportContent').textContent], { type: 'text/plain' });
-    const a = document.createElement('a'); a.href = URL.createObjectURL(b);
-    a.download = `proxies_${new Date().toISOString().slice(0,10)}.txt`; a.click();
-}
-
-function closeModal(id) { document.getElementById(id).classList.remove('vis'); }
+function saveStorage(){try{localStorage.setItem('tunnelx_px',JSON.stringify(proxies))}catch(e){}}
+function importStorage(){try{const d=JSON.parse(localStorage.getItem('tunnelx_px')||'[]');if(d.length){const seen=new Set(proxies.map(p=>p.address));let n=0;d.forEach(p=>{if(!seen.has(p.address)){proxies.push(p);seen.add(p.address);n++}});toast(`Loaded ${n}`,'success');xlog('info',`Loaded ${n} from storage`);render()}else toast('No saved','warn')}catch(e){toast('Failed','error')}}
+function clearAll(){proxies=[];selected=-1;document.getElementById('inputBox').value='';document.getElementById('proxyTag').className='proxy-tag no';document.getElementById('proxyTag').innerHTML='<span>No proxy</span>';document.getElementById('statusProxy').textContent='No proxy';render();saveStorage();clearCache()}
+function exportAlive(){const a=proxies.filter(p=>p.status==='alive');if(!a.length){toast('None alive','warn');return}document.getElementById('exportContent').textContent=a.map(p=>p.address).join('\n');document.getElementById('exportModal').classList.add('vis')}
+function dlExport(){const b=new Blob([document.getElementById('exportContent').textContent],{type:'text/plain'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=`proxies_${new Date().toISOString().slice(0,10)}.txt`;a.click()}
+function closeModal(id){document.getElementById(id).classList.remove('vis')}
 
 // ━━━ INIT ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-(async function() {
-    xlog('info', '═══ TunnelX started ═══');
-    xlog('info', `Session cache: empty (clears each session)`);
-    xlog('info', `Firewall-safe filter: ON (ports ${[...SAFE_PORTS].join(', ')})`);
+(async function(){
+    xlog('info','═══ TunnelX v4 ═══');
+    xlog('info','Session cache: fresh');
+
+    // Load default proxies if none saved
+    let loaded = false;
+    try {
+        const saved = JSON.parse(localStorage.getItem('tunnelx_px') || '[]');
+        if (saved.length > 0) {
+            saved.forEach(p => proxies.push(p));
+            xlog('info', `Loaded ${saved.length} proxies from storage`);
+            loaded = true;
+        }
+    } catch(e) {}
+
+    if (!loaded) {
+        const n = parseProxyText(DEFAULT_PROXIES);
+        xlog('success', `Loaded ${n} bundled Russian proxies`);
+    }
     render();
 
-    if (relayUrl) {
-        xlog('net', `Reconnecting to saved relay: ${relayUrl}`);
-        try {
-            const r = await fetch(`${relayUrl}/health`, { cache: 'no-store' });
-            const d = await r.json();
-            if (d.status === 'ok') {
-                relayOk = true;
-                xlog('success', `Relay reconnected (type: ${d.type || 'worker'})`);
-            }
-        } catch(e) {
-            xlog('warn', `Saved relay unreachable: ${e.message}`);
+    // Auto-load relay
+    if (!relayUrl) {
+        relayUrl = DEFAULT_RELAY;
+        xlog('info', `Auto-setting default relay: ${DEFAULT_RELAY}`);
+    }
+
+    xlog('net', `Connecting relay: ${relayUrl}`);
+    try {
+        const r = await fetch(`${relayUrl}/health`, { cache: 'no-store' });
+        const d = await r.json();
+        if (d.status === 'ok') {
+            relayOk = true;
+            try { localStorage.setItem('tunnelx_relay', relayUrl); } catch(e) {}
+            xlog('success', `Relay connected (${d.type || 'worker'})`);
         }
-    } else {
-        xlog('info', 'No relay configured — click ⚙ badge to set up');
+    } catch(e) {
+        xlog('warn', `Relay unreachable: ${e.message}`);
     }
     updateBadge();
 
-    document.querySelectorAll('.modal-bg').forEach(el => el.addEventListener('click', e => { if (e.target === el) el.classList.remove('vis'); }));
-    document.addEventListener('keydown', e => { if (e.ctrlKey && e.key === 'Enter') navigate(); });
+    document.querySelectorAll('.modal-bg').forEach(el => el.addEventListener('click', e => { if (e.target === el) el.classList.remove('vis') }));
+    document.addEventListener('keydown', e => { if (e.ctrlKey && e.key === 'Enter') navigate() });
 })();
 </script>
 </body>

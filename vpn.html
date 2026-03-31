@@ -441,6 +441,7 @@
             <div class="filter-badge active" id="filterSafe" onclick="toggleFilter()" title="Show only port 80/443 (firewall-safe)">🔒 80/443</div>
             <div class="sep"></div>
             <button class="btn btn-ghost btn-sm" onclick="exportAlive()">↓</button>
+            <button class="btn btn-ghost btn-sm" onclick="clearCache();toast('Cache cleared','success')" title="Clear page cache">🗑</button>
             <div class="rotate-ind" id="rotateInd" onclick="toggleRotate()">
                 <span>⟳</span><span id="rotateLabel">OFF</span>
             </div>
@@ -568,6 +569,11 @@ let rotateIdx = 0;
 let navHist = [], navPos = -1;
 let filterSafe = true;  // Only show port 80/443
 
+// ━━━ PAGE CACHE (cleared on reload/reconnect) ━━━
+const pageCache = new Map(); // url → { html, timestamp }
+const imageCache = new Map(); // url → blob URL
+const MAX_CACHE = 50;
+
 // ━━━ LOG STATE ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 let logEntries = [];
 let logFilter = 'all';
@@ -689,7 +695,7 @@ async function saveRelay() {
         if (d.status === 'ok') {
             relayUrl = url; relayOk = true;
             try { localStorage.setItem('tunnelx_relay', url); } catch(e){}
-            updateBadge();
+            updateBadge(); clearCache();
             xlog('success', `Relay connected: ${url} (type: ${d.type || 'worker'})`);
             toast('Relay connected!', 'success');
             closeModal('settingsModal');
@@ -835,6 +841,69 @@ function stopTests() {
     document.getElementById('testAllBtn').disabled = false;
 }
 
+// ━━━ CACHE HELPERS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function clearCache() {
+    // Revoke all blob URLs
+    imageCache.forEach(blobUrl => URL.revokeObjectURL(blobUrl));
+    pageCache.clear();
+    imageCache.clear();
+    xlog('info', 'Cache cleared');
+}
+
+function getCacheKey(url, proxyAddr) {
+    return `${url}|${proxyAddr || 'direct'}`;
+}
+
+// Rewrite resource URLs in HTML to go through relay
+function proxyResources(html, baseUrl, proxyAddr) {
+    if (!relayUrl) return html;
+
+    const base = new URL(baseUrl);
+
+    // Resolve a potentially relative URL against base
+    function resolve(src) {
+        if (!src || src.startsWith('data:') || src.startsWith('blob:') || src.startsWith('javascript:')) return src;
+        try {
+            if (src.startsWith('//')) return base.protocol + src;
+            if (src.startsWith('/')) return `${base.protocol}//${base.host}${src}`;
+            if (!/^https?:\/\//i.test(src)) return `${base.protocol}//${base.host}${base.pathname.replace(/\/[^/]*$/, '/')}${src}`;
+            return src;
+        } catch { return src; }
+    }
+
+    // Build relay URL for a resource
+    function relayFor(src) {
+        const resolved = resolve(src);
+        if (!resolved || resolved.startsWith('data:')) return resolved;
+        const proxyParam = proxyAddr ? `&proxy=${encodeURIComponent(proxyAddr)}` : '';
+        return `${relayUrl}/fetch?url=${encodeURIComponent(resolved)}${proxyParam}`;
+    }
+
+    // Rewrite img src, link href (CSS), script src
+    html = html.replace(/(<img\s[^>]*?src\s*=\s*)(["'])([^"']*?)\2/gi, (m, pre, q, src) => {
+        return `${pre}${q}${relayFor(src)}${q}`;
+    });
+
+    // Rewrite CSS url() references
+    html = html.replace(/url\(\s*(['"]?)([^)'"]+)\1\s*\)/gi, (m, q, src) => {
+        if (src.startsWith('data:')) return m;
+        return `url(${q}${relayFor(src)}${q})`;
+    });
+
+    // Rewrite <link rel="stylesheet" href="...">
+    html = html.replace(/(<link\s[^>]*?href\s*=\s*)(["'])([^"']*?)\2/gi, (m, pre, q, href) => {
+        return `${pre}${q}${relayFor(href)}${q}`;
+    });
+
+    // Rewrite background-image inline styles
+    html = html.replace(/(background(?:-image)?\s*:\s*[^;]*?url\s*\(\s*['"]?)([^)'"]+)(['"]?\s*\))/gi, (m, pre, src, post) => {
+        if (src.startsWith('data:')) return m;
+        return `${pre}${relayFor(src)}${post}`;
+    });
+
+    return html;
+}
+
 // ━━━ NAVIGATE ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 async function navigate() {
     let url = document.getElementById('urlInput').value.trim();
@@ -843,12 +912,31 @@ async function navigate() {
     document.getElementById('urlInput').value = url;
 
     const px = selected >= 0 ? proxies[selected] : null;
+    const cacheKey = getCacheKey(url, px?.address);
 
     document.getElementById('renderPlaceholder').style.display = 'none';
     document.getElementById('loadingOverlay').classList.add('show');
     document.getElementById('loadMsg').textContent = px ? `Tunneling via ${px.address}...` : 'Fetching...';
 
     xlog('nav', `Navigate: ${url}${px ? ' via ' + px.address : ''}`);
+
+    // Check cache first
+    if (pageCache.has(cacheKey)) {
+        const cached = pageCache.get(cacheKey);
+        const age = Math.round((Date.now() - cached.timestamp) / 1000);
+        xlog('success', `⚡ Cache hit (${age}s old, ${Math.round(cached.html.length/1024)}KB)`);
+
+        const frame = document.getElementById('renderFrame');
+        frame.srcdoc = cached.html;
+        frame.style.display = 'block';
+
+        navHist = navHist.slice(0, navPos + 1);
+        navHist.push(url); navPos = navHist.length - 1;
+        document.getElementById('lockIcon').textContent = url.startsWith('https') ? '🔒' : '🔓';
+        toast('Loaded from cache', 'success');
+        document.getElementById('loadingOverlay').classList.remove('show');
+        return;
+    }
 
     // Build fetch methods
     const methods = [];
@@ -882,7 +970,6 @@ async function navigate() {
             }
 
             const latency = r.headers.get('X-Latency') || r.headers.get('x-latency') || '?';
-            const size = r.headers.get('content-length') || '?';
             html = await r.text();
             source = m.name;
             xlog('success', `← ${m.name}: OK (${latency}ms, ${Math.round(html.length/1024)}KB)`);
@@ -906,6 +993,18 @@ async function navigate() {
     else if (html.includes('<html')) html = html.replace(/<html[^>]*>/, `$&<head>${base}</head>`);
     else html = base + html;
 
+    // Proxy images and resources through relay
+    xlog('net', 'Rewriting resource URLs through relay...');
+    html = proxyResources(html, url, px?.address);
+
+    // Cache the processed page
+    if (pageCache.size >= MAX_CACHE) {
+        const oldest = pageCache.keys().next().value;
+        pageCache.delete(oldest);
+    }
+    pageCache.set(cacheKey, { html, timestamp: Date.now() });
+    xlog('info', `Cached (${pageCache.size}/${MAX_CACHE} pages)`);
+
     const frame = document.getElementById('renderFrame');
     frame.srcdoc = html;
     frame.style.display = 'block';
@@ -914,7 +1013,7 @@ async function navigate() {
     navHist.push(url); navPos = navHist.length - 1;
 
     document.getElementById('lockIcon').textContent = url.startsWith('https') ? '🔒' : '🔓';
-    xlog('nav', `✓ Rendered ${url} via ${source}`);
+    xlog('nav', `✓ Rendered ${url} via ${source} (images proxied)`);
     toast('Page loaded', 'success');
     document.getElementById('loadingOverlay').classList.remove('show');
 }
@@ -939,6 +1038,7 @@ function rotateProxy() {
 
 // ━━━ SELECTION ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 function selectProxy(idx) {
+    if (selected !== idx) clearCache();
     selected = idx;
     const p = proxies[idx];
     const tag = document.getElementById('proxyTag');
@@ -1019,6 +1119,7 @@ function closeModal(id) { document.getElementById(id).classList.remove('vis'); }
 // ━━━ INIT ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 (async function() {
     xlog('info', '═══ TunnelX started ═══');
+    xlog('info', `Session cache: empty (clears each session)`);
     xlog('info', `Firewall-safe filter: ON (ports ${[...SAFE_PORTS].join(', ')})`);
     render();
 

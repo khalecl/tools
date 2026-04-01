@@ -1,235 +1,938 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
-<title>TunnelX</title>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
-<style>
-*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
-:root{--bg:#0a0c10;--bg2:#12151c;--bg3:#181c26;--bg4:#1f2430;--ac:#4d8cf5;--ac2:#6ea1ff;--acg:rgba(77,140,245,.1);--ok:#36d399;--ok-d:rgba(54,211,153,.1);--err:#f87272;--err-d:rgba(248,114,114,.1);--warn:#fbbd23;--warn-d:rgba(251,189,35,.1);--t1:#dfe5f0;--t2:#8b95a8;--t3:#5a6275;--brd:#222938;--r:8px}
-html,body{width:100%;height:100%;font-family:'IBM Plex Sans',system-ui,sans-serif;background:var(--bg);color:var(--t1);overflow:hidden}
-body{display:flex;flex-direction:column}
-.hdr{display:flex;align-items:center;gap:10px;padding:8px 14px;background:var(--bg2);border-bottom:1px solid var(--brd)}
-.hdr-logo{font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:13px;color:var(--ac2);display:flex;align-items:center;gap:6px}
-.hdr-status{margin-left:auto;display:flex;align-items:center;gap:5px;font-size:10px;color:var(--t3)}
-.dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
-.dot.on{background:var(--ok);box-shadow:0 0 5px var(--ok)}.dot.off{background:var(--err)}.dot.wait{background:var(--warn);animation:pls 1s infinite}
-@keyframes pls{50%{opacity:.35}}
-.ctrl{display:flex;align-items:center;gap:6px;padding:8px 14px;background:var(--bg2);border-bottom:1px solid var(--brd);flex-wrap:wrap}
-select{padding:6px 8px;background:var(--bg3);border:1px solid var(--brd);border-radius:var(--r);color:var(--t1);font-size:11px;font-family:inherit;cursor:pointer}
-select:focus{outline:none;border-color:var(--ac)}
-select option{background:var(--bg3)}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:4px;padding:6px 12px;border:none;border-radius:var(--r);font-family:inherit;font-size:10px;font-weight:600;cursor:pointer;transition:all .15s}
-.btn:active{transform:scale(.97)}.btn:disabled{opacity:.3;pointer-events:none}
-.btn-ac{background:var(--ac);color:#fff}.btn-ac:hover{background:var(--ac2)}
-.btn-ghost{background:var(--bg3);color:var(--t2);border:1px solid var(--brd)}.btn-ghost:hover{border-color:var(--ac);color:var(--t1)}
-.pill{padding:2px 7px;border-radius:10px;font-size:8px;font-weight:600;font-family:'IBM Plex Mono',monospace}
-.pill.ok{background:var(--ok-d);color:var(--ok)}.pill.no{background:var(--err-d);color:var(--err)}.pill.wait{background:var(--warn-d);color:var(--warn)}
-.mspin{width:11px;height:11px;border:2px solid var(--brd);border-top-color:var(--ac);border-radius:50%;animation:sp .6s linear infinite;display:none;flex-shrink:0}
-.mspin.show{display:inline-block}
-@keyframes sp{to{transform:rotate(360deg)}}
-.proxy-info{display:flex;align-items:center;gap:5px;margin-left:auto;font-size:9px;color:var(--t3);font-family:'IBM Plex Mono',monospace}
-.adv-toggle{font-size:9px;color:var(--t3);cursor:pointer;user-select:none;display:flex;align-items:center;gap:3px}
-.adv-toggle:hover{color:var(--t2)}
-.adv-panel{max-height:0;overflow:hidden;transition:max-height .3s ease;background:var(--bg3);border-bottom:1px solid var(--brd)}
-.adv-panel.open{max-height:300px}
-.adv-inner{padding:10px 14px;display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end}
-.adv-field{display:flex;flex-direction:column;gap:3px}
-.adv-field label{font-size:8px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--t3)}
-.adv-field input{padding:5px 7px;background:var(--bg);border:1px solid var(--brd);border-radius:5px;color:var(--t1);font-family:'IBM Plex Mono',monospace;font-size:10px;width:200px}
-.adv-field input:focus{outline:none;border-color:var(--ac)}
-.adv-sep{width:1px;height:28px;background:var(--brd);flex-shrink:0}
-.sw{display:flex;align-items:center;gap:5px}
-.sw label{font-size:9px;color:var(--t2);cursor:pointer;user-select:none}
-.tgl{position:relative;width:28px;height:16px;flex-shrink:0}
-.tgl input{opacity:0;width:0;height:0}
-.tgl .sl{position:absolute;inset:0;background:var(--brd);border-radius:8px;cursor:pointer;transition:.2s}
-.tgl .sl::before{content:'';position:absolute;width:12px;height:12px;left:2px;bottom:2px;background:var(--t3);border-radius:50%;transition:.2s}
-.tgl input:checked+.sl{background:var(--ac)}
-.tgl input:checked+.sl::before{transform:translateX(12px);background:#fff}
-.tgl input:disabled+.sl{opacity:.3;cursor:not-allowed}
-.cache-tag{font-size:8px;color:var(--t3);font-family:'IBM Plex Mono',monospace;padding:2px 5px;background:var(--bg);border-radius:3px}
-.url-row{display:flex;align-items:center;gap:5px;padding:7px 14px;background:var(--bg);border-bottom:1px solid var(--brd)}
-.url-row .lock{font-size:10px;color:var(--t3);flex-shrink:0}
-.url-row input{flex:1;padding:7px 8px;background:var(--bg3);border:1px solid var(--brd);border-radius:var(--r);color:var(--t1);font-family:'IBM Plex Mono',monospace;font-size:11px;min-width:0}
-.url-row input:focus{outline:none;border-color:var(--ac);box-shadow:0 0 0 2px var(--acg)}
-.render{flex:1;position:relative;overflow:hidden;background:#0d0f14}
-.render iframe{width:100%;height:100%;border:none;background:#fff}
-.render-ph{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:var(--t3);padding:20px}
-.render-ph h2{font-size:16px;color:var(--t2);margin:10px 0 5px;font-weight:500}
-.render-ph p{font-size:11px;line-height:1.6;max-width:300px}
-.render-ph .steps{margin-top:14px;text-align:left;font-size:10px;line-height:2}
-.render-ph .steps span{color:var(--ac);font-weight:600;margin-right:3px}
-.ld{position:absolute;inset:0;display:none;align-items:center;justify-content:center;background:rgba(10,12,16,.88);z-index:2}
-.ld.show{display:flex}
-.ld-spin{width:26px;height:26px;border:3px solid var(--brd);border-top-color:var(--ac);border-radius:50%;animation:sp .7s linear infinite;margin:0 auto 8px}
-.ld-msg{font-size:10px;color:var(--t2)}
-.ftr{display:flex;align-items:center;gap:8px;padding:4px 14px;background:var(--bg2);border-top:1px solid var(--brd);font-family:'IBM Plex Mono',monospace;font-size:8px;color:var(--t3)}
-.ftr .msg{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.toast-box{position:fixed;top:44px;right:10px;z-index:50;display:flex;flex-direction:column;gap:4px}
-.toast{padding:6px 10px;border-radius:5px;font-size:9px;font-weight:500;animation:tIn .2s;border:1px solid}
-.toast-ok{background:var(--ok-d);border-color:rgba(54,211,153,.2);color:var(--ok)}
-.toast-err{background:var(--err-d);border-color:rgba(248,114,114,.2);color:var(--err)}
-.toast-warn{background:var(--warn-d);border-color:rgba(251,189,35,.2);color:var(--warn)}
-.toast-info{background:var(--acg);border-color:rgba(77,140,245,.15);color:var(--ac2)}
-@keyframes tIn{from{opacity:0;transform:translateY(-6px)}}
-@media(max-width:600px){.ctrl{gap:4px;padding:6px 10px}.ctrl select{flex:1;min-width:0}.proxy-info{margin-left:0;width:100%;margin-top:3px}.url-row{padding:5px 10px}.adv-field input{width:140px}.adv-inner{gap:6px}}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>TunnelX — Proxy Tunnel & Browser</title>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+        :root{
+            --bg-deep:#06080f;--bg-base:#0b0f1a;--bg-surface:#111627;--bg-raised:#171d33;--bg-overlay:#1c2340;
+            --accent:#3b82f6;--accent-bright:#60a5fa;--accent-glow:rgba(59,130,246,.15);--accent-glow-strong:rgba(59,130,246,.3);
+            --green:#22c55e;--green-dim:rgba(34,197,94,.12);--red:#ef4444;--red-dim:rgba(239,68,68,.12);
+            --yellow:#eab308;--yellow-dim:rgba(234,179,8,.12);--purple:#a855f7;--purple-dim:rgba(168,85,247,.12);
+            --cyan:#06b6d4;--cyan-dim:rgba(6,182,212,.12);
+            --text-1:#e8ecf4;--text-2:#94a3b8;--text-3:#64748b;
+            --border:#1e293b;--border-light:#2d3a50;--radius:8px;--radius-lg:12px;
+            --sidebar-w:340px;
+        }
+        html,body{width:100%;height:100%;font-family:'DM Sans',system-ui,sans-serif;background:var(--bg-deep);color:var(--text-1);overflow:hidden;-webkit-font-smoothing:antialiased}
+        body{display:flex;flex-direction:column}
+        /* ── TOPBAR ── */
+        .topbar{display:flex;align-items:center;gap:10px;padding:7px 12px;background:var(--bg-base);border-bottom:1px solid var(--border);flex-shrink:0;z-index:20}
+        .menu-btn{display:none;width:34px;height:34px;border:1px solid var(--border);border-radius:6px;background:var(--bg-surface);color:var(--text-2);cursor:pointer;font-size:18px;align-items:center;justify-content:center}
+        .topbar-brand{display:flex;align-items:center;gap:7px;font-family:'JetBrains Mono',monospace;font-weight:700;font-size:13px;color:var(--accent-bright);white-space:nowrap}
+        .relay-badge{display:flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-size:9px;font-weight:600;cursor:pointer;border:1px solid;transition:all .2s}
+        .relay-badge.on{background:var(--green-dim);border-color:rgba(34,197,94,.3);color:var(--green)}
+        .relay-badge.off{background:var(--yellow-dim);border-color:rgba(234,179,8,.3);color:var(--yellow)}
+        .topbar-stats{display:flex;gap:10px;margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:10px}
+        .topbar-stat{display:flex;align-items:center;gap:3px}
+        .topbar-stat .d{width:6px;height:6px;border-radius:50%}
+        /* ── LAYOUT ── */
+        .layout{display:flex;flex:1;overflow:hidden;position:relative}
+        /* ── SIDEBAR ── */
+        .sidebar{width:var(--sidebar-w);min-width:280px;max-width:45vw;display:flex;flex-direction:column;background:var(--bg-base);border-right:1px solid var(--border);flex-shrink:0;z-index:15;transition:transform .3s ease}
+        .sidebar-overlay{display:none;position:absolute;inset:0;background:rgba(0,0,0,.5);z-index:14}
+        .input-area{padding:10px;border-bottom:1px solid var(--border)}
+        .input-area label{display:block;font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--text-3);margin-bottom:5px}
+        textarea{width:100%;background:var(--bg-surface);border:1px solid var(--border);border-radius:var(--radius);padding:8px;color:var(--text-1);font-family:'JetBrains Mono',monospace;font-size:10px;line-height:1.5;resize:vertical;min-height:60px}
+        textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-glow)}
+        textarea::placeholder{color:var(--text-3)}
+        .btn-row{display:flex;gap:5px;margin-top:7px;flex-wrap:wrap}
+        /* ── BUTTONS ── */
+        .btn{display:inline-flex;align-items:center;justify-content:center;gap:4px;padding:7px 10px;border:1px solid transparent;border-radius:6px;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:600;cursor:pointer;transition:all .15s;white-space:nowrap}
+        .btn:active{transform:scale(.97)}.btn:disabled{opacity:.4;pointer-events:none}
+        .btn-accent{background:var(--accent);color:#fff}.btn-accent:hover{background:#4f8ff7}
+        .btn-ghost{background:transparent;color:var(--text-2);border-color:var(--border)}.btn-ghost:hover{border-color:var(--accent);color:var(--text-1)}
+        .btn-green{background:var(--green);color:#000}
+        .btn-sm{padding:5px 7px;font-size:10px}.btn-fill{flex:1}
+        /* ── TOOLBAR ── */
+        .toolbar{display:flex;align-items:center;gap:5px;padding:7px 10px;background:var(--bg-surface);border-bottom:1px solid var(--border);flex-shrink:0;flex-wrap:wrap}
+        .toolbar .sep{width:1px;height:16px;background:var(--border)}
+        .filter-badge{display:flex;align-items:center;gap:3px;padding:2px 7px;border-radius:4px;font-size:8px;font-weight:700;cursor:pointer;border:1px solid var(--border);color:var(--text-3);text-transform:uppercase;letter-spacing:.5px}
+        .filter-badge.active{border-color:var(--cyan);color:var(--cyan);background:var(--cyan-dim)}
+        .rotate-ind{display:flex;align-items:center;gap:3px;font-size:9px;color:var(--text-3);margin-left:auto;cursor:pointer}
+        .rotate-ind.active{color:var(--green)}
+        /* ── PROXY LIST ── */
+        .proxy-list{flex:1;overflow-y:auto;padding:5px;display:flex;flex-direction:column;gap:3px}
+        .proxy-list::-webkit-scrollbar{width:4px}.proxy-list::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+        .pcard{display:flex;align-items:center;gap:6px;padding:7px 8px;background:var(--bg-surface);border:1px solid var(--border);border-radius:6px;cursor:pointer;transition:all .12s;font-size:10px}
+        .pcard:hover{border-color:var(--border-light);background:var(--bg-raised)}
+        .pcard.sel{border-color:var(--accent);background:var(--accent-glow)}
+        .pcard.hidden{display:none}
+        .pcard .pip{width:7px;height:7px;border-radius:50%;flex-shrink:0;background:var(--text-3)}
+        .pcard .pip.alive{background:var(--green);box-shadow:0 0 5px var(--green)}
+        .pcard .pip.dead{background:var(--red)}
+        .pcard .pip.testing{background:var(--yellow);animation:blink .8s infinite}
+        @keyframes blink{50%{opacity:.3}}
+        .pcard .addr{flex:1;min-width:0;font-family:'JetBrains Mono',monospace;font-size:9px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+        .pcard .badge{font-size:7px;font-weight:700;text-transform:uppercase;padding:2px 4px;border-radius:3px;flex-shrink:0}
+        .b-http{background:rgba(59,130,246,.15);color:var(--accent-bright)}.b-https{background:var(--green-dim);color:var(--green)}
+        .b-socks4{background:var(--yellow-dim);color:var(--yellow)}.b-socks5{background:var(--purple-dim);color:var(--purple)}
+        .pcard .port-tag{font-family:'JetBrains Mono',monospace;font-size:8px;padding:1px 3px;border-radius:3px;flex-shrink:0}
+        .port-safe{background:var(--green-dim);color:var(--green)}.port-risky{background:var(--red-dim);color:var(--red)}
+        .pcard .ms{font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--text-3);flex-shrink:0}
+        .pcard .tbtn{padding:3px 6px;font-size:8px;background:var(--bg-overlay);color:var(--text-2);border:1px solid var(--border);border-radius:3px;cursor:pointer;flex-shrink:0}
+        .pcard .tbtn:hover{border-color:var(--accent);color:var(--accent-bright)}
+        /* ── COUNTRY BAR ── */
+        .country-bar{display:flex;align-items:center;gap:5px;padding:7px 10px;background:var(--bg-raised);border-bottom:1px solid var(--border);flex-shrink:0}
+        .country-bar label{font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text-3);white-space:nowrap}
+        .country-select{flex:1;min-width:0;padding:5px 6px;background:var(--bg-deep);border:1px solid var(--border);border-radius:5px;color:var(--text-1);font-family:'JetBrains Mono',monospace;font-size:10px;appearance:auto;cursor:pointer}
+        .country-select:focus{outline:none;border-color:var(--accent)}
+        .country-select option{background:var(--bg-deep);color:var(--text-1)}
+        .load-spinner{width:14px;height:14px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .6s linear infinite;display:none;flex-shrink:0}
+        .load-spinner.show{display:block}
+        .country-bar .load-spinner.active{display:block}
+        .empty-state{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--text-3);text-align:center;padding:20px}
+        .empty-state h3{font-size:12px;color:var(--text-2);margin:8px 0 3px}.empty-state p{font-size:10px;line-height:1.4;max-width:200px}
+        /* ── MAIN PANEL ── */
+        .main-panel{flex:1;display:flex;flex-direction:column;background:var(--bg-deep);overflow:hidden}
+        .main-tabs{display:flex;background:var(--bg-base);border-bottom:1px solid var(--border);flex-shrink:0}
+        .main-tab{padding:8px 16px;font-size:11px;font-weight:600;color:var(--text-3);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s}
+        .main-tab:hover{color:var(--text-2)}.main-tab.active{color:var(--accent-bright);border-bottom-color:var(--accent)}
+        .tab-badge{display:inline-flex;align-items:center;justify-content:center;min-width:14px;height:14px;padding:0 3px;border-radius:7px;font-size:8px;font-weight:700;margin-left:4px;background:var(--accent-glow);color:var(--accent-bright)}
+        .tab-panel{display:none;flex:1;flex-direction:column;overflow:hidden}.tab-panel.active{display:flex}
+        /* ── BROWSER ── */
+        .browser-bar{display:flex;align-items:center;gap:5px;padding:7px 10px;background:var(--bg-base);border-bottom:1px solid var(--border);flex-shrink:0}
+        .nav-btns{display:flex;gap:2px}
+        .nav-btns button{width:26px;height:26px;display:flex;align-items:center;justify-content:center;background:var(--bg-surface);border:1px solid var(--border);border-radius:5px;color:var(--text-2);cursor:pointer;font-size:12px}
+        .nav-btns button:hover{border-color:var(--accent);color:var(--text-1)}
+        .url-bar{flex:1;display:flex;align-items:center;background:var(--bg-surface);border:1px solid var(--border);border-radius:6px;overflow:hidden;min-width:0}
+        .url-bar:focus-within{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-glow)}
+        .url-bar .lock{padding:0 6px;font-size:10px;color:var(--text-3);flex-shrink:0}
+        .url-bar input{flex:1;border:none;background:transparent;padding:6px 8px 6px 0;color:var(--text-1);font-family:'JetBrains Mono',monospace;font-size:11px;min-width:0}
+        .url-bar input:focus{outline:none}
+        .proxy-tag{display:flex;align-items:center;gap:3px;padding:3px 7px;font-size:8px;font-weight:600;border-radius:4px;white-space:nowrap;flex-shrink:0}
+        .proxy-tag.ok{background:var(--green-dim);color:var(--green)}.proxy-tag.no{background:var(--red-dim);color:var(--red)}
+        .render-area{flex:1;position:relative;overflow:hidden;background:var(--bg-deep)}
+        .render-frame{width:100%;height:100%;border:none;background:#fff}
+        .render-placeholder{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:var(--text-3);padding:20px}
+        .render-placeholder h2{font-size:15px;color:var(--text-2);margin:10px 0 5px}.render-placeholder p{font-size:11px;line-height:1.5;max-width:320px}
+        .render-overlay{position:absolute;inset:0;display:none;align-items:center;justify-content:center;background:rgba(6,8,15,.85);z-index:5}
+        .render-overlay.show{display:flex}
+        .spinner{width:30px;height:30px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite}
+        @keyframes spin{to{transform:rotate(360deg)}}
+        /* ── LOG ── */
+        .log-toolbar{display:flex;align-items:center;gap:5px;padding:7px 10px;background:var(--bg-base);border-bottom:1px solid var(--border);flex-shrink:0;flex-wrap:wrap}
+        .log-filter{padding:2px 7px;border-radius:4px;font-size:8px;font-weight:700;cursor:pointer;border:1px solid var(--border);color:var(--text-3);text-transform:uppercase;letter-spacing:.5px}
+        .log-filter.active{border-color:var(--accent);color:var(--accent-bright);background:var(--accent-glow)}
+        .log-scroll{flex:1;overflow-y:auto;background:var(--bg-deep);font-family:'JetBrains Mono',monospace;font-size:10px;line-height:1.6}
+        .log-scroll::-webkit-scrollbar{width:4px}.log-scroll::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+        .log-entry{display:flex;gap:0;padding:1px 10px;border-bottom:1px solid rgba(30,41,59,.3)}
+        .log-entry:hover{background:rgba(59,130,246,.03)}
+        .log-ts{width:58px;flex-shrink:0;color:var(--text-3);font-size:9px;padding-top:1px}
+        .log-icon{width:18px;flex-shrink:0;text-align:center;font-size:10px}
+        .log-msg{flex:1;word-break:break-word}
+        .log-entry.info .log-msg{color:var(--text-2)}.log-entry.success .log-msg{color:var(--green)}.log-entry.error .log-msg{color:var(--red)}
+        .log-entry.warn .log-msg{color:var(--yellow)}.log-entry.net .log-msg{color:var(--cyan)}.log-entry.proxy .log-msg{color:var(--purple)}.log-entry.nav .log-msg{color:var(--accent-bright)}
+        .log-counter{padding:5px 10px;font-size:9px;color:var(--text-3);background:var(--bg-base);border-top:1px solid var(--border);display:flex;justify-content:space-between;flex-shrink:0}
+        /* ── STATUS ── */
+        .statusbar{display:flex;align-items:center;gap:10px;padding:4px 10px;background:var(--bg-base);border-top:1px solid var(--border);font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--text-3);flex-shrink:0}
+        .statusbar .msg{flex:1}
+        /* ── TOASTS ── */
+        .toast-box{position:fixed;top:46px;right:12px;z-index:100;display:flex;flex-direction:column;gap:5px}
+        .toast{padding:7px 12px;border-radius:6px;font-size:10px;font-weight:500;animation:tIn .25s;backdrop-filter:blur(8px);border:1px solid}
+        .toast-info{background:rgba(59,130,246,.12);border-color:rgba(59,130,246,.25);color:var(--accent-bright)}
+        .toast-success{background:var(--green-dim);border-color:rgba(34,197,94,.25);color:var(--green)}
+        .toast-error{background:var(--red-dim);border-color:rgba(239,68,68,.25);color:var(--red)}
+        .toast-warn{background:var(--yellow-dim);border-color:rgba(234,179,8,.25);color:var(--yellow)}
+        @keyframes tIn{from{opacity:0;transform:translateX(16px)}}
+        /* ── MODALS ── */
+        .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:50;display:none;align-items:center;justify-content:center;padding:16px}
+        .modal-bg.vis{display:flex}
+        .modal{background:var(--bg-surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:18px;width:480px;max-width:100%;max-height:80vh;overflow-y:auto}
+        .modal h3{font-size:13px;margin-bottom:12px;color:var(--accent-bright)}
+        .modal pre{background:var(--bg-deep);border:1px solid var(--border);border-radius:6px;padding:8px;font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--text-2);white-space:pre-wrap;word-break:break-all;max-height:200px;overflow-y:auto}
+        .modal .field{margin-bottom:12px}
+        .modal .field label{display:block;font-size:9px;font-weight:600;color:var(--text-2);margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px}
+        .modal .field input{width:100%;padding:7px 9px;background:var(--bg-deep);border:1px solid var(--border);border-radius:6px;color:var(--text-1);font-family:'JetBrains Mono',monospace;font-size:10px}
+        .modal .field input:focus{outline:none;border-color:var(--accent)}
+        .modal .hint{font-size:9px;color:var(--text-3);margin-top:3px;line-height:1.4}
+        .modal-footer{margin-top:14px;display:flex;gap:5px;justify-content:flex-end}
+        /* ── SETTINGS STRIP ── */
+        .settings-strip{display:flex;align-items:center;gap:10px;padding:5px 12px;background:var(--bg-surface);border-bottom:1px solid var(--border);flex-shrink:0;flex-wrap:wrap;font-size:10px}
+        .setting{display:flex;align-items:center;gap:5px;color:var(--text-2)}
+        .setting label{cursor:pointer;user-select:none;font-size:9px;font-weight:600;letter-spacing:.3px}
+        .toggle{position:relative;width:32px;height:18px;flex-shrink:0}
+        .toggle input{opacity:0;width:0;height:0}
+        .toggle .slider{position:absolute;inset:0;background:var(--border);border-radius:9px;cursor:pointer;transition:.2s}
+        .toggle .slider::before{content:'';position:absolute;width:14px;height:14px;left:2px;bottom:2px;background:var(--text-3);border-radius:50%;transition:.2s}
+        .toggle input:checked+.slider{background:var(--accent)}
+        .toggle input:checked+.slider::before{transform:translateX(14px);background:#fff}
+        .settings-sep{width:1px;height:14px;background:var(--border)}
+        .cache-count{font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--text-3);padding:2px 6px;background:var(--bg-deep);border-radius:3px}
+        /* ── MOBILE ── */
+        @media(max-width:768px){
+            .menu-btn{display:flex}
+            .sidebar{position:absolute;top:0;bottom:0;left:0;width:85vw;max-width:340px;transform:translateX(-100%);z-index:16;box-shadow:4px 0 20px rgba(0,0,0,.5)}
+            .sidebar.open{transform:translateX(0)}
+            .sidebar-overlay.open{display:block;z-index:15}
+            .topbar-stats{gap:6px}.topbar-stat{font-size:9px}
+            .browser-bar{flex-wrap:wrap;gap:4px}
+            .url-bar{order:10;flex-basis:100%}
+            .proxy-tag{order:11}
+        }
+    </style>
 </head>
 <body>
-<div class="hdr">
-<div class="hdr-logo"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>TunnelX</div>
-<div class="hdr-status"><div class="dot off" id="sDot"></div><span id="sTxt">Not connected</span></div>
+<!-- TOPBAR -->
+<div class="topbar">
+    <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+    <div class="topbar-brand">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        TunnelX
+    </div>
+    <div class="relay-badge off" id="relayBadge" onclick="showSettings()"><span id="relayLabel">⚙ No Relay</span></div>
+    <div class="topbar-stats">
+        <div class="topbar-stat"><div class="d" style="background:var(--accent)"></div><span id="sT">0</span></div>
+        <div class="topbar-stat"><div class="d" style="background:var(--green)"></div><span id="sA">0</span></div>
+        <div class="topbar-stat"><div class="d" style="background:var(--red)"></div><span id="sD">0</span></div>
+        <div class="topbar-stat"><div class="d" style="background:var(--yellow)"></div><span id="sP">0</span></div>
+    </div>
 </div>
-<div class="ctrl">
-<select id="cSel"><option value="">Choose country...</option></select>
-<button class="btn btn-ac" onclick="go()" id="goBtn">Connect</button>
-<div class="mspin" id="goSpin"></div>
-<div class="adv-toggle" onclick="toggleAdv()"><span id="advArrow">&#9656;</span> Advanced</div>
-<div class="proxy-info"><div class="pill no" id="pPill">No proxy</div><span class="cache-tag" id="cacheTag">0 cached</span></div>
+<div class="layout">
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+    <!-- SIDEBAR -->
+    <div class="sidebar" id="sidebar">
+        <div class="input-area">
+            <label>Paste proxies (any format)</label>
+            <textarea id="inputBox" placeholder="socks5://1.2.3.4:1080&#10;http://5.6.7.8:80&#10;or paste tables, CSV..."></textarea>
+            <div class="btn-row">
+                <button class="btn btn-accent btn-fill" onclick="parseInput()">Extract</button>
+                <button class="btn btn-ghost" onclick="importStorage()">↑ Load</button>
+                <button class="btn btn-ghost" onclick="clearAll()">✕</button>
+            </div>
+        </div>
+        <div class="country-bar">
+            <label>🌍</label>
+            <select class="country-select" id="countrySelect">
+                <option value="">Load by country...</option>
+            </select>
+            <button class="btn btn-accent btn-sm" onclick="loadCountryProxies()" id="countryLoadBtn">Load</button>
+            <div class="load-spinner" id="countrySpinner"></div>
+        </div>
+        <div class="toolbar">
+            <button class="btn btn-green btn-sm" onclick="testAll()" id="testAllBtn">▶ Test</button>
+            <button class="btn btn-ghost btn-sm" onclick="stopTests()">■</button>
+            <div class="sep"></div>
+            <div class="filter-badge active" id="filterSafe" onclick="toggleFilter()">🔒 80/443</div>
+            <div class="sep"></div>
+            <button class="btn btn-ghost btn-sm" onclick="exportAlive()">↓</button>
+            <button class="btn btn-ghost btn-sm" onclick="clearCache();toast('Cache cleared','success')" title="Clear cache">🗑</button>
+            <div class="rotate-ind" id="rotateInd" onclick="toggleRotate()"><span>⟳</span><span id="rotateLabel">OFF</span></div>
+        </div>
+        <div class="proxy-list" id="proxyList"><div class="empty-state"><h3>Loading...</h3></div></div>
+    </div>
+    <!-- MAIN -->
+    <div class="main-panel">
+        <div class="main-tabs">
+            <div class="main-tab active" onclick="switchTab('browser')">🌐 Browser</div>
+            <div class="main-tab" onclick="switchTab('log')">📡 Log <span class="tab-badge" id="logBadge">0</span></div>
+        </div>
+        <div class="tab-panel active" id="tab-browser">
+            <div class="browser-bar">
+                <div class="nav-btns">
+                    <button onclick="navBack()">←</button>
+                    <button onclick="navForward()">→</button>
+                    <button onclick="navReload()">↻</button>
+                </div>
+                <div class="url-bar">
+                    <span class="lock" id="lockIcon">🔓</span>
+                    <input type="text" id="urlInput" placeholder="Enter URL..." onkeydown="if(event.key==='Enter')navigate()">
+                </div>
+                <button class="btn btn-accent btn-sm" onclick="navigate()">Go</button>
+                <div class="proxy-tag no" id="proxyTag"><span>No proxy</span></div>
+            </div>
+            <div class="settings-strip">
+                <div class="setting">
+                    <div class="toggle"><input type="checkbox" id="optImages" checked onchange="onSettingChange()"><span class="slider"></span></div>
+                    <label for="optImages">🖼 Images</label>
+                </div>
+                <div class="setting">
+                    <div class="toggle"><input type="checkbox" id="optCSS" checked onchange="onSettingChange()"><span class="slider"></span></div>
+                    <label for="optCSS">🎨 CSS</label>
+                </div>
+                <div class="setting">
+                    <div class="toggle"><input type="checkbox" id="optVideos" onchange="onSettingChange()"><span class="slider"></span></div>
+                    <label for="optVideos">🎬 Video</label>
+                </div>
+                <div class="settings-sep"></div>
+                <div class="setting">
+                    <div class="toggle"><input type="checkbox" id="optCache" checked onchange="onSettingChange()"><span class="slider"></span></div>
+                    <label for="optCache">💾 Cache</label>
+                </div>
+                <span class="cache-count" id="cacheCount">0 pages</span>
+                <div class="settings-sep"></div>
+                <button class="btn btn-ghost btn-sm" onclick="clearCache();updateCacheCount();toast('Cache cleared','success')">🗑 Clear</button>
+            </div>
+            <div class="render-area">
+                <iframe id="renderFrame" class="render-frame" sandbox="allow-scripts allow-forms" style="display:none"></iframe>
+                <div class="render-placeholder" id="renderPlaceholder">
+                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" opacity=".25"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+                    <h2>Tunnel Browser</h2>
+                    <p>Select a proxy → Test it → Enter a URL → Go</p>
+                </div>
+                <div class="render-overlay" id="loadingOverlay">
+                    <div style="text-align:center"><div class="spinner"></div>
+                    <div style="margin-top:8px;font-size:10px;color:var(--text-2)" id="loadMsg">Fetching...</div></div>
+                </div>
+            </div>
+        </div>
+        <div class="tab-panel" id="tab-log">
+            <div class="log-toolbar">
+                <div class="log-filter active" data-f="all" onclick="setLogFilter('all')">All</div>
+                <div class="log-filter" data-f="net" onclick="setLogFilter('net')">Net</div>
+                <div class="log-filter" data-f="proxy" onclick="setLogFilter('proxy')">Proxy</div>
+                <div class="log-filter" data-f="nav" onclick="setLogFilter('nav')">Nav</div>
+                <div class="log-filter" data-f="error" onclick="setLogFilter('error')">Err</div>
+                <div style="flex:1"></div>
+                <button class="btn btn-ghost btn-sm" onclick="copyLogs()">Copy</button>
+                <button class="btn btn-ghost btn-sm" onclick="clearLogs()">Clear</button>
+            </div>
+            <div class="log-scroll" id="logScroll"></div>
+            <div class="log-counter"><span id="logCount">0</span><span id="logAutoScroll" style="cursor:pointer" onclick="toggleAutoScroll()">Auto-scroll: ON</span></div>
+        </div>
+    </div>
 </div>
-<div class="adv-panel" id="advPanel">
-<div class="adv-inner">
-<div class="adv-field"><label>Custom Proxy</label><input type="text" id="customProxy" placeholder="socks5://1.2.3.4:1080"></div>
-<div class="adv-field"><label>Custom Relay</label><input type="text" id="customRelay" placeholder="https://your-relay.onrender.com"></div>
-<button class="btn btn-ghost" onclick="applyCustom()" style="align-self:flex-end">Apply</button>
-<div class="adv-sep"></div>
-<div class="sw"><div class="tgl"><input type="checkbox" id="optImg" checked onchange="saveOpts()"><span class="sl"></span></div><label for="optImg">&#x1F5BC; Images</label></div>
-<div class="sw"><div class="tgl"><input type="checkbox" id="optCss" checked onchange="saveOpts()"><span class="sl"></span></div><label for="optCss">&#x1F3A8; CSS</label></div>
-<div class="sw"><div class="tgl"><input type="checkbox" id="optVid" disabled onchange="saveOpts()"><span class="sl"></span></div><label for="optVid" style="opacity:.4" id="vidLabel">&#x1F3AC; Video (custom relay only)</label></div>
-<div class="adv-sep"></div>
-<button class="btn btn-ghost" onclick="clearPgCache();toast('Cache cleared','ok')">&#x1F5D1; Clear Cache</button>
-</div>
-</div>
-<div class="url-row">
-<span class="lock" id="lockIcon">&#x1F513;</span>
-<input type="text" id="urlInput" placeholder="Enter URL and press Enter..." onkeydown="if(event.key==='Enter')navigate()">
-<button class="btn btn-ac" onclick="navigate()">Go</button>
-</div>
-<div class="render">
-<iframe id="frame" sandbox="allow-scripts allow-forms" style="display:none"></iframe>
-<div class="render-ph" id="ph">
-<svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" opacity=".2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-<h2>Browse through tunnel</h2>
-<p>Choose a country, connect, then enter any URL.</p>
-<div class="steps"><span>1</span> Select a country<br><span>2</span> Click Connect<br><span>3</span> Enter URL and go</div>
-</div>
-<div class="ld" id="ld"><div><div class="ld-spin"></div><div class="ld-msg" id="ldMsg">Loading...</div></div></div>
-</div>
-<div class="ftr"><span class="msg" id="fMsg">Ready</span></div>
+<div class="statusbar"><span class="msg" id="statusMsg">Ready</span><span id="statusProxy">No proxy</span></div>
 <div class="toast-box" id="toasts"></div>
+<!-- SETTINGS MODAL -->
+<div class="modal-bg" id="settingsModal">
+    <div class="modal">
+        <h3>⚡ Relay Setup</h3>
+        <div class="field">
+            <label>Relay URL</label>
+            <input type="text" id="relayUrlInput" placeholder="https://your-relay.onrender.com">
+            <div class="hint">Deploy tunnelx-relay on Render.com (free) or run locally with <code>node tunnelx-server.mjs</code></div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-ghost" onclick="closeModal('settingsModal')">Cancel</button>
+            <button class="btn btn-accent" onclick="saveRelay()">Connect</button>
+        </div>
+    </div>
+</div>
+<!-- EXPORT MODAL -->
+<div class="modal-bg" id="exportModal">
+    <div class="modal">
+        <h3>Export Working Proxies</h3>
+        <pre id="exportContent"></pre>
+        <div class="modal-footer">
+            <button class="btn btn-ghost btn-sm" onclick="navigator.clipboard.writeText(document.getElementById('exportContent').textContent);toast('Copied','success')">Copy</button>
+            <button class="btn btn-ghost btn-sm" onclick="dlExport()">Download</button>
+            <button class="btn btn-accent btn-sm" onclick="closeModal('exportModal')">Close</button>
+        </div>
+    </div>
+</div>
 <script>
-var DEFAULT_RELAY='https://tunnelx-relay.onrender.com';
-var PROXIFLY='https://cdn.jsdelivr.net/gh/proxifly/free-proxy-list@main/proxies/countries';
-var CORS_FB=function(u){return'https://api.allorigins.win/raw?url='+encodeURIComponent(u)};
-var BATCH=10;
-var CC=[['RU','\u{1F1F7}\u{1F1FA} Russia'],['US','\u{1F1FA}\u{1F1F8} USA'],['DE','\u{1F1E9}\u{1F1EA} Germany'],['GB','\u{1F1EC}\u{1F1E7} UK'],['FR','\u{1F1EB}\u{1F1F7} France'],['NL','\u{1F1F3}\u{1F1F1} Netherlands'],['CA','\u{1F1E8}\u{1F1E6} Canada'],['BR','\u{1F1E7}\u{1F1F7} Brazil'],['IN','\u{1F1EE}\u{1F1F3} India'],['JP','\u{1F1EF}\u{1F1F5} Japan'],['KR','\u{1F1F0}\u{1F1F7} S. Korea'],['CN','\u{1F1E8}\u{1F1F3} China'],['AU','\u{1F1E6}\u{1F1FA} Australia'],['IT','\u{1F1EE}\u{1F1F9} Italy'],['ES','\u{1F1EA}\u{1F1F8} Spain'],['PL','\u{1F1F5}\u{1F1F1} Poland'],['UA','\u{1F1FA}\u{1F1E6} Ukraine'],['TR','\u{1F1F9}\u{1F1F7} Turkey'],['ID','\u{1F1EE}\u{1F1E9} Indonesia'],['TH','\u{1F1F9}\u{1F1ED} Thailand'],['VN','\u{1F1FB}\u{1F1F3} Vietnam'],['MX','\u{1F1F2}\u{1F1FD} Mexico'],['AR','\u{1F1E6}\u{1F1F7} Argentina'],['EG','\u{1F1EA}\u{1F1EC} Egypt'],['SA','\u{1F1F8}\u{1F1E6} Saudi Arabia'],['AE','\u{1F1E6}\u{1F1EA} UAE'],['ZA','\u{1F1FF}\u{1F1E6} South Africa'],['SG','\u{1F1F8}\u{1F1EC} Singapore'],['HK','\u{1F1ED}\u{1F1F0} Hong Kong'],['TW','\u{1F1F9}\u{1F1FC} Taiwan'],['PH','\u{1F1F5}\u{1F1ED} Philippines'],['MY','\u{1F1F2}\u{1F1FE} Malaysia'],['IR','\u{1F1EE}\u{1F1F7} Iran'],['KZ','\u{1F1F0}\u{1F1FF} Kazakhstan'],['BY','\u{1F1E7}\u{1F1FE} Belarus'],['CZ','\u{1F1E8}\u{1F1FF} Czechia'],['RO','\u{1F1F7}\u{1F1F4} Romania'],['SE','\u{1F1F8}\u{1F1EA} Sweden'],['NO','\u{1F1F3}\u{1F1F4} Norway'],['FI','\u{1F1EB}\u{1F1EE} Finland'],['CH','\u{1F1E8}\u{1F1ED} Switzerland'],['AT','\u{1F1E6}\u{1F1F9} Austria'],['BE','\u{1F1E7}\u{1F1EA} Belgium'],['PT','\u{1F1F5}\u{1F1F9} Portugal'],['GR','\u{1F1EC}\u{1F1F7} Greece'],['BD','\u{1F1E7}\u{1F1E9} Bangladesh'],['PK','\u{1F1F5}\u{1F1F0} Pakistan'],['CL','\u{1F1E8}\u{1F1F1} Chile'],['CO','\u{1F1E8}\u{1F1F4} Colombia'],['NG','\u{1F1F3}\u{1F1EC} Nigeria']];
-var relay=DEFAULT_RELAY,activeProxy=null,aliveProxies=[],allProxies=[],bgAbort=null,pgCache=new Map(),optImg=true,optCss=true,optVid=false,isCustomRelay=false,curCountry='';
-var $=function(id){return document.getElementById(id)};
-function setDot(s,t){$('sDot').className='dot '+s;$('sTxt').textContent=t}
-function ft(m){$('fMsg').textContent=m}
-function setPill(s,t){var p=$('pPill');p.className='pill '+s;p.textContent=t}
-function toast(m,t){var e=document.createElement('div');e.className='toast toast-'+(t||'info');e.textContent=m;$('toasts').appendChild(e);setTimeout(function(){e.remove()},3000)}
-function showLd(m){$('ldMsg').textContent=m;$('ld').classList.add('show')}
-function hideLd(){$('ld').classList.remove('show')}
-function updC(){$('cacheTag').textContent=pgCache.size+' cached'}
-function toggleAdv(){var p=$('advPanel');p.classList.toggle('open');$('advArrow').innerHTML=p.classList.contains('open')?'&#9662;':'&#9656;'}
-function applyCustom(){
-    var cp=$('customProxy').value.trim(),cr=$('customRelay').value.trim();
-    if(cr){relay=cr.replace(/\/+$/,'');isCustomRelay=true;$('optVid').disabled=false;$('vidLabel').style.opacity='1';toast('Custom relay set','ok');ft('Relay: '+relay)}
-    if(cp){var m=cp.match(/^(socks[45]?|https?):\/\/([^:]+):(\d+)$/i);
-        if(m){clearPgCache();activeProxy={protocol:m[1].toLowerCase(),host:m[2],port:parseInt(m[3]),address:cp,latency:null};aliveProxies=[activeProxy];
-            setDot('on','Custom proxy');setPill('ok',activeProxy.protocol.toUpperCase()+' '+activeProxy.host+':'+activeProxy.port);toast('Custom proxy set','ok')}
-        else toast('Invalid format: protocol://host:port','err')}
+// ━━━ BUNDLED DEFAULTS ━━━━━━━━━━━━━━━━━━━━━━━━━
+const DEFAULT_RELAY = 'https://tunnelx-relay.khaled-mohamed-rady.workers.dev';
+const DEFAULT_PROXIES = `socks5://94.233.120.194:1080
+socks5://217.173.31.28:1080
+socks5://46.146.220.247:1080
+socks5://195.19.49.8:1080
+socks5://195.19.50.44:1080
+socks5://46.146.210.123:1080
+socks5://195.19.48.215:1080
+socks5://147.45.240.36:1080
+socks5://5.42.103.183:1080
+socks5://109.95.23.146:1080
+http://95.164.1.87:443
+http://95.213.206.11:8008
+http://95.213.206.11:8009
+http://92.242.41.77:443
+http://185.108.4.61:443
+http://81.25.50.12:8481
+http://81.25.50.12:8480
+http://109.70.24.168:443
+http://91.233.223.147:3128
+http://95.213.217.168:52004
+http://46.161.6.165:8080
+http://37.220.84.251:12062`;
+// ━━━ STATE ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+let proxies = [];
+let selected = -1;
+let testAbort = null;
+let autoRotate = false;
+let rotateIdx = 0;
+let navHist = [], navPos = -1;
+let filterSafe = true;
+let sidebarOpen = false;
+const pageCache = new Map();
+const MAX_CACHE = 50;
+let logEntries = [];
+let logFilter = 'all';
+let logAutoScroll = true;
+let logCount = 0;
+let relayUrl = ''; try { relayUrl = localStorage.getItem('tunnelx_relay') || ''; } catch(e){}
+let relayOk = false;
+const CORS_FB = [
+    u => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,
+    u => `https://corsproxy.io/?${encodeURIComponent(u)}`,
+];
+const SAFE_PORTS = new Set([80, 443, 8080, 8443]);
+// ━━━ COUNTRY CODES (MERGED & UNIFIED) ━━━━━━━━━━━━━━━━━━━
+const PROXIFLY_CDN = 'https://cdn.jsdelivr.net/gh/proxifly/free-proxy-list@main/proxies/countries';
+const COUNTRIES = [
+    {code:'AF',name:'Afghanistan'},{code:'AL',name:'Albania'},{code:'DZ',name:'Algeria'},{code:'AO',name:'Angola'},
+    {code:'AR',name:'Argentina'},{code:'AM',name:'Armenia'},{code:'AU',name:'Australia'},{code:'AT',name:'Austria'},
+    {code:'AZ',name:'Azerbaijan'},{code:'BD',name:'Bangladesh'},{code:'BY',name:'Belarus'},{code:'BE',name:'Belgium'},
+    {code:'BO',name:'Bolivia'},{code:'BA',name:'Bosnia'},{code:'BR',name:'Brazil'},{code:'BG',name:'Bulgaria'},
+    {code:'KH',name:'Cambodia'},{code:'CM',name:'Cameroon'},{code:'CA',name:'Canada'},{code:'CL',name:'Chile'},
+    {code:'CN',name:'China'},{code:'CO',name:'Colombia'},{code:'CR',name:'Costa Rica'},{code:'HR',name:'Croatia'},
+    {code:'CY',name:'Cyprus'},{code:'CZ',name:'Czechia'},{code:'DK',name:'Denmark'},{code:'DO',name:'Dominican Rep.'},
+    {code:'EC',name:'Ecuador'},{code:'EG',name:'Egypt'},{code:'SV',name:'El Salvador'},{code:'EE',name:'Estonia'},
+    {code:'ET',name:'Ethiopia'},{code:'FI',name:'Finland'},{code:'FR',name:'France'},{code:'GE',name:'Georgia'},
+    {code:'DE',name:'Germany'},{code:'GH',name:'Ghana'},{code:'GR',name:'Greece'},{code:'GT',name:'Guatemala'},
+    {code:'HN',name:'Honduras'},{code:'HK',name:'Hong Kong'},{code:'HU',name:'Hungary'},{code:'IN',name:'India'},
+    {code:'ID',name:'Indonesia'},{code:'IR',name:'Iran'},{code:'IQ',name:'Iraq'},{code:'IE',name:'Ireland'},
+    {code:'IL',name:'Israel'},{code:'IT',name:'Italy'},{code:'JP',name:'Japan'},{code:'JO',name:'Jordan'},
+    {code:'KZ',name:'Kazakhstan'},{code:'KE',name:'Kenya'},{code:'KR',name:'South Korea'},{code:'KW',name:'Kuwait'},
+    {code:'KG',name:'Kyrgyzstan'},{code:'LA',name:'Laos'},{code:'LV',name:'Latvia'},{code:'LB',name:'Lebanon'},
+    {code:'LT',name:'Lithuania'},{code:'LU',name:'Luxembourg'},{code:'MG',name:'Madagascar'},{code:'MY',name:'Malaysia'},
+    {code:'MX',name:'Mexico'},{code:'MD',name:'Moldova'},{code:'MN',name:'Mongolia'},{code:'MA',name:'Morocco'},
+    {code:'MZ',name:'Mozambique'},{code:'MM',name:'Myanmar'},{code:'NP',name:'Nepal'},{code:'NL',name:'Netherlands'},
+    {code:'NZ',name:'New Zealand'},{code:'NI',name:'Nicaragua'},{code:'NG',name:'Nigeria'},{code:'NO',name:'Norway'},
+    {code:'OM',name:'Oman'},{code:'PK',name:'Pakistan'},{code:'PA',name:'Panama'},{code:'PY',name:'Paraguay'},
+    {code:'PE',name:'Peru'},{code:'PH',name:'Philippines'},{code:'PL',name:'Poland'},{code:'PT',name:'Portugal'},
+    {code:'QA',name:'Qatar'},{code:'RO',name:'Romania'},{code:'RU',name:'Russia'},{code:'SA',name:'Saudi Arabia'},
+    {code:'RS',name:'Serbia'},{code:'SG',name:'Singapore'},{code:'SK',name:'Slovakia'},{code:'SI',name:'Slovenia'},
+    {code:'ZA',name:'South Africa'},{code:'ES',name:'Spain'},{code:'LK',name:'Sri Lanka'},{code:'SE',name:'Sweden'},
+    {code:'CH',name:'Switzerland'},{code:'TW',name:'Taiwan'},{code:'TJ',name:'Tajikistan'},{code:'TZ',name:'Tanzania'},
+    {code:'TH',name:'Thailand'},{code:'TR',name:'Turkey'},{code:'UA',name:'Ukraine'},{code:'AE',name:'UAE'},
+    {code:'GB',name:'United Kingdom'},{code:'US',name:'United States'},{code:'UY',name:'Uruguay'},
+    {code:'UZ',name:'Uzbekistan'},{code:'VE',name:'Venezuela'},{code:'VN',name:'Vietnam'},{code:'ZM',name:'Zambia'},
+];
+// ━━━ COUNTRY DROPDOWN INIT ━━━━━━━━━━━━━━━━━━━
+function initCountrySelect() {
+    const sel = document.getElementById('countrySelect');
+    sel.innerHTML = '<option value="">Select country...</option>';
+    COUNTRIES.forEach(c => {
+        const opt = document.createElement('option');
+        opt.value = c.code;
+        opt.textContent = `${c.name} (${c.code})`;
+        sel.appendChild(opt);
+    });
+    // Default to Russia
+    sel.value = 'RU';
 }
-function saveOpts(){optImg=$('optImg').checked;optCss=$('optCss').checked;optVid=$('optVid').checked}
-function clearPgCache(){pgCache.clear();updC()}
-function stopBg(){if(bgAbort)bgAbort.stopped=true}
-
-async function go(){
-    var code=$('cSel').value;if(!code){toast('Pick a country','warn');return}
-    if(code!==curCountry){clearPgCache();stopBg()}
-    curCountry=code;
-    var name=(CC.find(function(c){return c[0]===code})||['','?'])[1];
-    $('goBtn').disabled=true;$('goSpin').classList.add('show');
-    setDot('wait','Connecting to '+name+'...');setPill('wait','Searching...');ft('Fetching proxies...');
-    activeProxy=null;aliveProxies=[];
-    try{
-        var resp=await fetch(PROXIFLY+'/'+code+'/data.json');
-        if(!resp.ok)throw new Error(resp.status===404?'No proxies for '+name:'HTTP '+resp.status);
-        var data=await resp.json();if(!data.length)throw new Error('Empty list');
-        allProxies=data.map(function(e){var pr=(e.protocol||'http').toLowerCase();return{protocol:pr,host:e.ip,port:e.port,address:pr+'://'+e.ip+':'+e.port,latency:null,status:'untested',exitIp:null}}).filter(function(p){return p.host&&p.port});
-        ft('Found '+allProxies.length+' proxies \u2014 finding first working...');
-        var hooked=false;
-        for(var i=0;i<Math.min(allProxies.length,30);i+=3){
-            var batch=allProxies.slice(i,i+3);
-            await Promise.allSettled(batch.map(async function(p){
-                try{var r=await fetch(relay+'/test?host='+p.host+'&port='+p.port+'&proto='+p.protocol,{cache:'no-store'});
-                    var d=await r.json();p.latency=d.latency;p.status=d.status;p.exitIp=d.exitIp;
-                    if(d.status==='alive'){aliveProxies.push(p);
-                        if(!hooked){hooked=true;activeProxy=p;setDot('on','Connected via '+name);
-                            setPill('ok',p.protocol.toUpperCase()+' '+p.host+':'+p.port+' ('+p.latency+'ms)');
-                            ft('Connected! Testing more in background...');toast('Connected to '+name+'!','ok')}}}
-                catch(e){p.status='dead'}}));
-            if(hooked)break}
-        if(!hooked)throw new Error('No working proxies in first 30');
-        $('goBtn').disabled=false;$('goSpin').classList.remove('show');
-        startBg(allProxies.filter(function(p){return p.status==='untested'}),name);
-    }catch(e){setDot('off','Failed');setPill('no','No proxy');ft(e.message);toast(e.message,'err');activeProxy=null;$('goBtn').disabled=false;$('goSpin').classList.remove('show')}
+// ━━━ LOAD COUNTRY PROXIES ━━━━━━━━━━━━━━━━━━━━
+async function loadCountryProxies() {
+    const code = document.getElementById('countrySelect').value;
+    if (!code) { toast('Select a country', 'warn'); return; }
+    const country = COUNTRIES.find(c => c.code === code);
+    const name = country ? country.name : code;
+    document.getElementById('countryLoadBtn').disabled = true;
+    document.getElementById('countrySpinner').classList.add('active');
+    xlog('info', `Loading proxies for ${name} (${code})...`);
+    try {
+        const url = `${PROXIFLY_CDN}/${code}/data.json`;
+        xlog('net', `Fetching ${url}`);
+        const resp = await fetch(url, { cache: 'no-store' });
+        if (!resp.ok) throw new Error(`HTTP ${resp.status} — no proxies found for ${code}`);
+        const data = await resp.json();
+        if (!Array.isArray(data) || data.length === 0) {
+            throw new Error(`Empty list for ${code}`);
+        }
+        // Reset proxy list
+        proxies = [];
+        selected = -1;
+        clearCache();
+        // Parse the JSON format: [{protocol, ip, port, ...}]
+        let added = 0;
+        const seen = new Set();
+        data.forEach(p => {
+            const proto = (p.protocol || 'http').toLowerCase();
+            const ip = p.ip;
+            const port = p.port;
+            if (!ip || !port) return;
+            const addr = `${proto}://${ip}:${port}`;
+            if (!seen.has(addr)) {
+                seen.add(addr);
+                proxies.push({
+                    protocol: proto, host: ip, port: parseInt(port), address: addr,
+                    status: 'untested', latency: null, lastTest: null, fails: 0, exitIp: null
+                });
+                added++;
+            }
+        });
+        const safeCount = proxies.filter(p => SAFE_PORTS.has(p.port)).length;
+        xlog('success', `Loaded ${added} proxies for ${name} (${safeCount} on safe ports)`);
+        toast(`${added} proxies from ${name}`, 'success');
+        render();
+        saveStorage();
+    } catch (e) {
+        xlog('error', `Failed to load ${name}: ${e.message}`);
+        toast(`Failed: ${e.message}`, 'error');
+    }
+    document.getElementById('countryLoadBtn').disabled = false;
+    document.getElementById('countrySpinner').classList.remove('active');
 }
-
-async function startBg(rem,cn){
-    bgAbort={stopped:false};var tested=0;
-    for(var i=0;i<rem.length;i+=BATCH){if(bgAbort.stopped)return;
-        var batch=rem.slice(i,i+BATCH);
-        await Promise.allSettled(batch.map(async function(p){if(bgAbort.stopped)return;
-            try{var r=await fetch(relay+'/test?host='+p.host+'&port='+p.port+'&proto='+p.protocol,{cache:'no-store'});
-                var d=await r.json();p.latency=d.latency;p.status=d.status;p.exitIp=d.exitIp;if(d.status==='alive')aliveProxies.push(p)}
-            catch(e){p.status='dead'}tested++}));
-        aliveProxies.sort(function(a,b){return(a.latency||99999)-(b.latency||99999)});
-        if(aliveProxies[0]&&aliveProxies[0]!==activeProxy){activeProxy=aliveProxies[0];setPill('ok',activeProxy.protocol.toUpperCase()+' '+activeProxy.host+':'+activeProxy.port+' ('+activeProxy.latency+'ms)')}
-        ft(aliveProxies.length+' alive / '+(tested+30)+' tested')}
-    ft('Done \u2014 '+aliveProxies.length+' proxies for '+cn)}
-
+// ━━━ USER SETTINGS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+let optImages = true;
+let optCSS = true;
+let optVideos = false;
+let optCache = true;
+function onSettingChange() {
+    optImages = document.getElementById('optImages').checked;
+    optCSS = document.getElementById('optCSS').checked;
+    optVideos = document.getElementById('optVideos').checked;
+    const newCache = document.getElementById('optCache').checked;
+    if (optCache && !newCache) { clearCache(); updateCacheCount(); }
+    optCache = newCache;
+    xlog('info', `Settings: images=${optImages} css=${optCSS} video=${optVideos} cache=${optCache}`);
+}
+function updateCacheCount() {
+    document.getElementById('cacheCount').textContent = `${pageCache.size} pages`;
+}
+// ━━━ SIDEBAR TOGGLE ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function toggleSidebar() {
+    sidebarOpen = !sidebarOpen;
+    document.getElementById('sidebar').classList.toggle('open', sidebarOpen);
+    document.getElementById('sidebarOverlay').classList.toggle('open', sidebarOpen);
+}
+// ━━━ LOGGING ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function xlog(type, msg) {
+    const ts = new Date().toLocaleTimeString('en-GB',{hour12:false,hour:'2-digit',minute:'2-digit',second:'2-digit'});
+    const icons = {info:'ℹ',success:'✓',error:'✗',warn:'⚠',net:'↔',proxy:'⬡',nav:'→'};
+    const entry = {ts,type,msg,icon:icons[type]||'·'};
+    logEntries.push(entry); logCount++;
+    document.getElementById('logBadge').textContent = logCount;
+    const scroll = document.getElementById('logScroll');
+    if (logFilter === 'all' || logFilter === type) {
+        const div = document.createElement('div');
+        div.className = `log-entry ${type}`;
+        div.innerHTML = `<span class="log-ts">${ts}</span><span class="log-icon">${entry.icon}</span><span class="log-msg">${esc(msg)}</span>`;
+        scroll.appendChild(div);
+        if (logAutoScroll) scroll.scrollTop = scroll.scrollHeight;
+    }
+    document.getElementById('logCount').textContent = logEntries.length;
+    document.getElementById('statusMsg').textContent = msg;
+}
+function esc(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML}
+function setLogFilter(f){logFilter=f;document.querySelectorAll('.log-filter').forEach(el=>el.classList.toggle('active',el.dataset.f===f));rerenderLog()}
+function rerenderLog(){const s=document.getElementById('logScroll');s.innerHTML='';(logFilter==='all'?logEntries:logEntries.filter(e=>e.type===logFilter)).forEach(e=>{const d=document.createElement('div');d.className=`log-entry ${e.type}`;d.innerHTML=`<span class="log-ts">${e.ts}</span><span class="log-icon">${e.icon}</span><span class="log-msg">${esc(e.msg)}</span>`;s.appendChild(d)});if(logAutoScroll)s.scrollTop=s.scrollHeight}
+function toggleAutoScroll(){logAutoScroll=!logAutoScroll;document.getElementById('logAutoScroll').textContent=`Auto-scroll: ${logAutoScroll?'ON':'OFF'}`}
+function copyLogs(){
+navigator.clipboard.writeText(logEntries.map(e=>`[${e.ts}] ${e.icon} ${e.msg}`).join('\n'));toast('Copied','success')}
+function clearLogs(){logEntries=[];logCount=0;document.getElementById('logScroll').innerHTML='';document.getElementById('logBadge').textContent='0';document.getElementById('logCount').textContent='0'}
+function toast(m,t='info'){const el=document.createElement('div');el.className=`toast toast-${t}`;el.textContent=m;document.getElementById('toasts').appendChild(el);setTimeout(()=>el.remove(),3000)}
+// ━━━ TABS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function switchTab(n){document.querySelectorAll('.main-tab').forEach((t,i)=>t.classList.toggle('active',(i===0&&n==='browser')||(i===1&&n==='log')));document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));document.getElementById(`tab-${n}`).classList.add('active');if(n==='log'){logCount=0;document.getElementById('logBadge').textContent='0'}}
+// ━━━ RELAY ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function showSettings(){document.getElementById('relayUrlInput').value=relayUrl;document.getElementById('settingsModal').classList.add('vis')}
+async function saveRelay(){
+    let url=document.getElementById('relayUrlInput').value.trim().replace(/\/+$/,'');
+    if(!url){relayUrl='';relayOk=false;try{localStorage.removeItem('tunnelx_relay')}catch(e){}updateBadge();toast('Relay cleared','warn');xlog('info','Relay disconnected');closeModal('settingsModal');return}
+    xlog('net',`Connecting: ${url}`);
+    try{const r=await fetch(`${url}/health`,{cache:'no-store',mode:'cors'});const d=await r.json();
+    if(d.status==='ok'){relayUrl=url;relayOk=true;try{localStorage.setItem('tunnelx_relay',url)}catch(e){}updateBadge();clearCache();xlog('success',`Relay connected: ${url} (${d.type||'worker'})`);toast('Connected!','success');closeModal('settingsModal')}
+    else throw new Error('Bad response')}
+    catch(e){if(location.protocol==='file:'){relayUrl=url;relayOk=true;try{localStorage.setItem('tunnelx_relay',url)}catch(e2){}updateBadge();xlog('warn',`Relay saved (file:// mode): ${url}`);toast('Saved','warn');closeModal('settingsModal')}
+    else{xlog('error',`Failed: ${e.message}`);toast('Failed','error')}}
+}
+function updateBadge(){const b=document.getElementById('relayBadge'),l=document.getElementById('relayLabel');if(relayOk){b.className='relay-badge on';l.textContent='⚡ Relay'}else if(relayUrl){b.className='relay-badge off';l.textContent='⚠ Set'}else{b.className='relay-badge off';l.textContent='⚙ Setup'}}
+// ━━━ PARSING ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function parseInput(){
+    const raw=document.getElementById('inputBox').value.trim();if(!raw){toast('Paste content','warn');return}
+    const seen=new Set(proxies.map(p=>p.address));let added=0;xlog('info','Parsing...');
+    const text=raw.replace(/<[^>]*>/g,' ');let m;
+    const r1=/\b(socks5|socks4|https?):\/\/([a-zA-Z0-9._-]+):(\d{2,5})\b/gi;
+    while((m=r1.exec(raw))!==null){const a=`${m[1].toLowerCase()}://${m[2]}:${m[3]}`;if(!seen.has(a)){addPx(m[1].toLowerCase(),m[2],m[3],a);seen.add(a);added++}}
+    const r2=/\b((?:(?:25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}(?:25[0-5]|2[0-4]\d|[01]?\d\d?)):(\d{2,5})\b/g;
+    while((m=r2.exec(text))!==null){const a=`http://${m[1]}:${m[2]}`;if(!seen.has(a)){addPx('http',m[1],m[2],a);seen.add(a);added++}}
+    const r3=/\b((?:\d{1,3}\.){3}\d{1,3})\s+(\d{2,5})\s+(SOCKS[45]|HTTPS?)/gi;
+    while((m=r3.exec(text))!==null){const p=m[3].toLowerCase(),a=`${p}://${m[1]}:${m[2]}`;if(!seen.has(a)){addPx(p,m[1],m[2],a);seen.add(a);added++}}
+    if(!added)toast('No new proxies','warn');else{xlog('success',`Extracted ${added} proxies`);toast(`${added} extracted`,'success')}
+    render();saveStorage();
+}
+function parseProxyText(text){
+    const seen=new Set(proxies.map(p=>p.address));let added=0;let m;
+    const r1=/\b(socks5|socks4|https?):\/\/([a-zA-Z0-9._-]+):(\d{2,5})\b/gi;
+    while((m=r1.exec(text))!==null){const a=`${m[1].toLowerCase()}://${m[2]}:${m[3]}`;if(!seen.has(a)){addPx(m[1].toLowerCase(),m[2],m[3],a);seen.add(a);added++}}
+    const r2=/\b((?:(?:25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}(?:25[0-5]|2[0-4]\d|[01]?\d\d?)):(\d{2,5})\b/g;
+    while((m=r2.exec(text))!==null){const a=`http://${m[1]}:${m[2]}`;if(!seen.has(a)){addPx('http',m[1],m[2],a);seen.add(a);added++}}
+    return added;
+}
+function addPx(proto,host,port,address){proxies.push({protocol:proto,host,port:parseInt(port),address,status:'untested',latency:null,lastTest:null,fails:0,exitIp:null})}
+// ━━━ FILTER ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function toggleFilter(){filterSafe=!filterSafe;document.getElementById('filterSafe').classList.toggle('active',filterSafe);xlog('info',filterSafe?'Filter: safe ports only':'Filter: all ports');render()}
+// ━━━ CACHE ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function clearCache(){pageCache.clear();xlog('info','Cache cleared')}
+function getCacheKey(url,pa){return `${url}|${pa||'direct'}`}
+function proxyResources(html,baseUrl,proxyAddr){
+    if(!relayUrl)return html;const base=new URL(baseUrl);
+    function resolve(s){if(!s||s.startsWith('data:')||s.startsWith('blob:')||s.startsWith('javascript:'))return s;try{if(s.startsWith('//'))return base.protocol+s;if(s.startsWith('/'))return `${base.protocol}//${base.host}${s}`;if(!/^https?:\/\//i.test(s))return `${base.protocol}//${base.host}${base.pathname.replace(/\/[^/]*$/,'/')}${s}`;return s}catch{return s}}
+    function rfor(s){const r=resolve(s);if(!r||r.startsWith('data:'))return r;const pp=proxyAddr?`&proxy=${encodeURIComponent(proxyAddr)}`:'';return `${relayUrl}/fetch?url=${encodeURIComponent(r)}${pp}`}
+    // Scripts: ALWAYS proxy through relay (critical for SPAs like nalog.ru)
+    html=html.replace(/(<script\s[^>]*?src\s*=\s*)(["'])([^"']*?)\2/gi,(m,pre,q,src)=>`${pre}${q}${rfor(src)}${q}`);
+    // Images
+    if(optImages){
+        html=html.replace(/(<img\s[^>]*?src\s*=\s*)(["'])([^"']*?)\2/gi,(m,pre,q,src)=>`${pre}${q}${rfor(src)}${q}`);
+        html=html.replace(/(background(?:-image)?\s*:[^;]*?url\s*\(\s*['"]?)([^)'"]+)(['"]?\s*\))/gi,(m,pre,src,post)=>src.startsWith('data:')?m:`${pre}${rfor(src)}${post}`);
+        // srcset
+        html=html.replace(/(<img\s[^>]*?srcset\s*=\s*)(["'])([^"']*?)\2/gi,(m,pre,q,srcset)=>{
+            const rewritten=srcset.split(',').map(s=>{const parts=s.trim().split(/\s+/);parts[0]=rfor(parts[0]);return parts.join(' ')}).join(', ');
+            return `${pre}${q}${rewritten}${q}`;
+        });
+    } else {
+        html=html.replace(/<img\s[^>]*>/gi,'');
+        html=html.replace(/(background(?:-image)?\s*:[^;]*?url\s*\([^)]*\))/gi,'background:none');
+    }
+    // CSS
+    if(optCSS){
+        html=html.replace(/(<link\s[^>]*?href\s*=\s*)(["'])([^"']*?)\2/gi,(m,pre,q,h)=>`${pre}${q}${rfor(h)}${q}`);
+        html=html.replace(/url\(\s*(['"]?)([^)'"]+)\1\s*\)/gi,(m,q,src)=>src.startsWith('data:')?m:`url(${q}${rfor(src)}${q})`);
+    } else {
+        html=html.replace(/<link\s[^>]*rel\s*=\s*["']stylesheet["'][^>]*>/gi,'');
+    }
+    // Videos
+    if(!optVideos){
+        html=html.replace(/<video\s[^>]*>[\s\S]*?<\/video>/gi,'');
+        html=html.replace(/<iframe\s[^>]*(?:youtube|vimeo|dailymotion)[^>]*>[\s\S]*?<\/iframe>/gi,'');
+    }
+    // Favicon / manifest / other link tags with href
+    html=html.replace(/(<link\s[^>]*?href\s*=\s*)(["'])([^"']*?)\2/gi,(m,pre,q,h)=>{
+        if(m.includes('stylesheet'))return m; // already handled above
+        return `${pre}${q}${rfor(h)}${q}`;
+    });
+    return html;
+}
+// ━━━ TEST ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+async function testProxy(idx){
+    const p=proxies[idx];p.status='testing';p.latency=null;render();xlog('proxy',`Testing ${p.address}...`);
+    try{if(relayUrl){
+        xlog('net',`→ ${relayUrl}/test?host=${p.host}&port=${p.port}&proto=${p.protocol}`);
+        const r=await fetch(`${relayUrl}/test?host=${p.host}&port=${p.port}&proto=${p.protocol}`,{cache:'no-store'});const d=await r.json();
+        xlog('net',`← status=${d.status} ${d.latency}ms ${d.detail||''} ${d.error?'err='+d.error:''}`);
+        if(d.status==='alive'){p.status='alive';p.latency=d.latency;p.fails=0;p.exitIp=d.exitIp||null;
+        xlog('success',`✓ ${p.address} ALIVE (${d.latency}ms)${d.exitIp?' exit:'+d.exitIp:''}${d.detail?' ['+d.detail+']':''}`)}
+        else throw new Error(d.error||'Dead')
+    }else{xlog('net',`→ CORS probe ${p.protocol}://${p.host}:${p.port}/`);const t0=performance.now();const r=await fetch(CORS_FB[0](`${p.protocol}://${p.host}:${p.port}/`),{cache:'no-store',signal:AbortSignal.timeout(8000)});const ms=Math.round(performance.now()-t0);
+        p.status='alive';p.latency=ms;p.fails=0;xlog('success',`✓ ${p.address} ALIVE (${ms}ms fallback)`)}}
+    catch(e){p.status='dead';p.fails++;xlog('error',`✗ ${p.address} DEAD: ${e.message}`)}
+    p.lastTest=new Date();render();saveStorage();
+}
+async function testAll(){
+    const toTest=filterSafe?proxies.filter(p=>SAFE_PORTS.has(p.port)):proxies;
+    if(!toTest.length){toast('No proxies','warn');return}
+    xlog('info',`━━ Batch: ${toTest.length} proxies ━━`);document.getElementById('testAllBtn').disabled=true;testAbort={stopped:false};
+    for(const p of toTest){if(testAbort.stopped)break;await testProxy(proxies.indexOf(p));await new Promise(r=>setTimeout(r,80))}
+    const alive=toTest.filter(p=>p.status==='alive').length;xlog('info',`━━ Done: ${alive}/${toTest.length} alive ━━`);
+    toast(`${alive}/${toTest.length} alive`,alive?'success':'error');document.getElementById('testAllBtn').disabled=false;
+}
+function stopTests(){if(testAbort)testAbort.stopped=true;xlog('warn','Stopped');document.getElementById('testAllBtn').disabled=false}
+// ━━━ NAVIGATE ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 async function navigate(){
-    var url=$('urlInput').value.trim();if(!url)return;
-    if(!/^https?:\/\//i.test(url))url='https://'+url;$('urlInput').value=url;
-    if(!activeProxy){toast('Connect first','warn');return}
-    var ck=url+'|'+activeProxy.address;
-    $('ph').style.display='none';$('lockIcon').innerHTML=url.startsWith('https')?'&#x1F512;':'&#x1F513;';
-    if(pgCache.has(ck)){var c=pgCache.get(ck);$('frame').srcdoc=c.html;$('frame').style.display='block';ft('Cached ('+Math.round((Date.now()-c.ts)/1000)+'s)');toast('From cache','ok');return}
-    showLd('Loading via '+activeProxy.host+'...');ft('Fetching '+url+'...');
-    try{var pp='&proxy='+encodeURIComponent(activeProxy.address);var html=null;
-        try{var r=await fetch(relay+'/fetch?url='+encodeURIComponent(url)+pp,{cache:'no-store'});if(r.ok)html=await r.text()}catch(e){}
-        if(!html){try{var r2=await fetch(CORS_FB(url),{cache:'no-store'});if(r2.ok)html=await r2.text()}catch(e){}}
-        if(!html)throw new Error('Failed to load');
-        html=processHtml(html,url);
-        if(pgCache.size>=30)pgCache.delete(pgCache.keys().next().value);
-        pgCache.set(ck,{html:html,ts:Date.now()});updC();
-        $('frame').srcdoc=html;$('frame').style.display='block';ft('Loaded '+url);toast('Loaded','ok');
-    }catch(e){ft(e.message);toast(e.message,'err')}hideLd()}
-
-function processHtml(html,url){
-    var base='<base href="'+url+'">';
-    if(html.indexOf('<head>')!==-1)html=html.replace('<head>','<head>'+base);else html=base+html;
-    var R=relay,P=encodeURIComponent(activeProxy.address);
-    var intr='<script>(function(){var R="'+R+'",P="'+P+'",B=new URL("'+url+'");function fix(u){if(!u||u.indexOf("data:")===0||u.indexOf("blob:")===0||u.indexOf("javascript:")===0)return u;try{var s=u;if(u.indexOf("//")===0)s=B.protocol+u;else if(u.indexOf("/")===0)s=B.protocol+"//"+B.host+u;else if(!/^https?:\\/\\//i.test(u))s=B.protocol+"//"+B.host+B.pathname.replace(/\\/[^/]*$/,"/")+u;return R+"/fetch?url="+encodeURIComponent(s)+"&proxy="+P}catch(e){return u}}var F=window.fetch;window.fetch=function(i,o){if(typeof i==="string")i=fix(i);return F.call(this,i,o)};var X=XMLHttpRequest.prototype.open;XMLHttpRequest.prototype.open=function(m,u){arguments[1]=fix(u);return X.apply(this,arguments)};["HTMLScriptElement","HTMLImageElement"].forEach(function(c){var p=window[c]&&window[c].prototype;if(!p)return;var d=Object.getOwnPropertyDescriptor(p,"src");if(d&&d.set)Object.defineProperty(p,"src",{set:function(v){d.set.call(this,fix(v))},get:d.get,configurable:true})});var ld=Object.getOwnPropertyDescriptor(HTMLLinkElement.prototype,"href");if(ld&&ld.set)Object.defineProperty(HTMLLinkElement.prototype,"href",{set:function(v){ld.set.call(this,fix(v))},get:ld.get,configurable:true})})()<\/script>';
-    html=html.replace('<head>','<head>'+intr);
-    function rfor(s){if(!s||s.indexOf('data:')===0)return s;var resolved=s;try{var b=new URL(url);if(s.indexOf('//')===0)resolved=b.protocol+s;else if(s.indexOf('/')===0)resolved=b.protocol+'//'+b.host+s;else if(!/^https?:\/\//i.test(s))resolved=b.protocol+'//'+b.host+b.pathname.replace(/\/[^/]*$/,'/')+s}catch(e){}return R+'/fetch?url='+encodeURIComponent(resolved)+'&proxy='+P}
-    html=html.replace(/(<script\s[^>]*?src\s*=\s*)(["'])([^"']*?)\2/gi,function(m,pre,q,src){return pre+q+rfor(src)+q});
-    if(optImg){html=html.replace(/(<img\s[^>]*?src\s*=\s*)(["'])([^"']*?)\2/gi,function(m,pre,q,src){return pre+q+rfor(src)+q})}
-    else{html=html.replace(/<img\s[^>]*>/gi,'');html=html.replace(/(background(?:-image)?\s*:[^;]*?url\s*\([^)]*\))/gi,'background:none')}
-    if(optCss){html=html.replace(/(<link\s[^>]*?href\s*=\s*)(["'])([^"']*?)\2/gi,function(m,pre,q,h){return pre+q+rfor(h)+q});html=html.replace(/url\(\s*(['"]?)([^)'"]+)\1\s*\)/gi,function(m,q,src){return src.indexOf('data:')===0?m:'url('+q+rfor(src)+q+')'})}
-    else{html=html.replace(/<link\s[^>]*rel\s*=\s*["']stylesheet["'][^>]*>/gi,'')}
-    if(!optVid||!isCustomRelay){html=html.replace(/<video\s[^>]*>[\s\S]*?<\/video>/gi,'');html=html.replace(/<iframe\s[^>]*(?:youtube|vimeo|dailymotion|tiktok|rutube)[^>]*>[\s\S]*?<\/iframe>/gi,'')}
-    return html}
-
+    let url=document.getElementById('urlInput').value.trim();if(!url){toast('Enter URL','warn');return}
+    if(!/^https?:\/\//i.test(url))url='https://'+url;document.getElementById('urlInput').value=url;
+    const px=selected>=0?proxies[selected]:null;const ck=getCacheKey(url,px?.address);
+    document.getElementById('renderPlaceholder').style.display='none';document.getElementById('loadingOverlay').classList.add('show');
+    document.getElementById('loadMsg').textContent=px?`Via ${px.host}:${px.port}...`:'Fetching...';
+    xlog('nav',`Navigate: ${url}${px?' via '+px.address:''}`);
+    if(optCache && pageCache.has(ck)){const c=pageCache.get(ck);const age=Math.round((Date.now()-c.ts)/1000);
+        xlog('success',`⚡ Cache hit (${age}s, ${Math.round(c.html.length/1024)}KB)`);
+        const f=document.getElementById('renderFrame');f.srcdoc=c.html;f.style.display='block';
+        navHist=navHist.slice(0,navPos+1);navHist.push(url);navPos=navHist.length-1;
+        document.getElementById('lockIcon').textContent=url.startsWith('https')?'🔒':'🔓';
+        toast('From cache','success');document.getElementById('loadingOverlay').classList.remove('show');return}
+    const methods=[];
+    if(relayUrl){const pp=px?`&proxy=${encodeURIComponent(px.address)}`:'';
+        methods.push({name:px?`relay→${px.host}:${px.port}`:'relay-direct',fn:()=>fetch(`${relayUrl}/fetch?url=${encodeURIComponent(url)}${pp}`,{cache:'no-store'})})}
+    CORS_FB.forEach((f,i)=>methods.push({name:`cors-${i}`,fn:()=>fetch(f(url),{cache:'no-store'})}));
+    let html=null,source='';
+    for(const m of methods){try{xlog('net',`→ ${m.name}...`);document.getElementById('loadMsg').textContent=m.name;
+        const r=await m.fn();
+        if(r.status===429){xlog('warn',`← ${m.name}: 429`);continue}
+        if(r.status===530){xlog('warn',`← ${m.name}: 530 geo-block`);continue}
+        if(!r.ok){xlog('warn',`← ${m.name}: HTTP ${r.status}`);continue}
+        const lat=r.headers.get('X-Latency')||'?';html=await r.text();source=m.name;
+        xlog('success',`← ${m.name}: OK (${lat}ms, ${Math.round(html.length/1024)}KB)`);break;
+    }catch(e){xlog('error',`← ${m.name}: ${e.message}`}}}
+    if(!html){xlog('error',`Failed: ${url}`);toast('Failed','error');
+        if(autoRotate&&proxies.some(p=>p.status==='alive')){rotateProxy();xlog('info','Auto-rotating...')}
+        document.getElementById('loadingOverlay').classList.remove('show');return}
+    const base=`<base href="${url}">`;
+    if(html.includes('<head>'))html=html.replace('<head>',`<head>${base}`);
+    else if(html.includes('<html'))html=html.replace(/<html[^>]*>/,`$&<head>${base}</head>`);
+    else html=base+html;
+    xlog('net','Rewriting resource URLs...');html=proxyResources(html,url,px?.address);
+    // Inject runtime interceptor for dynamic resource loads (SPAs)
+    const proxyParam = px ? `&proxy=${encodeURIComponent(px.address)}` : '';
+    const interceptor = `<script>
 (function(){
-    var sel=$('cSel');CC.forEach(function(c){var o=document.createElement('option');o.value=c[0];o.textContent=c[1];sel.appendChild(o)});
-    sel.addEventListener('change',function(){if(sel.value!==curCountry){clearPgCache();stopBg();activeProxy=null;aliveProxies=[];setDot('off','Not connected');setPill('no','No proxy');ft('Country changed \u2014 click Connect')}});
-    fetch(relay+'/health',{cache:'no-store'}).then(function(r){return r.json()}).then(function(d){if(d.status==='ok')ft('Relay online \u2014 choose a country')}).catch(function(){ft('Relay sleeping \u2014 wakes on first request')});
+  var RELAY='${relayUrl}';
+  var PROXY='${proxyParam}';
+  var BASE='${url}';
+  var baseUrl=new URL(BASE);
+  function toRelay(u){
+    if(!u||u.startsWith('data:')||u.startsWith('blob:')||u.startsWith('javascript:'))return u;
+    try{
+      var resolved=u;
+      if(u.startsWith('//'))resolved=baseUrl.protocol+u;
+      else if(u.startsWith('/'))resolved=baseUrl.protocol+'//'+baseUrl.host+u;
+      else if(!/^https?:\\/\\/\\/i.test(u))resolved=baseUrl.protocol+'//'+baseUrl.host+baseUrl.pathname.replace(/\\/[^/]*$/,'/')+u;
+      return RELAY+'/fetch?url='+encodeURIComponent(resolved)+PROXY;
+    }catch(e){return u}
+  }
+  // Intercept fetch()
+  var origFetch=window.fetch;
+  window.fetch=function(input,init){
+    if(typeof input==='string')input=toRelay(input);
+    else if(input&&input.url)input=new Request(toRelay(input.url),input);
+    return origFetch.call(this,input,init);
+  };
+  // Intercept XMLHttpRequest
+  var origOpen=XMLHttpRequest.prototype.open;
+  XMLHttpRequest.prototype.open=function(method,url){
+    arguments[1]=toRelay(url);
+    return origOpen.apply(this,arguments);
+  };
+  // Intercept createElement for script/img/link
+  var origCreate=document.createElement.bind(document);
+  document.createElement=function(tag){
+    var el=origCreate(tag);
+    var t=tag.toLowerCase();
+    if(t==='script'||t==='img'||t==='link'){
+      var origSet=Object.getOwnPropertyDescriptor(HTMLElement.prototype,'setAttribute')||
+                  Object.getOwnPropertyDescriptor(Element.prototype,'setAttribute');
+      var prop=t==='link'?'href':'src';
+      try{
+        Object.defineProperty(el,prop,{
+          set:function(v){this.setAttribute(prop,toRelay(v))},
+          get:function(){return this.getAttribute(prop)},
+          configurable:true
+        });
+      }catch(e){}
+    }
+    return el;
+  };
+  // Intercept direct .src assignment on existing elements
+  ['HTMLScriptElement','HTMLImageElement'].forEach(function(cls){
+    var proto=window[cls]&&window[cls].prototype;
+    if(!proto)return;
+    var desc=Object.getOwnPropertyDescriptor(proto,'src');
+    if(desc&&desc.set){
+      Object.defineProperty(proto,'src',{
+        set:function(v){desc.set.call(this,toRelay(v))},
+        get:desc.get,
+        configurable:true
+      });
+    }
+  });
+  // Intercept link.href for stylesheets
+  var linkDesc=Object.getOwnPropertyDescriptor(HTMLLinkElement.prototype,'href');
+  if(linkDesc&&linkDesc.set){
+    Object.defineProperty(HTMLLinkElement.prototype,'href',{
+      set:function(v){linkDesc.set.call(this,toRelay(v))},
+      get:linkDesc.get,
+      configurable:true
+    });
+  }
+  console.log('[TunnelX] Resource interceptor active — routing through relay');
 })();
+<\/script>`;
+    // Inject interceptor as the FIRST script in <head>
+    if(html.includes('<head>')){
+      html=html.replace('<head>',`<head>${interceptor}`);
+    } else {
+      html=interceptor+html;
+    }
+    if(optCache){if(pageCache.size>=MAX_CACHE)pageCache.delete(pageCache.keys().next().value);
+    pageCache.set(ck,{html,ts:Date.now()});updateCacheCount()}
+    const f=document.getElementById('renderFrame');f.srcdoc=html;f.style.display='block';
+    navHist=navHist.slice(0,navPos+1);navHist.push(url);navPos=navHist.length-1;
+    document.getElementById('lockIcon').textContent=url.startsWith('https')?'🔒':'🔓';
+    xlog('nav',`✓ ${url} via ${source}`);toast('Loaded','success');
+    document.getElementById('loadingOverlay').classList.remove('show');
+}
+function navBack(){if(navPos>0){navPos--;document.getElementById('urlInput').value=navHist[navPos];navigate()}}
+function navForward(){if(navPos<navHist.length-1){navPos++;document.getElementById('urlInput').value=navHist[navPos];navigate()}}
+function navReload(){if(navHist.length>0){pageCache.delete(getCacheKey(navHist[navPos],selected>=0?proxies[selected]?.address:null));
+navigate()}}
+// ━━━ ROTATION / SELECT ━━━━━━━━━━━━━━━━━━━━━━━━
+function toggleRotate(){autoRotate=!autoRotate;document.getElementById('rotateLabel').textContent=autoRotate?'ON':'OFF';document.getElementById('rotateInd').classList.toggle('active',autoRotate)}
+function rotateProxy(){const a=proxies.map((p,i)=>({...p,idx:i})).filter(p=>p.status==='alive');if(!a.length)return;rotateIdx=(rotateIdx+1)%a.length;selectProxy(a[rotateIdx].idx)}
+function selectProxy(idx){
+    if(selected!==idx)clearCache();selected=idx;const p=proxies[idx];
+    document.getElementById('proxyTag').className='proxy-tag '+(p.status==='alive'?'ok':'no');
+    document.getElementById('proxyTag').innerHTML=`<span>${p.protocol.toUpperCase()} ${p.host}:${p.port}</span>`;
+    document.getElementById('statusProxy').textContent=p.address;
+    xlog('proxy',`Selected: ${p.address}${p.exitIp?' (exit:'+p.exitIp+')':''}`);render();
+    if(window.innerWidth<=768)toggleSidebar();
+}
+// ━━━ RENDER ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function render(){
+    const list=document.getElementById('proxyList');
+    if(!proxies.length){list.innerHTML='<div class="empty-state"><h3>No proxies</h3><p>Paste above or wait for defaults to load</p></div>';return}
+    list.innerHTML=proxies.map((p,i)=>{
+        const sel=i===selected?' sel':'';const pip=p.status==='alive'?'alive':p.status==='dead'?'dead':p.status==='testing'?'testing':'';
+        const safe=SAFE_PORTS.has(p.port);const hidden=filterSafe&&!safe?' hidden':'';
+        return `<div class="pcard${sel}${hidden}" onclick="selectProxy(${i})"><div class="pip ${pip}"></div><span class="addr">${p.host}:${p.port}</span><span class="badge b-${p.protocol}">${p.protocol}</span><span class="port-tag ${safe?'port-safe':'port-risky'}">${p.port}</span><span class="ms">${p.latency?p.latency+'ms':''}</span><button class="tbtn" onclick="event.stopPropagation();testProxy(${i})">Test</button></div>`;
+    }).join('');
+    const vis=filterSafe?proxies.filter(p=>SAFE_PORTS.has(p.port)):proxies;
+    document.getElementById('sT').textContent=vis.length;document.getElementById('sA').textContent=vis.filter(p=>p.status==='alive').length;
+    document.getElementById('sD').textContent=vis.filter(p=>p.status==='dead').length;document.getElementById('sP').textContent=vis.filter(p=>p.status==='testing').length;
+}
+// ━━━ STORAGE ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function saveStorage(){try{localStorage.setItem('tunnelx_px',JSON.stringify(proxies))}catch(e){}}
+function importStorage(){try{const d=JSON.parse(localStorage.getItem('tunnelx_px')||'[]');if(d.length){const seen=new Set(proxies.map(p=>p.address));let n=0;d.forEach(p=>{if(!seen.has(p.address)){proxies.push(p);seen.add(p.address);n++}});toast(`Loaded ${n}`,'success');xlog('info',`Loaded ${n} from storage`);render()}else toast('No saved','warn')}catch(e){toast('Failed','error')}}
+function clearAll(){proxies=[];selected=-1;document.getElementById('inputBox').value='';document.getElementById('proxyTag').className='proxy-tag no';document.getElementById('proxyTag').innerHTML='<span>No proxy</span>';document.getElementById('statusProxy').textContent='No proxy';render();saveStorage();clearCache()}
+function exportAlive(){const a=proxies.filter(p=>p.status==='alive');if(!a.length){toast('None alive','warn');return}document.getElementById('exportContent').textContent=a.map(p=>p.address).join('\n');document.getElementById('exportModal').classList.add('vis')}
+function dlExport(){const b=new Blob([document.getElementById('exportContent').textContent],{type:'text/plain'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=`proxies_${new Date().toISOString().slice(0,10)}.txt`;a.click()}
+function closeModal(id){document.getElementById(id).classList.remove('vis')}
+// ━━━ INIT ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+(async function(){
+    xlog('info','═══ TunnelX v4 ═══');
+    xlog('info','Session cache: fresh');
+    initCountrySelect();
+    // Load default proxies if none saved
+    let loaded = false;
+    try {
+        const saved = JSON.parse(localStorage.getItem('tunnelx_px') || '[]');
+        if (saved.length > 0) {
+            saved.forEach(p => proxies.push(p));
+            xlog('info', `Loaded ${saved.length} proxies from storage`);
+            loaded = true;
+        }
+    } catch(e) {}
+    if (!loaded) {
+        const n = parseProxyText(DEFAULT_PROXIES);
+        xlog('success', `Loaded ${n} bundled Russian proxies`);
+    }
+    render();
+    // Auto-load relay
+    if (!relayUrl) {
+        relayUrl = DEFAULT_RELAY;
+        xlog('info', `Auto-setting default relay: ${DEFAULT_RELAY}`);
+    }
+    xlog('net', `Connecting relay: ${relayUrl}`);
+    try {
+        const r = await fetch(`${relayUrl}/health`, { cache: 'no-store' });
+        const d = await r.json();
+        if (d.status === 'ok') {
+            relayOk = true;
+            try { localStorage.setItem('tunnelx_relay', relayUrl); } catch(e) {}
+            xlog('success', `Relay connected (${d.type || 'worker'})`);
+        }
+    } catch(e) {
+        xlog('warn', `Relay unreachable: ${e.message}`);
+    }
+    updateBadge();
+    document.querySelectorAll('.modal-bg').forEach(el => el.addEventListener('click', e => { if (e.target === el) el.classList.remove('vis') }));
+    document.addEventListener('keydown', e => { if (e.ctrlKey && e.key === 'Enter') navigate() });
+})();
+</script>
+<style>
+#minimax-floating-ball {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  padding: 10px 12px;
+  background: #222222;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  color: #F8F8F8;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  z-index: 9999;
+  transition: all 0.3s ease;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+#minimax-floating-ball:hover {
+  transform: translateY(-2px);
+  background: #383838;
+}
+.minimax-ball-content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.minimax-logo-wave {
+  
+  width: 20px;
+  height: 17px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='17' viewBox='0 0 20 17' fill='none'%3E%3Cpath d='M20 12.3718L16.283 16.2413H12.2518V13.1614H9.17175V16.2413H7.00999V13.1613H3.92998V16.2413H0V4.00101L3.84145 0H20V12.3718Z' fill='white'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.minimax-ball-text {
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.minimax-close-icon {
+  margin-left: 8px;
+  font-size: 16px;
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  cursor: pointer;
+  opacity: 0.7;
+  transition: opacity 0.2s ease;
+}
+
+.minimax-close-icon:hover {
+  opacity: 1;
+}
+</style>
+<div id="minimax-floating-ball">
+  <div class="minimax-ball-content">
+    <div class="minimax-logo-wave"></div>
+    <span class="minimax-ball-text">Created by MiniMax Agent</span>
+  </div>
+  <div class="minimax-close-icon">×</div>
+</div>
+<script>
+// Initialize floating ball functionality
+function initFloatingBall() {
+  const ball = document.getElementById('minimax-floating-ball');
+  if (!ball) return;
+
+  // Initial animation
+  ball.style.opacity = '0';
+  ball.style.transform = 'translateY(20px)';
+
+  setTimeout(() => {
+    ball.style.opacity = '1';
+    ball.style.transform = 'translateY(0)';
+  }, 500);
+
+  // Handle logo click
+  const ballContent = ball.querySelector('.minimax-ball-content');
+  ballContent.addEventListener('click', function (e) {
+    e.stopPropagation();
+    window.open('https://agent.minimax.io/', '_blank');
+    ball.style.transform = 'scale(0.95)';
+    setTimeout(() => {
+      ball.style.transform = 'scale(1)';
+    }, 100);
+  });
+
+  // Handle close button click
+  const closeIcon = ball.querySelector('.minimax-close-icon');
+  closeIcon.addEventListener('click', function (e) {
+    e.stopPropagation();
+    ball.style.opacity = '0';
+    ball.style.transform = 'translateY(20px)';
+
+    setTimeout(() => {
+      ball.style.display = 'none';
+    }, 300);
+  });
+}
+
+// Initialize when DOM is ready
+document.addEventListener('DOMContentLoaded', initFloatingBall); 
 </script>
 </body>
 </html>

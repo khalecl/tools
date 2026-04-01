@@ -1,408 +1,234 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TunnelX</title>
-    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
-    <style>
-        *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
-        :root{
-            --bg:#0a0c10;--bg2:#12151c;--bg3:#181c26;--bg4:#1f2430;
-            --ac:#4d8cf5;--ac2:#6ea1ff;--acg:rgba(77,140,245,.1);
-            --ok:#36d399;--ok-d:rgba(54,211,153,.1);
-            --err:#f87272;--err-d:rgba(248,114,114,.1);
-            --warn:#fbbd23;--warn-d:rgba(251,189,35,.1);
-            --t1:#dfe5f0;--t2:#8b95a8;--t3:#5a6275;
-            --brd:#222938;--r:8px;
-        }
-        html,body{width:100%;height:100%;font-family:'IBM Plex Sans',system-ui,sans-serif;background:var(--bg);color:var(--t1);overflow:hidden}
-        body{display:flex;flex-direction:column}
-
-        /* ── HEADER ── */
-        .hdr{display:flex;align-items:center;gap:10px;padding:10px 16px;background:var(--bg2);border-bottom:1px solid var(--brd)}
-        .hdr-logo{font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:14px;color:var(--ac2);display:flex;align-items:center;gap:6px}
-        .hdr-logo svg{flex-shrink:0}
-        .hdr-status{margin-left:auto;display:flex;align-items:center;gap:6px;font-size:10px;color:var(--t3)}
-        .hdr-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
-        .hdr-dot.on{background:var(--ok);box-shadow:0 0 6px var(--ok)}.hdr-dot.off{background:var(--err)}
-        .hdr-dot.wait{background:var(--warn);animation:pulse 1s infinite}
-        @keyframes pulse{50%{opacity:.4}}
-
-        /* ── CONTROL BAR ── */
-        .ctrl{display:flex;align-items:center;gap:8px;padding:10px 16px;background:var(--bg2);border-bottom:1px solid var(--brd);flex-wrap:wrap}
-        .ctrl select{padding:7px 10px;background:var(--bg3);border:1px solid var(--brd);border-radius:var(--r);color:var(--t1);font-size:12px;font-family:inherit;min-width:140px;cursor:pointer}
-        .ctrl select:focus{outline:none;border-color:var(--ac)}
-        .ctrl select option{background:var(--bg3)}
-
-        .btn{display:inline-flex;align-items:center;justify-content:center;gap:4px;padding:7px 14px;border:none;border-radius:var(--r);font-family:inherit;font-size:11px;font-weight:600;cursor:pointer;transition:all .15s}
-        .btn:active{transform:scale(.97)}.btn:disabled{opacity:.35;pointer-events:none}
-        .btn-ac{background:var(--ac);color:#fff}.btn-ac:hover{background:var(--ac2)}
-        .btn-ghost{background:var(--bg3);color:var(--t2);border:1px solid var(--brd)}.btn-ghost:hover{border-color:var(--ac);color:var(--t1)}
-
-        .proxy-info{display:flex;align-items:center;gap:6px;margin-left:auto;font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--t3)}
-        .proxy-pill{padding:3px 8px;border-radius:12px;font-size:9px;font-weight:600}
-        .proxy-pill.ok{background:var(--ok-d);color:var(--ok)}.proxy-pill.no{background:var(--err-d);color:var(--err)}
-        .proxy-pill.wait{background:var(--warn-d);color:var(--warn)}
-
-        .mini-spinner{width:12px;height:12px;border:2px solid var(--brd);border-top-color:var(--ac);border-radius:50%;animation:spin .6s linear infinite;display:none}
-        .mini-spinner.show{display:inline-block}
-        @keyframes spin{to{transform:rotate(360deg)}}
-
-        /* ── URL BAR ── */
-        .url-row{display:flex;align-items:center;gap:6px;padding:8px 16px;background:var(--bg);border-bottom:1px solid var(--brd)}
-        .url-row .lock{font-size:11px;color:var(--t3);flex-shrink:0}
-        .url-row input{flex:1;padding:8px 10px;background:var(--bg3);border:1px solid var(--brd);border-radius:var(--r);color:var(--t1);font-family:'IBM Plex Mono',monospace;font-size:12px;min-width:0}
-        .url-row input:focus{outline:none;border-color:var(--ac);box-shadow:0 0 0 2px var(--acg)}
-
-        /* ── RENDER ── */
-        .render{flex:1;position:relative;overflow:hidden;background:#0d0f14}
-        .render iframe{width:100%;height:100%;border:none;background:#fff}
-        .render-ph{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:var(--t3);padding:24px}
-        .render-ph h2{font-size:18px;color:var(--t2);margin:12px 0 6px;font-weight:500}
-        .render-ph p{font-size:12px;line-height:1.6;max-width:320px}
-        .render-ph .steps{margin-top:16px;text-align:left;font-size:11px;line-height:2}
-        .render-ph .steps span{color:var(--ac);font-weight:600;margin-right:4px}
-        .loader{position:absolute;inset:0;display:none;align-items:center;justify-content:center;background:rgba(10,12,16,.88);z-index:2}
-        .loader.show{display:flex}
-        .loader-inner{text-align:center}
-        .loader-spin{width:28px;height:28px;border:3px solid var(--brd);border-top-color:var(--ac);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 10px}
-        .loader-msg{font-size:11px;color:var(--t2)}
-
-        /* ── FOOTER ── */
-        .ftr{display:flex;align-items:center;gap:8px;padding:5px 16px;background:var(--bg2);border-top:1px solid var(--brd);font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--t3)}
-        .ftr .msg{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-
-        /* ── TOAST ── */
-        .toast-box{position:fixed;top:50px;right:12px;z-index:50;display:flex;flex-direction:column;gap:4px}
-        .toast{padding:7px 12px;border-radius:6px;font-size:10px;font-weight:500;animation:tIn .2s;border:1px solid}
-        .toast-ok{background:var(--ok-d);border-color:rgba(54,211,153,.25);color:var(--ok)}
-        .toast-err{background:var(--err-d);border-color:rgba(248,114,114,.25);color:var(--err)}
-        .toast-warn{background:var(--warn-d);border-color:rgba(251,189,35,.25);color:var(--warn)}
-        .toast-info{background:var(--acg);border-color:rgba(77,140,245,.2);color:var(--ac2)}
-        @keyframes tIn{from{opacity:0;transform:translateY(-8px)}}
-
-        /* ── MOBILE ── */
-        @media(max-width:600px){
-            .ctrl{gap:5px;padding:8px 10px}
-            .ctrl select{min-width:0;flex:1}
-            .proxy-info{margin-left:0;margin-top:4px;width:100%}
-            .url-row{padding:6px 10px}
-            .hdr{padding:8px 10px}
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>TunnelX</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#0a0c10;--bg2:#12151c;--bg3:#181c26;--bg4:#1f2430;--ac:#4d8cf5;--ac2:#6ea1ff;--acg:rgba(77,140,245,.1);--ok:#36d399;--ok-d:rgba(54,211,153,.1);--err:#f87272;--err-d:rgba(248,114,114,.1);--warn:#fbbd23;--warn-d:rgba(251,189,35,.1);--t1:#dfe5f0;--t2:#8b95a8;--t3:#5a6275;--brd:#222938;--r:8px}
+html,body{width:100%;height:100%;font-family:'IBM Plex Sans',system-ui,sans-serif;background:var(--bg);color:var(--t1);overflow:hidden}
+body{display:flex;flex-direction:column}
+.hdr{display:flex;align-items:center;gap:10px;padding:8px 14px;background:var(--bg2);border-bottom:1px solid var(--brd)}
+.hdr-logo{font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:13px;color:var(--ac2);display:flex;align-items:center;gap:6px}
+.hdr-status{margin-left:auto;display:flex;align-items:center;gap:5px;font-size:10px;color:var(--t3)}
+.dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.dot.on{background:var(--ok);box-shadow:0 0 5px var(--ok)}.dot.off{background:var(--err)}.dot.wait{background:var(--warn);animation:pls 1s infinite}
+@keyframes pls{50%{opacity:.35}}
+.ctrl{display:flex;align-items:center;gap:6px;padding:8px 14px;background:var(--bg2);border-bottom:1px solid var(--brd);flex-wrap:wrap}
+select{padding:6px 8px;background:var(--bg3);border:1px solid var(--brd);border-radius:var(--r);color:var(--t1);font-size:11px;font-family:inherit;cursor:pointer}
+select:focus{outline:none;border-color:var(--ac)}
+select option{background:var(--bg3)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:4px;padding:6px 12px;border:none;border-radius:var(--r);font-family:inherit;font-size:10px;font-weight:600;cursor:pointer;transition:all .15s}
+.btn:active{transform:scale(.97)}.btn:disabled{opacity:.3;pointer-events:none}
+.btn-ac{background:var(--ac);color:#fff}.btn-ac:hover{background:var(--ac2)}
+.btn-ghost{background:var(--bg3);color:var(--t2);border:1px solid var(--brd)}.btn-ghost:hover{border-color:var(--ac);color:var(--t1)}
+.pill{padding:2px 7px;border-radius:10px;font-size:8px;font-weight:600;font-family:'IBM Plex Mono',monospace}
+.pill.ok{background:var(--ok-d);color:var(--ok)}.pill.no{background:var(--err-d);color:var(--err)}.pill.wait{background:var(--warn-d);color:var(--warn)}
+.mspin{width:11px;height:11px;border:2px solid var(--brd);border-top-color:var(--ac);border-radius:50%;animation:sp .6s linear infinite;display:none;flex-shrink:0}
+.mspin.show{display:inline-block}
+@keyframes sp{to{transform:rotate(360deg)}}
+.proxy-info{display:flex;align-items:center;gap:5px;margin-left:auto;font-size:9px;color:var(--t3);font-family:'IBM Plex Mono',monospace}
+.adv-toggle{font-size:9px;color:var(--t3);cursor:pointer;user-select:none;display:flex;align-items:center;gap:3px}
+.adv-toggle:hover{color:var(--t2)}
+.adv-panel{max-height:0;overflow:hidden;transition:max-height .3s ease;background:var(--bg3);border-bottom:1px solid var(--brd)}
+.adv-panel.open{max-height:300px}
+.adv-inner{padding:10px 14px;display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end}
+.adv-field{display:flex;flex-direction:column;gap:3px}
+.adv-field label{font-size:8px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--t3)}
+.adv-field input{padding:5px 7px;background:var(--bg);border:1px solid var(--brd);border-radius:5px;color:var(--t1);font-family:'IBM Plex Mono',monospace;font-size:10px;width:200px}
+.adv-field input:focus{outline:none;border-color:var(--ac)}
+.adv-sep{width:1px;height:28px;background:var(--brd);flex-shrink:0}
+.sw{display:flex;align-items:center;gap:5px}
+.sw label{font-size:9px;color:var(--t2);cursor:pointer;user-select:none}
+.tgl{position:relative;width:28px;height:16px;flex-shrink:0}
+.tgl input{opacity:0;width:0;height:0}
+.tgl .sl{position:absolute;inset:0;background:var(--brd);border-radius:8px;cursor:pointer;transition:.2s}
+.tgl .sl::before{content:'';position:absolute;width:12px;height:12px;left:2px;bottom:2px;background:var(--t3);border-radius:50%;transition:.2s}
+.tgl input:checked+.sl{background:var(--ac)}
+.tgl input:checked+.sl::before{transform:translateX(12px);background:#fff}
+.tgl input:disabled+.sl{opacity:.3;cursor:not-allowed}
+.cache-tag{font-size:8px;color:var(--t3);font-family:'IBM Plex Mono',monospace;padding:2px 5px;background:var(--bg);border-radius:3px}
+.url-row{display:flex;align-items:center;gap:5px;padding:7px 14px;background:var(--bg);border-bottom:1px solid var(--brd)}
+.url-row .lock{font-size:10px;color:var(--t3);flex-shrink:0}
+.url-row input{flex:1;padding:7px 8px;background:var(--bg3);border:1px solid var(--brd);border-radius:var(--r);color:var(--t1);font-family:'IBM Plex Mono',monospace;font-size:11px;min-width:0}
+.url-row input:focus{outline:none;border-color:var(--ac);box-shadow:0 0 0 2px var(--acg)}
+.render{flex:1;position:relative;overflow:hidden;background:#0d0f14}
+.render iframe{width:100%;height:100%;border:none;background:#fff}
+.render-ph{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:var(--t3);padding:20px}
+.render-ph h2{font-size:16px;color:var(--t2);margin:10px 0 5px;font-weight:500}
+.render-ph p{font-size:11px;line-height:1.6;max-width:300px}
+.render-ph .steps{margin-top:14px;text-align:left;font-size:10px;line-height:2}
+.render-ph .steps span{color:var(--ac);font-weight:600;margin-right:3px}
+.ld{position:absolute;inset:0;display:none;align-items:center;justify-content:center;background:rgba(10,12,16,.88);z-index:2}
+.ld.show{display:flex}
+.ld-spin{width:26px;height:26px;border:3px solid var(--brd);border-top-color:var(--ac);border-radius:50%;animation:sp .7s linear infinite;margin:0 auto 8px}
+.ld-msg{font-size:10px;color:var(--t2)}
+.ftr{display:flex;align-items:center;gap:8px;padding:4px 14px;background:var(--bg2);border-top:1px solid var(--brd);font-family:'IBM Plex Mono',monospace;font-size:8px;color:var(--t3)}
+.ftr .msg{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.toast-box{position:fixed;top:44px;right:10px;z-index:50;display:flex;flex-direction:column;gap:4px}
+.toast{padding:6px 10px;border-radius:5px;font-size:9px;font-weight:500;animation:tIn .2s;border:1px solid}
+.toast-ok{background:var(--ok-d);border-color:rgba(54,211,153,.2);color:var(--ok)}
+.toast-err{background:var(--err-d);border-color:rgba(248,114,114,.2);color:var(--err)}
+.toast-warn{background:var(--warn-d);border-color:rgba(251,189,35,.2);color:var(--warn)}
+.toast-info{background:var(--acg);border-color:rgba(77,140,245,.15);color:var(--ac2)}
+@keyframes tIn{from{opacity:0;transform:translateY(-6px)}}
+@media(max-width:600px){.ctrl{gap:4px;padding:6px 10px}.ctrl select{flex:1;min-width:0}.proxy-info{margin-left:0;width:100%;margin-top:3px}.url-row{padding:5px 10px}.adv-field input{width:140px}.adv-inner{gap:6px}}
+</style>
 </head>
 <body>
-
 <div class="hdr">
-    <div class="hdr-logo">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-        TunnelX
-    </div>
-    <div class="hdr-status">
-        <div class="hdr-dot off" id="statusDot"></div>
-        <span id="statusText">Not connected</span>
-    </div>
+<div class="hdr-logo"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>TunnelX</div>
+<div class="hdr-status"><div class="dot off" id="sDot"></div><span id="sTxt">Not connected</span></div>
 </div>
-
 <div class="ctrl">
-    <select id="countrySelect">
-        <option value="">Choose country...</option>
-    </select>
-    <button class="btn btn-ac" onclick="go()" id="goBtn">Connect</button>
-    <div class="mini-spinner" id="goSpinner"></div>
-    <div class="proxy-info">
-        <div class="proxy-pill no" id="proxyPill">No proxy</div>
-    </div>
+<select id="cSel"><option value="">Choose country...</option></select>
+<button class="btn btn-ac" onclick="go()" id="goBtn">Connect</button>
+<div class="mspin" id="goSpin"></div>
+<div class="adv-toggle" onclick="toggleAdv()"><span id="advArrow">&#9656;</span> Advanced</div>
+<div class="proxy-info"><div class="pill no" id="pPill">No proxy</div><span class="cache-tag" id="cacheTag">0 cached</span></div>
 </div>
-
+<div class="adv-panel" id="advPanel">
+<div class="adv-inner">
+<div class="adv-field"><label>Custom Proxy</label><input type="text" id="customProxy" placeholder="socks5://1.2.3.4:1080"></div>
+<div class="adv-field"><label>Custom Relay</label><input type="text" id="customRelay" placeholder="https://your-relay.onrender.com"></div>
+<button class="btn btn-ghost" onclick="applyCustom()" style="align-self:flex-end">Apply</button>
+<div class="adv-sep"></div>
+<div class="sw"><div class="tgl"><input type="checkbox" id="optImg" checked onchange="saveOpts()"><span class="sl"></span></div><label for="optImg">&#x1F5BC; Images</label></div>
+<div class="sw"><div class="tgl"><input type="checkbox" id="optCss" checked onchange="saveOpts()"><span class="sl"></span></div><label for="optCss">&#x1F3A8; CSS</label></div>
+<div class="sw"><div class="tgl"><input type="checkbox" id="optVid" disabled onchange="saveOpts()"><span class="sl"></span></div><label for="optVid" style="opacity:.4" id="vidLabel">&#x1F3AC; Video (custom relay only)</label></div>
+<div class="adv-sep"></div>
+<button class="btn btn-ghost" onclick="clearPgCache();toast('Cache cleared','ok')">&#x1F5D1; Clear Cache</button>
+</div>
+</div>
 <div class="url-row">
-    <span class="lock" id="lockIcon">🔓</span>
-    <input type="text" id="urlInput" placeholder="Enter URL and press Enter..." onkeydown="if(event.key==='Enter')navigate()">
-    <button class="btn btn-ac" onclick="navigate()">Go</button>
+<span class="lock" id="lockIcon">&#x1F513;</span>
+<input type="text" id="urlInput" placeholder="Enter URL and press Enter..." onkeydown="if(event.key==='Enter')navigate()">
+<button class="btn btn-ac" onclick="navigate()">Go</button>
 </div>
-
 <div class="render">
-    <iframe id="frame" style="display:none"></iframe>
-    <div class="render-ph" id="placeholder">
-        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" opacity=".2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-        <h2>Browse through tunnel</h2>
-        <p>Choose a country, connect to a proxy, then enter any URL.</p>
-        <div class="steps">
-            <span>1</span> Select a country above<br>
-            <span>2</span> Click Connect — finds the fastest proxy<br>
-            <span>3</span> Enter a URL and browse
-        </div>
-    </div>
-    <div class="loader" id="loader">
-        <div class="loader-inner">
-            <div class="loader-spin"></div>
-            <div class="loader-msg" id="loaderMsg">Loading...</div>
-        </div>
-    </div>
+<iframe id="frame" sandbox="allow-scripts allow-forms" style="display:none"></iframe>
+<div class="render-ph" id="ph">
+<svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" opacity=".2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+<h2>Browse through tunnel</h2>
+<p>Choose a country, connect, then enter any URL.</p>
+<div class="steps"><span>1</span> Select a country<br><span>2</span> Click Connect<br><span>3</span> Enter URL and go</div>
 </div>
-
-<div class="ftr">
-    <span class="msg" id="footerMsg">Ready</span>
+<div class="ld" id="ld"><div><div class="ld-spin"></div><div class="ld-msg" id="ldMsg">Loading...</div></div></div>
 </div>
-
+<div class="ftr"><span class="msg" id="fMsg">Ready</span></div>
 <div class="toast-box" id="toasts"></div>
-
 <script>
-// ━━━ CONFIG ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-const RELAY = 'https://tunnelx-relay.onrender.com';
-const PROXIFLY = 'https://cdn.jsdelivr.net/gh/proxifly/free-proxy-list@main/proxies/countries';
-const CORS_FB = u => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`;
-const TEST_CONCURRENCY = 10;
+var DEFAULT_RELAY='https://tunnelx-relay.onrender.com';
+var PROXIFLY='https://cdn.jsdelivr.net/gh/proxifly/free-proxy-list@main/proxies/countries';
+var CORS_FB=function(u){return'https://api.allorigins.win/raw?url='+encodeURIComponent(u)};
+var BATCH=10;
+var CC=[['RU','\u{1F1F7}\u{1F1FA} Russia'],['US','\u{1F1FA}\u{1F1F8} USA'],['DE','\u{1F1E9}\u{1F1EA} Germany'],['GB','\u{1F1EC}\u{1F1E7} UK'],['FR','\u{1F1EB}\u{1F1F7} France'],['NL','\u{1F1F3}\u{1F1F1} Netherlands'],['CA','\u{1F1E8}\u{1F1E6} Canada'],['BR','\u{1F1E7}\u{1F1F7} Brazil'],['IN','\u{1F1EE}\u{1F1F3} India'],['JP','\u{1F1EF}\u{1F1F5} Japan'],['KR','\u{1F1F0}\u{1F1F7} S. Korea'],['CN','\u{1F1E8}\u{1F1F3} China'],['AU','\u{1F1E6}\u{1F1FA} Australia'],['IT','\u{1F1EE}\u{1F1F9} Italy'],['ES','\u{1F1EA}\u{1F1F8} Spain'],['PL','\u{1F1F5}\u{1F1F1} Poland'],['UA','\u{1F1FA}\u{1F1E6} Ukraine'],['TR','\u{1F1F9}\u{1F1F7} Turkey'],['ID','\u{1F1EE}\u{1F1E9} Indonesia'],['TH','\u{1F1F9}\u{1F1ED} Thailand'],['VN','\u{1F1FB}\u{1F1F3} Vietnam'],['MX','\u{1F1F2}\u{1F1FD} Mexico'],['AR','\u{1F1E6}\u{1F1F7} Argentina'],['EG','\u{1F1EA}\u{1F1EC} Egypt'],['SA','\u{1F1F8}\u{1F1E6} Saudi Arabia'],['AE','\u{1F1E6}\u{1F1EA} UAE'],['ZA','\u{1F1FF}\u{1F1E6} South Africa'],['SG','\u{1F1F8}\u{1F1EC} Singapore'],['HK','\u{1F1ED}\u{1F1F0} Hong Kong'],['TW','\u{1F1F9}\u{1F1FC} Taiwan'],['PH','\u{1F1F5}\u{1F1ED} Philippines'],['MY','\u{1F1F2}\u{1F1FE} Malaysia'],['IR','\u{1F1EE}\u{1F1F7} Iran'],['KZ','\u{1F1F0}\u{1F1FF} Kazakhstan'],['BY','\u{1F1E7}\u{1F1FE} Belarus'],['CZ','\u{1F1E8}\u{1F1FF} Czechia'],['RO','\u{1F1F7}\u{1F1F4} Romania'],['SE','\u{1F1F8}\u{1F1EA} Sweden'],['NO','\u{1F1F3}\u{1F1F4} Norway'],['FI','\u{1F1EB}\u{1F1EE} Finland'],['CH','\u{1F1E8}\u{1F1ED} Switzerland'],['AT','\u{1F1E6}\u{1F1F9} Austria'],['BE','\u{1F1E7}\u{1F1EA} Belgium'],['PT','\u{1F1F5}\u{1F1F9} Portugal'],['GR','\u{1F1EC}\u{1F1F7} Greece'],['BD','\u{1F1E7}\u{1F1E9} Bangladesh'],['PK','\u{1F1F5}\u{1F1F0} Pakistan'],['CL','\u{1F1E8}\u{1F1F1} Chile'],['CO','\u{1F1E8}\u{1F1F4} Colombia'],['NG','\u{1F1F3}\u{1F1EC} Nigeria']];
+var relay=DEFAULT_RELAY,activeProxy=null,aliveProxies=[],allProxies=[],bgAbort=null,pgCache=new Map(),optImg=true,optCss=true,optVid=false,isCustomRelay=false,curCountry='';
+var $=function(id){return document.getElementById(id)};
+function setDot(s,t){$('sDot').className='dot '+s;$('sTxt').textContent=t}
+function ft(m){$('fMsg').textContent=m}
+function setPill(s,t){var p=$('pPill');p.className='pill '+s;p.textContent=t}
+function toast(m,t){var e=document.createElement('div');e.className='toast toast-'+(t||'info');e.textContent=m;$('toasts').appendChild(e);setTimeout(function(){e.remove()},3000)}
+function showLd(m){$('ldMsg').textContent=m;$('ld').classList.add('show')}
+function hideLd(){$('ld').classList.remove('show')}
+function updC(){$('cacheTag').textContent=pgCache.size+' cached'}
+function toggleAdv(){var p=$('advPanel');p.classList.toggle('open');$('advArrow').innerHTML=p.classList.contains('open')?'&#9662;':'&#9656;'}
+function applyCustom(){
+    var cp=$('customProxy').value.trim(),cr=$('customRelay').value.trim();
+    if(cr){relay=cr.replace(/\/+$/,'');isCustomRelay=true;$('optVid').disabled=false;$('vidLabel').style.opacity='1';toast('Custom relay set','ok');ft('Relay: '+relay)}
+    if(cp){var m=cp.match(/^(socks[45]?|https?):\/\/([^:]+):(\d+)$/i);
+        if(m){clearPgCache();activeProxy={protocol:m[1].toLowerCase(),host:m[2],port:parseInt(m[3]),address:cp,latency:null};aliveProxies=[activeProxy];
+            setDot('on','Custom proxy');setPill('ok',activeProxy.protocol.toUpperCase()+' '+activeProxy.host+':'+activeProxy.port);toast('Custom proxy set','ok')}
+        else toast('Invalid format: protocol://host:port','err')}
+}
+function saveOpts(){optImg=$('optImg').checked;optCss=$('optCss').checked;optVid=$('optVid').checked}
+function clearPgCache(){pgCache.clear();updC()}
+function stopBg(){if(bgAbort)bgAbort.stopped=true}
 
-// ━━━ COUNTRIES ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-const C = [
-  ['RU','🇷🇺 Russia'],['US','🇺🇸 USA'],['DE','🇩🇪 Germany'],['GB','🇬🇧 UK'],['FR','🇫🇷 France'],
-  ['NL','🇳🇱 Netherlands'],['CA','🇨🇦 Canada'],['BR','🇧🇷 Brazil'],['IN','🇮🇳 India'],['JP','🇯🇵 Japan'],
-  ['KR','🇰🇷 S. Korea'],['CN','🇨🇳 China'],['AU','🇦🇺 Australia'],['IT','🇮🇹 Italy'],['ES','🇪🇸 Spain'],
-  ['PL','🇵🇱 Poland'],['UA','🇺🇦 Ukraine'],['TR','🇹🇷 Turkey'],['ID','🇮🇩 Indonesia'],['TH','🇹🇭 Thailand'],
-  ['VN','🇻🇳 Vietnam'],['MX','🇲🇽 Mexico'],['AR','🇦🇷 Argentina'],['EG','🇪🇬 Egypt'],['SA','🇸🇦 Saudi Arabia'],
-  ['AE','🇦🇪 UAE'],['ZA','🇿🇦 South Africa'],['SG','🇸🇬 Singapore'],['HK','🇭🇰 Hong Kong'],['TW','🇹🇼 Taiwan'],
-  ['PH','🇵🇭 Philippines'],['MY','🇲🇾 Malaysia'],['IR','🇮🇷 Iran'],['KZ','🇰🇿 Kazakhstan'],['BY','🇧🇾 Belarus'],
-  ['CZ','🇨🇿 Czechia'],['RO','🇷🇴 Romania'],['SE','🇸🇪 Sweden'],['NO','🇳🇴 Norway'],['FI','🇫🇮 Finland'],
-  ['CH','🇨🇭 Switzerland'],['AT','🇦🇹 Austria'],['BE','🇧🇪 Belgium'],['PT','🇵🇹 Portugal'],['GR','🇬🇷 Greece'],
-  ['BD','🇧🇩 Bangladesh'],['PK','🇵🇰 Pakistan'],['CL','🇨🇱 Chile'],['CO','🇨🇴 Colombia'],['NG','🇳🇬 Nigeria'],
-];
-
-// ━━━ STATE ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-let activeProxy = null;  // { protocol, host, port, address, latency }
-let proxies = [];
-let navHist = [], navPos = -1;
-
-// ━━━ HELPERS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-function status(state, text) {
-  const dot = document.getElementById('statusDot');
-  dot.className = 'hdr-dot ' + state;
-  document.getElementById('statusText').textContent = text;
+async function go(){
+    var code=$('cSel').value;if(!code){toast('Pick a country','warn');return}
+    if(code!==curCountry){clearPgCache();stopBg()}
+    curCountry=code;
+    var name=(CC.find(function(c){return c[0]===code})||['','?'])[1];
+    $('goBtn').disabled=true;$('goSpin').classList.add('show');
+    setDot('wait','Connecting to '+name+'...');setPill('wait','Searching...');ft('Fetching proxies...');
+    activeProxy=null;aliveProxies=[];
+    try{
+        var resp=await fetch(PROXIFLY+'/'+code+'/data.json');
+        if(!resp.ok)throw new Error(resp.status===404?'No proxies for '+name:'HTTP '+resp.status);
+        var data=await resp.json();if(!data.length)throw new Error('Empty list');
+        allProxies=data.map(function(e){var pr=(e.protocol||'http').toLowerCase();return{protocol:pr,host:e.ip,port:e.port,address:pr+'://'+e.ip+':'+e.port,latency:null,status:'untested',exitIp:null}}).filter(function(p){return p.host&&p.port});
+        ft('Found '+allProxies.length+' proxies \u2014 finding first working...');
+        var hooked=false;
+        for(var i=0;i<Math.min(allProxies.length,30);i+=3){
+            var batch=allProxies.slice(i,i+3);
+            await Promise.allSettled(batch.map(async function(p){
+                try{var r=await fetch(relay+'/test?host='+p.host+'&port='+p.port+'&proto='+p.protocol,{cache:'no-store'});
+                    var d=await r.json();p.latency=d.latency;p.status=d.status;p.exitIp=d.exitIp;
+                    if(d.status==='alive'){aliveProxies.push(p);
+                        if(!hooked){hooked=true;activeProxy=p;setDot('on','Connected via '+name);
+                            setPill('ok',p.protocol.toUpperCase()+' '+p.host+':'+p.port+' ('+p.latency+'ms)');
+                            ft('Connected! Testing more in background...');toast('Connected to '+name+'!','ok')}}}
+                catch(e){p.status='dead'}}));
+            if(hooked)break}
+        if(!hooked)throw new Error('No working proxies in first 30');
+        $('goBtn').disabled=false;$('goSpin').classList.remove('show');
+        startBg(allProxies.filter(function(p){return p.status==='untested'}),name);
+    }catch(e){setDot('off','Failed');setPill('no','No proxy');ft(e.message);toast(e.message,'err');activeProxy=null;$('goBtn').disabled=false;$('goSpin').classList.remove('show')}
 }
 
-function footer(msg) { document.getElementById('footerMsg').textContent = msg; }
+async function startBg(rem,cn){
+    bgAbort={stopped:false};var tested=0;
+    for(var i=0;i<rem.length;i+=BATCH){if(bgAbort.stopped)return;
+        var batch=rem.slice(i,i+BATCH);
+        await Promise.allSettled(batch.map(async function(p){if(bgAbort.stopped)return;
+            try{var r=await fetch(relay+'/test?host='+p.host+'&port='+p.port+'&proto='+p.protocol,{cache:'no-store'});
+                var d=await r.json();p.latency=d.latency;p.status=d.status;p.exitIp=d.exitIp;if(d.status==='alive')aliveProxies.push(p)}
+            catch(e){p.status='dead'}tested++}));
+        aliveProxies.sort(function(a,b){return(a.latency||99999)-(b.latency||99999)});
+        if(aliveProxies[0]&&aliveProxies[0]!==activeProxy){activeProxy=aliveProxies[0];setPill('ok',activeProxy.protocol.toUpperCase()+' '+activeProxy.host+':'+activeProxy.port+' ('+activeProxy.latency+'ms)')}
+        ft(aliveProxies.length+' alive / '+(tested+30)+' tested')}
+    ft('Done \u2014 '+aliveProxies.length+' proxies for '+cn)}
 
-function pill(state, text) {
-  const p = document.getElementById('proxyPill');
-  p.className = 'proxy-pill ' + state;
-  p.textContent = text;
-}
+async function navigate(){
+    var url=$('urlInput').value.trim();if(!url)return;
+    if(!/^https?:\/\//i.test(url))url='https://'+url;$('urlInput').value=url;
+    if(!activeProxy){toast('Connect first','warn');return}
+    var ck=url+'|'+activeProxy.address;
+    $('ph').style.display='none';$('lockIcon').innerHTML=url.startsWith('https')?'&#x1F512;':'&#x1F513;';
+    if(pgCache.has(ck)){var c=pgCache.get(ck);$('frame').srcdoc=c.html;$('frame').style.display='block';ft('Cached ('+Math.round((Date.now()-c.ts)/1000)+'s)');toast('From cache','ok');return}
+    showLd('Loading via '+activeProxy.host+'...');ft('Fetching '+url+'...');
+    try{var pp='&proxy='+encodeURIComponent(activeProxy.address);var html=null;
+        try{var r=await fetch(relay+'/fetch?url='+encodeURIComponent(url)+pp,{cache:'no-store'});if(r.ok)html=await r.text()}catch(e){}
+        if(!html){try{var r2=await fetch(CORS_FB(url),{cache:'no-store'});if(r2.ok)html=await r2.text()}catch(e){}}
+        if(!html)throw new Error('Failed to load');
+        html=processHtml(html,url);
+        if(pgCache.size>=30)pgCache.delete(pgCache.keys().next().value);
+        pgCache.set(ck,{html:html,ts:Date.now()});updC();
+        $('frame').srcdoc=html;$('frame').style.display='block';ft('Loaded '+url);toast('Loaded','ok');
+    }catch(e){ft(e.message);toast(e.message,'err')}hideLd()}
 
-function toast(msg, type='info') {
-  const el = document.createElement('div');
-  el.className = `toast toast-${type}`;
-  el.textContent = msg;
-  document.getElementById('toasts').appendChild(el);
-  setTimeout(() => el.remove(), 3500);
-}
+function processHtml(html,url){
+    var base='<base href="'+url+'">';
+    if(html.indexOf('<head>')!==-1)html=html.replace('<head>','<head>'+base);else html=base+html;
+    var R=relay,P=encodeURIComponent(activeProxy.address);
+    var intr='<script>(function(){var R="'+R+'",P="'+P+'",B=new URL("'+url+'");function fix(u){if(!u||u.indexOf("data:")===0||u.indexOf("blob:")===0||u.indexOf("javascript:")===0)return u;try{var s=u;if(u.indexOf("//")===0)s=B.protocol+u;else if(u.indexOf("/")===0)s=B.protocol+"//"+B.host+u;else if(!/^https?:\\/\\//i.test(u))s=B.protocol+"//"+B.host+B.pathname.replace(/\\/[^/]*$/,"/")+u;return R+"/fetch?url="+encodeURIComponent(s)+"&proxy="+P}catch(e){return u}}var F=window.fetch;window.fetch=function(i,o){if(typeof i==="string")i=fix(i);return F.call(this,i,o)};var X=XMLHttpRequest.prototype.open;XMLHttpRequest.prototype.open=function(m,u){arguments[1]=fix(u);return X.apply(this,arguments)};["HTMLScriptElement","HTMLImageElement"].forEach(function(c){var p=window[c]&&window[c].prototype;if(!p)return;var d=Object.getOwnPropertyDescriptor(p,"src");if(d&&d.set)Object.defineProperty(p,"src",{set:function(v){d.set.call(this,fix(v))},get:d.get,configurable:true})});var ld=Object.getOwnPropertyDescriptor(HTMLLinkElement.prototype,"href");if(ld&&ld.set)Object.defineProperty(HTMLLinkElement.prototype,"href",{set:function(v){ld.set.call(this,fix(v))},get:ld.get,configurable:true})})()<\/script>';
+    html=html.replace('<head>','<head>'+intr);
+    function rfor(s){if(!s||s.indexOf('data:')===0)return s;var resolved=s;try{var b=new URL(url);if(s.indexOf('//')===0)resolved=b.protocol+s;else if(s.indexOf('/')===0)resolved=b.protocol+'//'+b.host+s;else if(!/^https?:\/\//i.test(s))resolved=b.protocol+'//'+b.host+b.pathname.replace(/\/[^/]*$/,'/')+s}catch(e){}return R+'/fetch?url='+encodeURIComponent(resolved)+'&proxy='+P}
+    html=html.replace(/(<script\s[^>]*?src\s*=\s*)(["'])([^"']*?)\2/gi,function(m,pre,q,src){return pre+q+rfor(src)+q});
+    if(optImg){html=html.replace(/(<img\s[^>]*?src\s*=\s*)(["'])([^"']*?)\2/gi,function(m,pre,q,src){return pre+q+rfor(src)+q})}
+    else{html=html.replace(/<img\s[^>]*>/gi,'');html=html.replace(/(background(?:-image)?\s*:[^;]*?url\s*\([^)]*\))/gi,'background:none')}
+    if(optCss){html=html.replace(/(<link\s[^>]*?href\s*=\s*)(["'])([^"']*?)\2/gi,function(m,pre,q,h){return pre+q+rfor(h)+q});html=html.replace(/url\(\s*(['"]?)([^)'"]+)\1\s*\)/gi,function(m,q,src){return src.indexOf('data:')===0?m:'url('+q+rfor(src)+q+')'})}
+    else{html=html.replace(/<link\s[^>]*rel\s*=\s*["']stylesheet["'][^>]*>/gi,'')}
+    if(!optVid||!isCustomRelay){html=html.replace(/<video\s[^>]*>[\s\S]*?<\/video>/gi,'');html=html.replace(/<iframe\s[^>]*(?:youtube|vimeo|dailymotion|tiktok|rutube)[^>]*>[\s\S]*?<\/iframe>/gi,'')}
+    return html}
 
-function showLoader(msg) {
-  document.getElementById('loaderMsg').textContent = msg;
-  document.getElementById('loader').classList.add('show');
-}
-function hideLoader() { document.getElementById('loader').classList.remove('show'); }
-
-// ━━━ CONNECT FLOW ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-async function go() {
-  const code = document.getElementById('countrySelect').value;
-  if (!code) { toast('Pick a country first', 'warn'); return; }
-
-  const name = C.find(c => c[0] === code)?.[1] || code;
-  const btn = document.getElementById('goBtn');
-  const spinner = document.getElementById('goSpinner');
-  btn.disabled = true;
-  spinner.classList.add('show');
-  status('wait', `Connecting to ${name}...`);
-  pill('wait', 'Searching...');
-  footer(`Fetching proxy list for ${name}...`);
-
-  try {
-    // 1. Fetch proxies
-    const url = `${PROXIFLY}/${code}/data.json`;
-    const resp = await fetch(url);
-    if (!resp.ok) throw new Error(resp.status === 404 ? `No proxies for ${name}` : `HTTP ${resp.status}`);
-    const data = await resp.json();
-    if (!data.length) throw new Error('Empty list');
-
-    proxies = data.map(e => ({
-      protocol: (e.protocol || 'http').toLowerCase(),
-      host: e.ip, port: e.port,
-      address: `${(e.protocol||'http').toLowerCase()}://${e.ip}:${e.port}`,
-      latency: null, status: 'untested'
-    })).filter(p => p.host && p.port);
-
-    footer(`Found ${proxies.length} proxies — testing...`);
-
-    // 2. Test in batches (concurrency limited)
-    let tested = 0;
-    const alive = [];
-
-    for (let i = 0; i < proxies.length; i += TEST_CONCURRENCY) {
-      const batch = proxies.slice(i, i + TEST_CONCURRENCY);
-      const results = await Promise.allSettled(
-        batch.map(async (p) => {
-          const t0 = Date.now();
-          try {
-            const r = await fetch(`${RELAY}/test?host=${p.host}&port=${p.port}&proto=${p.protocol}`, { cache: 'no-store' });
-            const d = await r.json();
-            p.latency = d.latency;
-            p.status = d.status;
-            p.exitIp = d.exitIp;
-            if (d.status === 'alive') alive.push(p);
-          } catch (e) { p.status = 'dead'; }
-          tested++;
-          footer(`Testing... ${tested}/${proxies.length} (${alive.length} alive)`);
-          pill('wait', `${alive.length} found`);
-        })
-      );
-
-      // Stop early if we have enough good ones
-      if (alive.length >= 3) break;
-    }
-
-    if (alive.length === 0) throw new Error('No working proxies found');
-
-    // 3. Pick fastest
-    alive.sort((a, b) => (a.latency || 99999) - (b.latency || 99999));
-    activeProxy = alive[0];
-
-    status('on', `Connected via ${name}`);
-    pill('ok', `${activeProxy.protocol.toUpperCase()} ${activeProxy.host}:${activeProxy.port} (${activeProxy.latency}ms)`);
-    footer(`Ready — ${alive.length} proxies available, using fastest`);
-    toast(`Connected to ${name}!`, 'ok');
-
-  } catch (e) {
-    status('off', 'Connection failed');
-    pill('no', 'No proxy');
-    footer(e.message);
-    toast(e.message, 'err');
-    activeProxy = null;
-  }
-
-  btn.disabled = false;
-  spinner.classList.remove('show');
-}
-
-// ━━━ NAVIGATE ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-async function navigate() {
-  let url = document.getElementById('urlInput').value.trim();
-  if (!url) return;
-  if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
-  document.getElementById('urlInput').value = url;
-
-  if (!activeProxy) { toast('Connect to a country first', 'warn'); return; }
-
-  document.getElementById('placeholder').style.display = 'none';
-  showLoader(`Loading via ${activeProxy.host}...`);
-  document.getElementById('lockIcon').textContent = url.startsWith('https') ? '🔒' : '🔓';
-  footer(`Fetching ${url}...`);
-
-  try {
-    const proxyParam = `&proxy=${encodeURIComponent(activeProxy.address)}`;
-    let html = null;
-
-    // Try relay
-    try {
-      const r = await fetch(`${RELAY}/fetch?url=${encodeURIComponent(url)}${proxyParam}`, { cache: 'no-store' });
-      if (r.ok) html = await r.text();
-    } catch (e) {}
-
-    // Fallback: CORS
-    if (!html) {
-      try {
-        const r = await fetch(CORS_FB(url), { cache: 'no-store' });
-        if (r.ok) html = await r.text();
-      } catch (e) {}
-    }
-
-    if (!html) throw new Error('Failed to load page');
-
-    // Inject base tag
-    const base = `<base href="${url}">`;
-    if (html.includes('<head>')) html = html.replace('<head>', `<head>${base}`);
-    else html = base + html;
-
-    // Inject resource interceptor
-    const interceptor = `<script>
 (function(){
-var R='${RELAY}',P='${encodeURIComponent(activeProxy.address)}',B=new URL('${url}');
-function fix(u){if(!u||u.startsWith('data:')||u.startsWith('blob:')||u.startsWith('javascript:'))return u;
-try{var s=u;if(u.startsWith('//'))s=B.protocol+u;else if(u.startsWith('/'))s=B.protocol+'//'+B.host+u;
-else if(!/^https?:\\/\\//i.test(u))s=B.protocol+'//'+B.host+B.pathname.replace(/\\/[^/]*$/,'/')+u;
-return R+'/fetch?url='+encodeURIComponent(s)+'&proxy='+P}catch(e){return u}}
-var F=window.fetch;window.fetch=function(i,o){if(typeof i==='string')i=fix(i);return F.call(this,i,o)};
-var X=XMLHttpRequest.prototype.open;XMLHttpRequest.prototype.open=function(m,u){arguments[1]=fix(u);return X.apply(this,arguments)};
-['HTMLScriptElement','HTMLImageElement'].forEach(function(c){var p=window[c]&&window[c].prototype;if(!p)return;
-var d=Object.getOwnPropertyDescriptor(p,'src');if(d&&d.set)Object.defineProperty(p,'src',{set:function(v){d.set.call(this,fix(v))},get:d.get,configurable:true})});
-var ld=Object.getOwnPropertyDescriptor(HTMLLinkElement.prototype,'href');
-if(ld&&ld.set)Object.defineProperty(HTMLLinkElement.prototype,'href',{set:function(v){ld.set.call(this,fix(v))},get:ld.get,configurable:true});
-})();
-<\\/script>`;
-
-    html = html.replace('<head>', '<head>' + interceptor);
-
-    // Strip scripts/iframes: videos, trackers, heavy stuff
-    html = html.replace(/<video\s[^>]*>[\s\S]*?<\/video>/gi, '');
-    html = html.replace(/<iframe\s[^>]*(?:youtube|vimeo|dailymotion|tiktok)[^>]*>[\s\S]*?<\/iframe>/gi, '');
-
-    // Rewrite static <script src>, <link href>, <img src>
-    function rfor(s) {
-      if (!s || s.startsWith('data:')) return s;
-      let resolved = s;
-      try {
-        const b = new URL(url);
-        if (s.startsWith('//')) resolved = b.protocol + s;
-        else if (s.startsWith('/')) resolved = b.protocol + '//' + b.host + s;
-        else if (!/^https?:\/\//i.test(s)) resolved = b.protocol + '//' + b.host + b.pathname.replace(/\/[^/]*$/, '/') + s;
-      } catch(e) {}
-      return `${RELAY}/fetch?url=${encodeURIComponent(resolved)}&proxy=${encodeURIComponent(activeProxy.address)}`;
-    }
-
-    html = html.replace(/(<script\s[^>]*?src\s*=\s*)(["'])([^"']*?)\2/gi, (m,pre,q,src) => `${pre}${q}${rfor(src)}${q}`);
-    html = html.replace(/(<link\s[^>]*?href\s*=\s*)(["'])([^"']*?)\2/gi, (m,pre,q,h) => `${pre}${q}${rfor(h)}${q}`);
-    html = html.replace(/(<img\s[^>]*?src\s*=\s*)(["'])([^"']*?)\2/gi, (m,pre,q,src) => `${pre}${q}${rfor(src)}${q}`);
-
-    const frame = document.getElementById('frame');
-    frame.srcdoc = html;
-    frame.style.display = 'block';
-
-    navHist = navHist.slice(0, navPos + 1);
-    navHist.push(url);
-    navPos = navHist.length - 1;
-
-    footer(`Loaded ${url}`);
-    toast('Page loaded', 'ok');
-
-  } catch (e) {
-    footer(`Error: ${e.message}`);
-    toast(e.message, 'err');
-  }
-
-  hideLoader();
-}
-
-// ━━━ INIT ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-(function init() {
-  const sel = document.getElementById('countrySelect');
-  C.forEach(([code, name]) => {
-    const opt = document.createElement('option');
-    opt.value = code;
-    opt.textContent = name;
-    sel.appendChild(opt);
-  });
-
-  // Check relay
-  fetch(`${RELAY}/health`, { cache: 'no-store' })
-    .then(r => r.json())
-    .then(d => {
-      if (d.status === 'ok') {
-        footer('Relay online — choose a country to start');
-      }
-    })
-    .catch(() => {
-      footer('Relay offline — some features may not work');
-    });
+    var sel=$('cSel');CC.forEach(function(c){var o=document.createElement('option');o.value=c[0];o.textContent=c[1];sel.appendChild(o)});
+    sel.addEventListener('change',function(){if(sel.value!==curCountry){clearPgCache();stopBg();activeProxy=null;aliveProxies=[];setDot('off','Not connected');setPill('no','No proxy');ft('Country changed \u2014 click Connect')}});
+    fetch(relay+'/health',{cache:'no-store'}).then(function(r){return r.json()}).then(function(d){if(d.status==='ok')ft('Relay online \u2014 choose a country')}).catch(function(){ft('Relay sleeping \u2014 wakes on first request')});
 })();
 </script>
 </body>

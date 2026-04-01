@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>TunnelX</title>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+        :root{
+            --bg:#0a0c10;--bg2:#12151c;--bg3:#181c26;--bg4:#1f2430;
+            --ac:#4d8cf5;--ac2:#6ea1ff;--acg:rgba(77,140,245,.1);
+            --ok:#36d399;--ok-d:rgba(54,211,153,.1);
+            --err:#f87272;--err-d:rgba(248,114,114,.1);
+            --warn:#fbbd23;--warn-d:rgba(251,189,35,.1);
+            --t1:#dfe5f0;--t2:#8b95a8;--t3:#5a6275;
+            --brd:#222938;--r:8px;
+        }
+        html,body{width:100%;height:100%;font-family:'IBM Plex Sans',system-ui,sans-serif;background:var(--bg);color:var(--t1);overflow:hidden}
+        body{display:flex;flex-direction:column}
+
+        /* ── HEADER ── */
+        .hdr{display:flex;align-items:center;gap:10px;padding:10px 16px;background:var(--bg2);border-bottom:1px solid var(--brd)}
+        .hdr-logo{font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:14px;color:var(--ac2);display:flex;align-items:center;gap:6px}
+        .hdr-logo svg{flex-shrink:0}
+        .hdr-status{margin-left:auto;display:flex;align-items:center;gap:6px;font-size:10px;color:var(--t3)}
+        .hdr-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+        .hdr-dot.on{background:var(--ok);box-shadow:0 0 6px var(--ok)}.hdr-dot.off{background:var(--err)}
+        .hdr-dot.wait{background:var(--warn);animation:pulse 1s infinite}
+        @keyframes pulse{50%{opacity:.4}}
+
+        /* ── CONTROL BAR ── */
+        .ctrl{display:flex;align-items:center;gap:8px;padding:10px 16px;background:var(--bg2);border-bottom:1px solid var(--brd);flex-wrap:wrap}
+        .ctrl select{padding:7px 10px;background:var(--bg3);border:1px solid var(--brd);border-radius:var(--r);color:var(--t1);font-size:12px;font-family:inherit;min-width:140px;cursor:pointer}
+        .ctrl select:focus{outline:none;border-color:var(--ac)}
+        .ctrl select option{background:var(--bg3)}
+
+        .btn{display:inline-flex;align-items:center;justify-content:center;gap:4px;padding:7px 14px;border:none;border-radius:var(--r);font-family:inherit;font-size:11px;font-weight:600;cursor:pointer;transition:all .15s}
+        .btn:active{transform:scale(.97)}.btn:disabled{opacity:.35;pointer-events:none}
+        .btn-ac{background:var(--ac);color:#fff}.btn-ac:hover{background:var(--ac2)}
+        .btn-ghost{background:var(--bg3);color:var(--t2);border:1px solid var(--brd)}.btn-ghost:hover{border-color:var(--ac);color:var(--t1)}
+
+        .proxy-info{display:flex;align-items:center;gap:6px;margin-left:auto;font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--t3)}
+        .proxy-pill{padding:3px 8px;border-radius:12px;font-size:9px;font-weight:600}
+        .proxy-pill.ok{background:var(--ok-d);color:var(--ok)}.proxy-pill.no{background:var(--err-d);color:var(--err)}
+        .proxy-pill.wait{background:var(--warn-d);color:var(--warn)}
+
+        .mini-spinner{width:12px;height:12px;border:2px solid var(--brd);border-top-color:var(--ac);border-radius:50%;animation:spin .6s linear infinite;display:none}
+        .mini-spinner.show{display:inline-block}
+        @keyframes spin{to{transform:rotate(360deg)}}
+
+        /* ── URL BAR ── */
+        .url-row{display:flex;align-items:center;gap:6px;padding:8px 16px;background:var(--bg);border-bottom:1px solid var(--brd)}
+        .url-row .lock{font-size:11px;color:var(--t3);flex-shrink:0}
+        .url-row input{flex:1;padding:8px 10px;background:var(--bg3);border:1px solid var(--brd);border-radius:var(--r);color:var(--t1);font-family:'IBM Plex Mono',monospace;font-size:12px;min-width:0}
+        .url-row input:focus{outline:none;border-color:var(--ac);box-shadow:0 0 0 2px var(--acg)}
+
+        /* ── RENDER ── */
+        .render{flex:1;position:relative;overflow:hidden;background:#0d0f14}
+        .render iframe{width:100%;height:100%;border:none;background:#fff}
+        .render-ph{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:var(--t3);padding:24px}
+        .render-ph h2{font-size:18px;color:var(--t2);margin:12px 0 6px;font-weight:500}
+        .render-ph p{font-size:12px;line-height:1.6;max-width:320px}
+        .render-ph .steps{margin-top:16px;text-align:left;font-size:11px;line-height:2}
+        .render-ph .steps span{color:var(--ac);font-weight:600;margin-right:4px}
+        .loader{position:absolute;inset:0;display:none;align-items:center;justify-content:center;background:rgba(10,12,16,.88);z-index:2}
+        .loader.show{display:flex}
+        .loader-inner{text-align:center}
+        .loader-spin{width:28px;height:28px;border:3px solid var(--brd);border-top-color:var(--ac);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 10px}
+        .loader-msg{font-size:11px;color:var(--t2)}
+
+        /* ── FOOTER ── */
+        .ftr{display:flex;align-items:center;gap:8px;padding:5px 16px;background:var(--bg2);border-top:1px solid var(--brd);font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--t3)}
+        .ftr .msg{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+        /* ── TOAST ── */
+        .toast-box{position:fixed;top:50px;right:12px;z-index:50;display:flex;flex-direction:column;gap:4px}
+        .toast{padding:7px 12px;border-radius:6px;font-size:10px;font-weight:500;animation:tIn .2s;border:1px solid}
+        .toast-ok{background:var(--ok-d);border-color:rgba(54,211,153,.25);color:var(--ok)}
+        .toast-err{background:var(--err-d);border-color:rgba(248,114,114,.25);color:var(--err)}
+        .toast-warn{background:var(--warn-d);border-color:rgba(251,189,35,.25);color:var(--warn)}
+        .toast-info{background:var(--acg);border-color:rgba(77,140,245,.2);color:var(--ac2)}
+        @keyframes tIn{from{opacity:0;transform:translateY(-8px)}}
+
+        /* ── MOBILE ── */
+        @media(max-width:600px){
+            .ctrl{gap:5px;padding:8px 10px}
+            .ctrl select{min-width:0;flex:1}
+            .proxy-info{margin-left:0;margin-top:4px;width:100%}
+            .url-row{padding:6px 10px}
+            .hdr{padding:8px 10px}
+        }
+    </style>
+</head>
+<body>
+
+<div class="hdr">
+    <div class="hdr-logo">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        TunnelX
+    </div>
+    <div class="hdr-status">
+        <div class="hdr-dot off" id="statusDot"></div>
+        <span id="statusText">Not connected</span>
+    </div>
+</div>
+
+<div class="ctrl">
+    <select id="countrySelect">
+        <option value="">Choose country...</option>
+    </select>
+    <button class="btn btn-ac" onclick="go()" id="goBtn">Connect</button>
+    <div class="mini-spinner" id="goSpinner"></div>
+    <div class="proxy-info">
+        <div class="proxy-pill no" id="proxyPill">No proxy</div>
+    </div>
+</div>
+
+<div class="url-row">
+    <span class="lock" id="lockIcon">🔓</span>
+    <input type="text" id="urlInput" placeholder="Enter URL and press Enter..." onkeydown="if(event.key==='Enter')navigate()">
+    <button class="btn btn-ac" onclick="navigate()">Go</button>
+</div>
+
+<div class="render">
+    <iframe id="frame" style="display:none"></iframe>
+    <div class="render-ph" id="placeholder">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" opacity=".2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        <h2>Browse through tunnel</h2>
+        <p>Choose a country, connect to a proxy, then enter any URL.</p>
+        <div class="steps">
+            <span>1</span> Select a country above<br>
+            <span>2</span> Click Connect — finds the fastest proxy<br>
+            <span>3</span> Enter a URL and browse
+        </div>
+    </div>
+    <div class="loader" id="loader">
+        <div class="loader-inner">
+            <div class="loader-spin"></div>
+            <div class="loader-msg" id="loaderMsg">Loading...</div>
+        </div>
+    </div>
+</div>
+
+<div class="ftr">
+    <span class="msg" id="footerMsg">Ready</span>
+</div>
+
+<div class="toast-box" id="toasts"></div>
+
+<script>
+// ━━━ CONFIG ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+const RELAY = 'https://tunnelx-relay.onrender.com';
+const PROXIFLY = 'https://cdn.jsdelivr.net/gh/proxifly/free-proxy-list@main/proxies/countries';
+const CORS_FB = u => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`;
+const TEST_CONCURRENCY = 10;
+
+// ━━━ COUNTRIES ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+const C = [
+  ['RU','🇷🇺 Russia'],['US','🇺🇸 USA'],['DE','🇩🇪 Germany'],['GB','🇬🇧 UK'],['FR','🇫🇷 France'],
+  ['NL','🇳🇱 Netherlands'],['CA','🇨🇦 Canada'],['BR','🇧🇷 Brazil'],['IN','🇮🇳 India'],['JP','🇯🇵 Japan'],
+  ['KR','🇰🇷 S. Korea'],['CN','🇨🇳 China'],['AU','🇦🇺 Australia'],['IT','🇮🇹 Italy'],['ES','🇪🇸 Spain'],
+  ['PL','🇵🇱 Poland'],['UA','🇺🇦 Ukraine'],['TR','🇹🇷 Turkey'],['ID','🇮🇩 Indonesia'],['TH','🇹🇭 Thailand'],
+  ['VN','🇻🇳 Vietnam'],['MX','🇲🇽 Mexico'],['AR','🇦🇷 Argentina'],['EG','🇪🇬 Egypt'],['SA','🇸🇦 Saudi Arabia'],
+  ['AE','🇦🇪 UAE'],['ZA','🇿🇦 South Africa'],['SG','🇸🇬 Singapore'],['HK','🇭🇰 Hong Kong'],['TW','🇹🇼 Taiwan'],
+  ['PH','🇵🇭 Philippines'],['MY','🇲🇾 Malaysia'],['IR','🇮🇷 Iran'],['KZ','🇰🇿 Kazakhstan'],['BY','🇧🇾 Belarus'],
+  ['CZ','🇨🇿 Czechia'],['RO','🇷🇴 Romania'],['SE','🇸🇪 Sweden'],['NO','🇳🇴 Norway'],['FI','🇫🇮 Finland'],
+  ['CH','🇨🇭 Switzerland'],['AT','🇦🇹 Austria'],['BE','🇧🇪 Belgium'],['PT','🇵🇹 Portugal'],['GR','🇬🇷 Greece'],
+  ['BD','🇧🇩 Bangladesh'],['PK','🇵🇰 Pakistan'],['CL','🇨🇱 Chile'],['CO','🇨🇴 Colombia'],['NG','🇳🇬 Nigeria'],
+];
+
+// ━━━ STATE ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+let activeProxy = null;  // { protocol, host, port, address, latency }
+let proxies = [];
+let navHist = [], navPos = -1;
+
+// ━━━ HELPERS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function status(state, text) {
+  const dot = document.getElementById('statusDot');
+  dot.className = 'hdr-dot ' + state;
+  document.getElementById('statusText').textContent = text;
+}
+
+function footer(msg) { document.getElementById('footerMsg').textContent = msg; }
+
+function pill(state, text) {
+  const p = document.getElementById('proxyPill');
+  p.className = 'proxy-pill ' + state;
+  p.textContent = text;
+}
+
+function toast(msg, type='info') {
+  const el = document.createElement('div');
+  el.className = `toast toast-${type}`;
+  el.textContent = msg;
+  document.getElementById('toasts').appendChild(el);
+  setTimeout(() => el.remove(), 3500);
+}
+
+function showLoader(msg) {
+  document.getElementById('loaderMsg').textContent = msg;
+  document.getElementById('loader').classList.add('show');
+}
+function hideLoader() { document.getElementById('loader').classList.remove('show'); }
+
+// ━━━ CONNECT FLOW ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+async function go() {
+  const code = document.getElementById('countrySelect').value;
+  if (!code) { toast('Pick a country first', 'warn'); return; }
+
+  const name = C.find(c => c[0] === code)?.[1] || code;
+  const btn = document.getElementById('goBtn');
+  const spinner = document.getElementById('goSpinner');
+  btn.disabled = true;
+  spinner.classList.add('show');
+  status('wait', `Connecting to ${name}...`);
+  pill('wait', 'Searching...');
+  footer(`Fetching proxy list for ${name}...`);
+
+  try {
+    // 1. Fetch proxies
+    const url = `${PROXIFLY}/${code}/data.json`;
+    const resp = await fetch(url);
+    if (!resp.ok) throw new Error(resp.status === 404 ? `No proxies for ${name}` : `HTTP ${resp.status}`);
+    const data = await resp.json();
+    if (!data.length) throw new Error('Empty list');
+
+    proxies = data.map(e => ({
+      protocol: (e.protocol || 'http').toLowerCase(),
+      host: e.ip, port: e.port,
+      address: `${(e.protocol||'http').toLowerCase()}://${e.ip}:${e.port}`,
+      latency: null, status: 'untested'
+    })).filter(p => p.host && p.port);
+
+    footer(`Found ${proxies.length} proxies — testing...`);
+
+    // 2. Test in batches (concurrency limited)
+    let tested = 0;
+    const alive = [];
+
+    for (let i = 0; i < proxies.length; i += TEST_CONCURRENCY) {
+      const batch = proxies.slice(i, i + TEST_CONCURRENCY);
+      const results = await Promise.allSettled(
+        batch.map(async (p) => {
+          const t0 = Date.now();
+          try {
+            const r = await fetch(`${RELAY}/test?host=${p.host}&port=${p.port}&proto=${p.protocol}`, { cache: 'no-store' });
+            const d = await r.json();
+            p.latency = d.latency;
+            p.status = d.status;
+            p.exitIp = d.exitIp;
+            if (d.status === 'alive') alive.push(p);
+          } catch (e) { p.status = 'dead'; }
+          tested++;
+          footer(`Testing... ${tested}/${proxies.length} (${alive.length} alive)`);
+          pill('wait', `${alive.length} found`);
+        })
+      );
+
+      // Stop early if we have enough good ones
+      if (alive.length >= 3) break;
+    }
+
+    if (alive.length === 0) throw new Error('No working proxies found');
+
+    // 3. Pick fastest
+    alive.sort((a, b) => (a.latency || 99999) - (b.latency || 99999));
+    activeProxy = alive[0];
+
+    status('on', `Connected via ${name}`);
+    pill('ok', `${activeProxy.protocol.toUpperCase()} ${activeProxy.host}:${activeProxy.port} (${activeProxy.latency}ms)`);
+    footer(`Ready — ${alive.length} proxies available, using fastest`);
+    toast(`Connected to ${name}!`, 'ok');
+
+  } catch (e) {
+    status('off', 'Connection failed');
+    pill('no', 'No proxy');
+    footer(e.message);
+    toast(e.message, 'err');
+    activeProxy = null;
+  }
+
+  btn.disabled = false;
+  spinner.classList.remove('show');
+}
+
+// ━━━ NAVIGATE ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+async function navigate() {
+  let url = document.getElementById('urlInput').value.trim();
+  if (!url) return;
+  if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
+  document.getElementById('urlInput').value = url;
+
+  if (!activeProxy) { toast('Connect to a country first', 'warn'); return; }
+
+  document.getElementById('placeholder').style.display = 'none';
+  showLoader(`Loading via ${activeProxy.host}...`);
+  document.getElementById('lockIcon').textContent = url.startsWith('https') ? '🔒' : '🔓';
+  footer(`Fetching ${url}...`);
+
+  try {
+    const proxyParam = `&proxy=${encodeURIComponent(activeProxy.address)}`;
+    let html = null;
+
+    // Try relay
+    try {
+      const r = await fetch(`${RELAY}/fetch?url=${encodeURIComponent(url)}${proxyParam}`, { cache: 'no-store' });
+      if (r.ok) html = await r.text();
+    } catch (e) {}
+
+    // Fallback: CORS
+    if (!html) {
+      try {
+        const r = await fetch(CORS_FB(url), { cache: 'no-store' });
+        if (r.ok) html = await r.text();
+      } catch (e) {}
+    }
+
+    if (!html) throw new Error('Failed to load page');
+
+    // Inject base tag
+    const base = `<base href="${url}">`;
+    if (html.includes('<head>')) html = html.replace('<head>', `<head>${base}`);
+    else html = base + html;
+
+    // Inject resource interceptor
+    const interceptor = `<script>
+(function(){
+var R='${RELAY}',P='${encodeURIComponent(activeProxy.address)}',B=new URL('${url}');
+function fix(u){if(!u||u.startsWith('data:')||u.startsWith('blob:')||u.startsWith('javascript:'))return u;
+try{var s=u;if(u.startsWith('//'))s=B.protocol+u;else if(u.startsWith('/'))s=B.protocol+'//'+B.host+u;
+else if(!/^https?:\\/\\//i.test(u))s=B.protocol+'//'+B.host+B.pathname.replace(/\\/[^/]*$/,'/')+u;
+return R+'/fetch?url='+encodeURIComponent(s)+'&proxy='+P}catch(e){return u}}
+var F=window.fetch;window.fetch=function(i,o){if(typeof i==='string')i=fix(i);return F.call(this,i,o)};
+var X=XMLHttpRequest.prototype.open;XMLHttpRequest.prototype.open=function(m,u){arguments[1]=fix(u);return X.apply(this,arguments)};
+['HTMLScriptElement','HTMLImageElement'].forEach(function(c){var p=window[c]&&window[c].prototype;if(!p)return;
+var d=Object.getOwnPropertyDescriptor(p,'src');if(d&&d.set)Object.defineProperty(p,'src',{set:function(v){d.set.call(this,fix(v))},get:d.get,configurable:true})});
+var ld=Object.getOwnPropertyDescriptor(HTMLLinkElement.prototype,'href');
+if(ld&&ld.set)Object.defineProperty(HTMLLinkElement.prototype,'href',{set:function(v){ld.set.call(this,fix(v))},get:ld.get,configurable:true});
+})();
+<\\/script>`;
+
+    html = html.replace('<head>', '<head>' + interceptor);
+
+    // Strip scripts/iframes: videos, trackers, heavy stuff
+    html = html.replace(/<video\s[^>]*>[\s\S]*?<\/video>/gi, '');
+    html = html.replace(/<iframe\s[^>]*(?:youtube|vimeo|dailymotion|tiktok)[^>]*>[\s\S]*?<\/iframe>/gi, '');
+
+    // Rewrite static <script src>, <link href>, <img src>
+    function rfor(s) {
+      if (!s || s.startsWith('data:')) return s;
+      let resolved = s;
+      try {
+        const b = new URL(url);
+        if (s.startsWith('//')) resolved = b.protocol + s;
+        else if (s.startsWith('/')) resolved = b.protocol + '//' + b.host + s;
+        else if (!/^https?:\/\//i.test(s)) resolved = b.protocol + '//' + b.host + b.pathname.replace(/\/[^/]*$/, '/') + s;
+      } catch(e) {}
+      return `${RELAY}/fetch?url=${encodeURIComponent(resolved)}&proxy=${encodeURIComponent(activeProxy.address)}`;
+    }
+
+    html = html.replace(/(<script\s[^>]*?src\s*=\s*)(["'])([^"']*?)\2/gi, (m,pre,q,src) => `${pre}${q}${rfor(src)}${q}`);
+    html = html.replace(/(<link\s[^>]*?href\s*=\s*)(["'])([^"']*?)\2/gi, (m,pre,q,h) => `${pre}${q}${rfor(h)}${q}`);
+    html = html.replace(/(<img\s[^>]*?src\s*=\s*)(["'])([^"']*?)\2/gi, (m,pre,q,src) => `${pre}${q}${rfor(src)}${q}`);
+
+    const frame = document.getElementById('frame');
+    frame.srcdoc = html;
+    frame.style.display = 'block';
+
+    navHist = navHist.slice(0, navPos + 1);
+    navHist.push(url);
+    navPos = navHist.length - 1;
+
+    footer(`Loaded ${url}`);
+    toast('Page loaded', 'ok');
+
+  } catch (e) {
+    footer(`Error: ${e.message}`);
+    toast(e.message, 'err');
+  }
+
+  hideLoader();
+}
+
+// ━━━ INIT ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+(function init() {
+  const sel = document.getElementById('countrySelect');
+  C.forEach(([code, name]) => {
+    const opt = document.createElement('option');
+    opt.value = code;
+    opt.textContent = name;
+    sel.appendChild(opt);
+  });
+
+  // Check relay
+  fetch(`${RELAY}/health`, { cache: 'no-store' })
+    .then(r => r.json())
+    .then(d => {
+      if (d.status === 'ok') {
+        footer('Relay online — choose a country to start');
+      }
+    })
+    .catch(() => {
+      footer('Relay offline — some features may not work');
+    });
+})();
+</script>
+</body>
+</html>

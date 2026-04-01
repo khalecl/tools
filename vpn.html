@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -60,6 +61,15 @@
         .rotate-ind{display:flex;align-items:center;gap:3px;font-size:9px;color:var(--text-3);margin-left:auto;cursor:pointer}
         .rotate-ind.active{color:var(--green)}
 
+        /* ── COUNTRY LOADER ── */
+        .country-strip{display:flex;align-items:center;gap:5px;padding:7px 10px;background:var(--bg-raised);border-bottom:1px solid var(--border);flex-shrink:0}
+        .country-strip select{background:var(--bg-surface);border:1px solid var(--border);border-radius:5px;color:var(--text-1);font-family:'JetBrains Mono',monospace;font-size:10px;padding:4px 6px;flex:1;min-width:0;cursor:pointer;appearance:auto}
+        .country-strip select:focus{outline:none;border-color:var(--accent)}
+        .country-strip .cload-btn{padding:5px 10px;font-size:9px;font-weight:700;background:var(--purple);color:#fff;border:none;border-radius:5px;cursor:pointer;white-space:nowrap;transition:all .15s}
+        .country-strip .cload-btn:hover{background:#b66dfc}
+        .country-strip .cload-btn:disabled{opacity:.4;pointer-events:none}
+        .country-strip label{font-size:8px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:.5px;white-space:nowrap}
+
         /* ── PROXY LIST ── */
         .proxy-list{flex:1;overflow-y:auto;padding:5px;display:flex;flex-direction:column;gap:3px}
         .proxy-list::-webkit-scrollbar{width:4px}.proxy-list::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
@@ -81,6 +91,16 @@
         .pcard .ms{font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--text-3);flex-shrink:0}
         .pcard .tbtn{padding:3px 6px;font-size:8px;background:var(--bg-overlay);color:var(--text-2);border:1px solid var(--border);border-radius:3px;cursor:pointer;flex-shrink:0}
         .pcard .tbtn:hover{border-color:var(--accent);color:var(--accent-bright)}
+
+        /* ── COUNTRY LOADER ── */
+        .country-bar{display:flex;align-items:center;gap:5px;padding:7px 10px;background:var(--bg-raised);border-bottom:1px solid var(--border);flex-shrink:0}
+        .country-bar label{font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text-3);white-space:nowrap}
+        .country-select{flex:1;min-width:0;padding:5px 6px;background:var(--bg-deep);border:1px solid var(--border);border-radius:5px;color:var(--text-1);font-family:'JetBrains Mono',monospace;font-size:10px;appearance:auto;cursor:pointer}
+        .country-select:focus{outline:none;border-color:var(--accent)}
+        .country-select option{background:var(--bg-deep);color:var(--text-1)}
+        .load-spinner{display:none;width:14px;height:14px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .6s linear infinite}
+        .country-bar .load-spinner.active{display:block}
+
         .empty-state{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--text-3);text-align:center;padding:20px}
         .empty-state h3{font-size:12px;color:var(--text-2);margin:8px 0 3px}.empty-state p{font-size:10px;line-height:1.4;max-width:200px}
 
@@ -154,6 +174,16 @@
         .modal .hint{font-size:9px;color:var(--text-3);margin-top:3px;line-height:1.4}
         .modal-footer{margin-top:14px;display:flex;gap:5px;justify-content:flex-end}
 
+        /* ── COUNTRY LOADER ── */
+        .country-strip{display:flex;align-items:center;gap:6px;padding:8px 10px;background:var(--bg-raised);border-bottom:1px solid var(--border);flex-shrink:0}
+        .country-strip label{font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text-3);white-space:nowrap}
+        .country-select{flex:1;background:var(--bg-surface);border:1px solid var(--border);border-radius:5px;padding:5px 6px;color:var(--text-1);font-family:'JetBrains Mono',monospace;font-size:10px;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%2364748b'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 6px center;padding-right:20px;cursor:pointer}
+        .country-select:focus{outline:none;border-color:var(--accent)}
+        .country-select option{background:var(--bg-surface);color:var(--text-1)}
+        .country-loading{font-size:9px;color:var(--yellow);display:none;align-items:center;gap:4px}
+        .country-loading.show{display:flex}
+        .mini-spin{width:12px;height:12px;border:2px solid var(--border);border-top-color:var(--yellow);border-radius:50%;animation:spin .6s linear infinite;flex-shrink:0}
+
         /* ── SETTINGS STRIP ── */
         .settings-strip{display:flex;align-items:center;gap:10px;padding:5px 12px;background:var(--bg-surface);border-bottom:1px solid var(--border);flex-shrink:0;flex-wrap:wrap;font-size:10px}
         .setting{display:flex;align-items:center;gap:5px;color:var(--text-2)}
@@ -166,6 +196,15 @@
         .toggle input:checked+.slider::before{transform:translateX(14px);background:#fff}
         .settings-sep{width:1px;height:14px;background:var(--border)}
         .cache-count{font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--text-3);padding:2px 6px;background:var(--bg-deep);border-radius:3px}
+
+        /* ── COUNTRY BAR ── */
+        .country-bar{display:flex;align-items:center;gap:5px;padding:8px 10px;border-bottom:1px solid var(--border);background:var(--bg-surface)}
+        .country-bar label{font-size:12px;flex-shrink:0}
+        .country-select{flex:1;min-width:0;padding:5px 6px;background:var(--bg-deep);border:1px solid var(--border);border-radius:5px;color:var(--text-1);font-size:10px;font-family:'DM Sans',sans-serif}
+        .country-select:focus{outline:none;border-color:var(--accent)}
+        .country-select option{background:var(--bg-deep);color:var(--text-1)}
+        .load-spinner{width:14px;height:14px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .6s linear infinite;display:none;flex-shrink:0}
+        .load-spinner.show{display:block}
 
         /* ── MOBILE ── */
         @media(max-width:768px){
@@ -211,6 +250,14 @@
                 <button class="btn btn-ghost" onclick="importStorage()">↑ Load</button>
                 <button class="btn btn-ghost" onclick="clearAll()">✕</button>
             </div>
+        </div>
+        <div class="country-bar">
+            <label>🌍</label>
+            <select class="country-select" id="countrySelect">
+                <option value="">Load by country...</option>
+            </select>
+            <button class="btn btn-accent btn-sm" onclick="loadCountryProxies()" id="countryLoadBtn">Load</button>
+            <div class="load-spinner" id="countrySpinner"></div>
         </div>
         <div class="toolbar">
             <button class="btn btn-green btn-sm" onclick="testAll()" id="testAllBtn">▶ Test</button>
@@ -381,6 +428,219 @@ const CORS_FB = [
     u => `https://corsproxy.io/?${encodeURIComponent(u)}`,
 ];
 const SAFE_PORTS = new Set([80, 443, 8080, 8443]);
+
+// ━━━ PROXIFLY COUNTRY CODES ━━━━━━━━━━━━━━━━━━━
+const COUNTRIES = [
+  ['RU','🇷🇺 Russia'],['US','🇺🇸 USA'],['DE','🇩🇪 Germany'],['GB','🇬🇧 UK'],['FR','🇫🇷 France'],
+  ['NL','🇳🇱 Netherlands'],['CA','🇨🇦 Canada'],['BR','🇧🇷 Brazil'],['IN','🇮🇳 India'],['JP','🇯🇵 Japan'],
+  ['KR','🇰🇷 South Korea'],['CN','🇨🇳 China'],['AU','🇦🇺 Australia'],['IT','🇮🇹 Italy'],['ES','🇪🇸 Spain'],
+  ['PL','🇵🇱 Poland'],['UA','🇺🇦 Ukraine'],['TR','🇹🇷 Turkey'],['ID','🇮🇩 Indonesia'],['TH','🇹🇭 Thailand'],
+  ['VN','🇻🇳 Vietnam'],['MX','🇲🇽 Mexico'],['AR','🇦🇷 Argentina'],['CL','🇨🇱 Chile'],['CO','🇨🇴 Colombia'],
+  ['EG','🇪🇬 Egypt'],['SA','🇸🇦 Saudi Arabia'],['AE','🇦🇪 UAE'],['ZA','🇿🇦 South Africa'],['NG','🇳🇬 Nigeria'],
+  ['SG','🇸🇬 Singapore'],['HK','🇭🇰 Hong Kong'],['TW','🇹🇼 Taiwan'],['PH','🇵🇭 Philippines'],['MY','🇲🇾 Malaysia'],
+  ['BD','🇧🇩 Bangladesh'],['PK','🇵🇰 Pakistan'],['IR','🇮🇷 Iran'],['KZ','🇰🇿 Kazakhstan'],['BY','🇧🇾 Belarus'],
+  ['CZ','🇨🇿 Czech Republic'],['RO','🇷🇴 Romania'],['SE','🇸🇪 Sweden'],['NO','🇳🇴 Norway'],['FI','🇫🇮 Finland'],
+  ['AT','🇦🇹 Austria'],['CH','🇨🇭 Switzerland'],['BE','🇧🇪 Belgium'],['PT','🇵🇹 Portugal'],['GR','🇬🇷 Greece'],
+];
+
+const PROXIFLY_BASE = 'https://cdn.jsdelivr.net/gh/proxifly/free-proxy-list@main/proxies/countries';
+
+function populateCountryDropdown() {
+  const sel = document.getElementById('countrySelect');
+  sel.innerHTML = '<option value="">Select country...</option>';
+  COUNTRIES.forEach(([code, name]) => {
+    const opt = document.createElement('option');
+    opt.value = code;
+    opt.textContent = name;
+    sel.appendChild(opt);
+  });
+}
+
+async function loadCountryProxies() {
+  const code = document.getElementById('countrySelect').value;
+  if (!code) { toast('Select a country', 'warn'); return; }
+
+  const btn = document.getElementById('countryLoadBtn');
+  const spinner = document.getElementById('countrySpinner');
+  btn.disabled = true;
+  spinner.classList.add('show');
+
+  const countryName = COUNTRIES.find(c => c[0] === code)?.[1] || code;
+  xlog('info', `Fetching proxies for ${countryName}...`);
+
+  try {
+    // Try JSON first (has protocol info)
+    const jsonUrl = `${PROXIFLY_BASE}/${code}/data.json`;
+    xlog('net', `→ ${jsonUrl}`);
+    const resp = await fetch(jsonUrl);
+
+    if (!resp.ok) {
+      if (resp.status === 404) throw new Error(`No proxies found for ${countryName}`);
+      throw new Error(`HTTP ${resp.status}`);
+    }
+
+    const data = await resp.json();
+    if (!Array.isArray(data) || data.length === 0) throw new Error('Empty proxy list');
+
+    // Clear existing and add new
+    proxies = [];
+    selected = -1;
+    let added = 0;
+    const seen = new Set();
+
+    data.forEach(entry => {
+      const proto = (entry.protocol || 'http').toLowerCase();
+      const ip = entry.ip;
+      const port = entry.port;
+      const addr = `${proto}://${ip}:${port}`;
+      if (!seen.has(addr) && ip && port) {
+        addPx(proto, ip, String(port), addr);
+        seen.add(addr);
+        added++;
+      }
+    });
+
+    render();
+    saveStorage();
+    xlog('success', `✓ Loaded ${added} proxies for ${countryName}`);
+    toast(`${added} proxies loaded`, 'success');
+
+  } catch (e) {
+    xlog('error', `Failed to load ${countryName}: ${e.message}`);
+    toast(e.message, 'error');
+
+    // Fallback: try .txt format
+    try {
+      const txtUrl = `${PROXIFLY_BASE}/${code}/data.txt`;
+      xlog('net', `→ Fallback: ${txtUrl}`);
+      const resp2 = await fetch(txtUrl);
+      if (resp2.ok) {
+        const text = await resp2.text();
+        proxies = [];
+        selected = -1;
+        const n = parseProxyText(text);
+        render();
+        saveStorage();
+        if (n > 0) {
+          xlog('success', `✓ Loaded ${n} proxies from txt fallback`);
+          toast(`${n} proxies loaded`, 'success');
+        }
+      }
+    } catch (e2) {
+      xlog('error', `Txt fallback also failed: ${e2.message}`);
+    }
+  }
+
+  btn.disabled = false;
+  spinner.classList.remove('show');
+}
+
+// ━━━ COUNTRY PROXY LOADER (Proxifly) ━━━━━━━━━━
+const PROXIFLY_CDN = 'https://cdn.jsdelivr.net/gh/proxifly/free-proxy-list@main/proxies/countries';
+const COUNTRIES = [
+    {code:'AF',name:'Afghanistan'},{code:'AL',name:'Albania'},{code:'DZ',name:'Algeria'},{code:'AO',name:'Angola'},
+    {code:'AR',name:'Argentina'},{code:'AM',name:'Armenia'},{code:'AU',name:'Australia'},{code:'AT',name:'Austria'},
+    {code:'AZ',name:'Azerbaijan'},{code:'BD',name:'Bangladesh'},{code:'BY',name:'Belarus'},{code:'BE',name:'Belgium'},
+    {code:'BO',name:'Bolivia'},{code:'BA',name:'Bosnia'},{code:'BR',name:'Brazil'},{code:'BG',name:'Bulgaria'},
+    {code:'KH',name:'Cambodia'},{code:'CM',name:'Cameroon'},{code:'CA',name:'Canada'},{code:'CL',name:'Chile'},
+    {code:'CN',name:'China'},{code:'CO',name:'Colombia'},{code:'CR',name:'Costa Rica'},{code:'HR',name:'Croatia'},
+    {code:'CY',name:'Cyprus'},{code:'CZ',name:'Czechia'},{code:'DK',name:'Denmark'},{code:'DO',name:'Dominican Rep.'},
+    {code:'EC',name:'Ecuador'},{code:'EG',name:'Egypt'},{code:'SV',name:'El Salvador'},{code:'EE',name:'Estonia'},
+    {code:'ET',name:'Ethiopia'},{code:'FI',name:'Finland'},{code:'FR',name:'France'},{code:'GE',name:'Georgia'},
+    {code:'DE',name:'Germany'},{code:'GH',name:'Ghana'},{code:'GR',name:'Greece'},{code:'GT',name:'Guatemala'},
+    {code:'HN',name:'Honduras'},{code:'HK',name:'Hong Kong'},{code:'HU',name:'Hungary'},{code:'IN',name:'India'},
+    {code:'ID',name:'Indonesia'},{code:'IR',name:'Iran'},{code:'IQ',name:'Iraq'},{code:'IE',name:'Ireland'},
+    {code:'IL',name:'Israel'},{code:'IT',name:'Italy'},{code:'JP',name:'Japan'},{code:'JO',name:'Jordan'},
+    {code:'KZ',name:'Kazakhstan'},{code:'KE',name:'Kenya'},{code:'KR',name:'South Korea'},{code:'KW',name:'Kuwait'},
+    {code:'KG',name:'Kyrgyzstan'},{code:'LA',name:'Laos'},{code:'LV',name:'Latvia'},{code:'LB',name:'Lebanon'},
+    {code:'LT',name:'Lithuania'},{code:'LU',name:'Luxembourg'},{code:'MG',name:'Madagascar'},{code:'MY',name:'Malaysia'},
+    {code:'MX',name:'Mexico'},{code:'MD',name:'Moldova'},{code:'MN',name:'Mongolia'},{code:'MA',name:'Morocco'},
+    {code:'MZ',name:'Mozambique'},{code:'MM',name:'Myanmar'},{code:'NP',name:'Nepal'},{code:'NL',name:'Netherlands'},
+    {code:'NZ',name:'New Zealand'},{code:'NI',name:'Nicaragua'},{code:'NG',name:'Nigeria'},{code:'NO',name:'Norway'},
+    {code:'OM',name:'Oman'},{code:'PK',name:'Pakistan'},{code:'PA',name:'Panama'},{code:'PY',name:'Paraguay'},
+    {code:'PE',name:'Peru'},{code:'PH',name:'Philippines'},{code:'PL',name:'Poland'},{code:'PT',name:'Portugal'},
+    {code:'QA',name:'Qatar'},{code:'RO',name:'Romania'},{code:'RU',name:'🇷🇺 Russia'},{code:'SA',name:'Saudi Arabia'},
+    {code:'RS',name:'Serbia'},{code:'SG',name:'Singapore'},{code:'SK',name:'Slovakia'},{code:'SI',name:'Slovenia'},
+    {code:'ZA',name:'South Africa'},{code:'ES',name:'Spain'},{code:'LK',name:'Sri Lanka'},{code:'SE',name:'Sweden'},
+    {code:'CH',name:'Switzerland'},{code:'TW',name:'Taiwan'},{code:'TJ',name:'Tajikistan'},{code:'TZ',name:'Tanzania'},
+    {code:'TH',name:'Thailand'},{code:'TR',name:'Turkey'},{code:'UA',name:'Ukraine'},{code:'AE',name:'UAE'},
+    {code:'GB',name:'United Kingdom'},{code:'US',name:'United States'},{code:'UY',name:'Uruguay'},
+    {code:'UZ',name:'Uzbekistan'},{code:'VE',name:'Venezuela'},{code:'VN',name:'Vietnam'},{code:'ZM',name:'Zambia'},
+];
+
+function initCountrySelect() {
+    const sel = document.getElementById('countrySelect');
+    COUNTRIES.forEach(c => {
+        const opt = document.createElement('option');
+        opt.value = c.code;
+        opt.textContent = `${c.name} (${c.code})`;
+        sel.appendChild(opt);
+    });
+    // Default to Russia
+    sel.value = 'RU';
+}
+
+async function loadCountryProxies() {
+    const code = document.getElementById('countrySelect').value;
+    if (!code) { toast('Select a country', 'warn'); return; }
+
+    const country = COUNTRIES.find(c => c.code === code);
+    const name = country ? country.name : code;
+
+    document.getElementById('countryLoadBtn').disabled = true;
+    document.getElementById('countrySpinner').classList.add('active');
+    xlog('info', `Loading proxies for ${name} (${code})...`);
+
+    try {
+        const url = `${PROXIFLY_CDN}/${code}/data.json`;
+        xlog('net', `→ Fetching ${url}`);
+        const resp = await fetch(url, { cache: 'no-store' });
+
+        if (!resp.ok) throw new Error(`HTTP ${resp.status} — no proxies found for ${code}`);
+
+        const data = await resp.json();
+
+        if (!Array.isArray(data) || data.length === 0) {
+            throw new Error(`Empty list for ${code}`);
+        }
+
+        // Reset proxy list
+        proxies = [];
+        selected = -1;
+        clearCache();
+
+        // Parse the JSON format: [{protocol, ip, port, ...}]
+        let added = 0;
+        const seen = new Set();
+        data.forEach(p => {
+            const proto = (p.protocol || 'http').toLowerCase();
+            const ip = p.ip;
+            const port = p.port;
+            if (!ip || !port) return;
+            const addr = `${proto}://${ip}:${port}`;
+            if (!seen.has(addr)) {
+                seen.add(addr);
+                proxies.push({
+                    protocol: proto, host: ip, port: parseInt(port), address: addr,
+                    status: 'untested', latency: null, lastTest: null, fails: 0, exitIp: null
+                });
+                added++;
+            }
+        });
+
+        xlog('success', `✓ Loaded ${added} proxies for ${name} (${SAFE_PORTS.has(80) ? proxies.filter(p => SAFE_PORTS.has(p.port)).length + ' on safe ports' : ''})`);
+        toast(`${added} proxies from ${name}`, 'success');
+        render();
+        saveStorage();
+
+    } catch (e) {
+        xlog('error', `Failed to load ${name}: ${e.message}`);
+        toast(`Failed: ${e.message}`, 'error');
+    }
+
+    document.getElementById('countryLoadBtn').disabled = false;
+    document.getElementById('countrySpinner').classList.remove('active');
+}
 
 // ━━━ USER SETTINGS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 let optImages = true;
@@ -735,6 +995,8 @@ function closeModal(id){document.getElementById(id).classList.remove('vis')}
 (async function(){
     xlog('info','═══ TunnelX v4 ═══');
     xlog('info','Session cache: fresh');
+    populateCountryDropdown();
+    initCountrySelect();
 
     // Load default proxies if none saved
     let loaded = false;

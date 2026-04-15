@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>TunnelX GeoAnalyzer</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#0a0c10;--bg2:#12151c;--bg3:#181c26;--bg4:#1f2430;--ac:#4d8cf5;--ac2:#6ea1ff;--acg:rgba(77,140,245,.1);--ok:#36d399;--ok-d:rgba(54,211,153,.1);--err:#f87272;--err-d:rgba(248,114,114,.1);--warn:#fbbd23;--warn-d:rgba(251,189,35,.1);--t1:#dfe5f0;--t2:#8b95a8;--t3:#5a6275;--brd:#222938;--r:8px}
+html,body{width:100%;height:100%;font-family:'IBM Plex Sans',system-ui,sans-serif;background:var(--bg);color:var(--t1);overflow:hidden}
+body{display:flex;flex-direction:column}
+
+.hdr{display:flex;align-items:center;gap:8px;padding:7px 12px;background:var(--bg2);border-bottom:1px solid var(--brd)}
+.logo{font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:13px;color:var(--ac2);display:flex;align-items:center;gap:5px}
+.hdr-r{margin-left:auto;display:flex;align-items:center;gap:6px;font-size:9px;color:var(--t3)}
+
+.ctrl{display:flex;align-items:center;gap:6px;padding:8px 12px;background:var(--bg2);border-bottom:1px solid var(--brd);flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:3px;padding:5px 10px;border:none;border-radius:var(--r);font-family:inherit;font-size:10px;font-weight:600;cursor:pointer;transition:all .15s}
+.btn:active{transform:scale(.97)}.btn:disabled{opacity:.3;pointer-events:none}
+.btn-ac{background:var(--ac);color:#fff}.btn-ac:hover{background:var(--ac2)}
+.btn-ok{background:var(--ok);color:#000}
+.btn-err{background:var(--err);color:#fff}
+.btn-ghost{background:var(--bg3);color:var(--t2);border:1px solid var(--brd)}.btn-ghost:hover{border-color:var(--ac);color:var(--t1)}
+.pill{padding:2px 6px;border-radius:10px;font-size:8px;font-weight:600;font-family:'IBM Plex Mono',monospace}
+.pill.ok{background:var(--ok-d);color:var(--ok)}.pill.no{background:var(--err-d);color:var(--err)}.pill.wait{background:var(--warn-d);color:var(--warn)}.pill.info{background:var(--acg);color:var(--ac2)}
+
+.url-row{display:flex;align-items:center;gap:5px;padding:7px 12px;background:var(--bg);border-bottom:1px solid var(--brd)}
+.url-row input{flex:1;padding:6px 8px;background:var(--bg3);border:1px solid var(--brd);border-radius:var(--r);color:var(--t1);font-family:'IBM Plex Mono',monospace;font-size:11px;min-width:0}
+.url-row input:focus{outline:none;border-color:var(--ac);box-shadow:0 0 0 2px var(--acg)}
+
+/* COUNTRY GRID */
+.country-panel{padding:8px 12px;background:var(--bg2);border-bottom:1px solid var(--brd);max-height:0;overflow:hidden;transition:max-height .3s}
+.country-panel.open{max-height:200px;overflow-y:auto}
+.country-grid{display:flex;flex-wrap:wrap;gap:4px}
+.cc-chip{padding:3px 7px;border-radius:4px;font-size:9px;cursor:pointer;border:1px solid var(--brd);background:var(--bg3);color:var(--t3);transition:all .15s;user-select:none}
+.cc-chip:hover{border-color:var(--ac);color:var(--t2)}
+.cc-chip.sel{background:var(--acg);border-color:var(--ac);color:var(--ac2)}
+.cc-actions{display:flex;gap:4px;margin-bottom:6px}
+
+/* PROGRESS */
+.prog{padding:6px 12px;background:var(--bg3);border-bottom:1px solid var(--brd);display:none}
+.prog.show{display:block}
+.prog-bar{height:4px;background:var(--brd);border-radius:2px;overflow:hidden;margin-top:4px}
+.prog-fill{height:100%;background:var(--ac);border-radius:2px;transition:width .3s}
+.prog-txt{font-size:9px;color:var(--t2);font-family:'IBM Plex Mono',monospace}
+
+/* RESULTS TABLE */
+.results{flex:1;overflow:auto;background:var(--bg)}
+.results table{width:100%;border-collapse:collapse;font-size:10px}
+.results th{position:sticky;top:0;background:var(--bg2);padding:7px 8px;text-align:left;font-size:9px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--brd);cursor:pointer}
+.results th:hover{color:var(--t1)}
+.results td{padding:6px 8px;border-bottom:1px solid rgba(34,41,56,.5);font-family:'IBM Plex Mono',monospace;font-size:9px;vertical-align:top}
+.results tr:hover{background:rgba(77,140,245,.03)}
+.results tr.scanning td{color:var(--warn);font-style:italic}
+.results tr.ok-row td:first-child{border-left:2px solid var(--ok)}
+.results tr.err-row td:first-child{border-left:2px solid var(--err)}
+.results tr.block-row td:first-child{border-left:2px solid var(--warn)}
+.results .status-ok{color:var(--ok)}.results .status-err{color:var(--err)}.results .status-block{color:var(--warn)}
+.results .title-cell{max-width:250px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:'IBM Plex Sans',sans-serif}
+.results .views-cell{font-weight:600;color:var(--ac2)}
+
+.empty-msg{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;color:var(--t3);text-align:center;padding:40px}
+.empty-msg h2{font-size:15px;color:var(--t2);margin:10px 0 5px;font-weight:500}
+.empty-msg p{font-size:10px;line-height:1.6;max-width:340px}
+
+/* RELAY FIELD */
+.relay-row{display:flex;align-items:center;gap:5px;padding:5px 12px;background:var(--bg3);border-bottom:1px solid var(--brd)}
+.relay-row label{font-size:8px;color:var(--t3);font-weight:600;text-transform:uppercase;flex-shrink:0}
+.relay-row input{flex:1;padding:4px 6px;background:var(--bg);border:1px solid var(--brd);border-radius:4px;color:var(--t1);font-family:'IBM Plex Mono',monospace;font-size:9px}
+.relay-row input:focus{outline:none;border-color:var(--ac)}
+
+.ftr{display:flex;align-items:center;gap:6px;padding:4px 12px;background:var(--bg2);border-top:1px solid var(--brd);font-family:'IBM Plex Mono',monospace;font-size:8px;color:var(--t3)}
+.ftr .msg{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+.toast-box{position:fixed;top:40px;right:10px;z-index:50;display:flex;flex-direction:column;gap:3px}
+.toast{padding:5px 9px;border-radius:5px;font-size:9px;font-weight:500;animation:tIn .2s;border:1px solid}
+.toast-ok{background:var(--ok-d);border-color:rgba(54,211,153,.2);color:var(--ok)}
+.toast-err{background:var(--err-d);border-color:rgba(248,114,114,.2);color:var(--err)}
+.toast-warn{background:var(--warn-d);border-color:rgba(251,189,35,.2);color:var(--warn)}
+.toast-info{background:var(--acg);border-color:rgba(77,140,245,.15);color:var(--ac2)}
+@keyframes tIn{from{opacity:0;transform:translateY(-5px)}}
+@media(max-width:600px){.ctrl{gap:4px;padding:5px 8px}.url-row{gap:3px;padding:5px 8px}.results td,.results th{padding:4px 5px;font-size:8px}.results .title-cell{max-width:120px}.country-panel.open{max-height:140px}}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+    <div class="logo"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>TunnelX GeoAnalyzer</div>
+    <div class="hdr-r"><span id="sTxt">Ready</span></div>
+</div>
+
+<div class="relay-row">
+    <label>Relay</label>
+    <input type="text" id="relayIn" value="https://tunnelx-relay.onrender.com">
+    <button class="btn btn-ghost" onclick="testRelay()">Test</button>
+</div>
+
+<div class="url-row">
+    <span style="font-size:10px">🔍</span>
+    <input type="text" id="urlIn" placeholder="Paste any URL (YouTube, website, etc.)..." onkeydown="if(event.key==='Enter')scan()">
+    <button class="btn btn-ok" onclick="scan()" id="scanBtn">Scan</button>
+    <button class="btn btn-err" onclick="stopScan()" id="stopBtn" disabled>Stop</button>
+</div>
+
+<div class="ctrl">
+    <button class="btn btn-ghost" onclick="toggleCountries()"><span id="ccArrow">▸</span> Countries <span class="pill info" id="ccCount">0 selected</span></button>
+    <button class="btn btn-ghost" onclick="exportCSV()">📋 Export CSV</button>
+    <button class="btn btn-ghost" onclick="clearResults()">🗑 Clear</button>
+    <span style="font-size:9px;color:var(--t3);margin-left:auto" id="scanStat"></span>
+</div>
+
+<div class="country-panel" id="ccPanel">
+    <div class="cc-actions">
+        <button class="btn btn-ghost" onclick="selAll()">All</button>
+        <button class="btn btn-ghost" onclick="selNone()">None</button>
+        <button class="btn btn-ghost" onclick="selPreset('popular')">Popular</button>
+        <button class="btn btn-ghost" onclick="selPreset('eu')">Europe</button>
+        <button class="btn btn-ghost" onclick="selPreset('asia')">Asia</button>
+        <button class="btn btn-ghost" onclick="selPreset('americas')">Americas</button>
+    </div>
+    <div class="country-grid" id="ccGrid"></div>
+</div>
+
+<div class="prog" id="prog">
+    <div class="prog-txt" id="progTxt">Scanning...</div>
+    <div class="prog-bar"><div class="prog-fill" id="progFill" style="width:0%"></div></div>
+</div>
+
+<div class="results" id="resultsArea">
+    <div class="empty-msg" id="emptyMsg">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" opacity=".2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <h2>Geo-Analyze any URL</h2>
+        <p>Paste a URL above, select countries, and click Scan. The tool fetches the page through proxies in each country and shows what users there see — title, status, content, view counts.</p>
+    </div>
+    <table id="tbl" style="display:none">
+        <thead>
+            <tr>
+                <th onclick="sortBy('country')">Country</th>
+                <th onclick="sortBy('exitIp')">Exit IP</th>
+                <th onclick="sortBy('status')">Status</th>
+                <th onclick="sortBy('httpCode')">HTTP</th>
+                <th onclick="sortBy('title')">Title</th>
+                <th onclick="sortBy('views')">Views / Info</th>
+                <th onclick="sortBy('size')">Size</th>
+                <th onclick="sortBy('latency')">Latency</th>
+                <th onclick="sortBy('tried')">Tried</th>
+            </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+    </table>
+</div>
+
+<div class="ftr"><span class="msg" id="fMsg">Paste a URL and select countries to begin</span></div>
+<div class="toast-box" id="toasts"></div>
+
+<script>
+var PF='https://cdn.jsdelivr.net/gh/proxifly/free-proxy-list@main/proxies/countries';
+var CC=[
+['RU','🇷🇺 Russia'],['US','🇺🇸 USA'],['DE','🇩🇪 Germany'],['GB','🇬🇧 UK'],['FR','🇫🇷 France'],
+['NL','🇳🇱 Netherlands'],['CA','🇨🇦 Canada'],['BR','🇧🇷 Brazil'],['IN','🇮🇳 India'],['JP','🇯🇵 Japan'],
+['KR','🇰🇷 S.Korea'],['CN','🇨🇳 China'],['AU','🇦🇺 Australia'],['IT','🇮🇹 Italy'],['ES','🇪🇸 Spain'],
+['PL','🇵🇱 Poland'],['UA','🇺🇦 Ukraine'],['TR','🇹🇷 Turkey'],['ID','🇮🇩 Indonesia'],['TH','🇹🇭 Thailand'],
+['VN','🇻🇳 Vietnam'],['MX','🇲🇽 Mexico'],['AR','🇦🇷 Argentina'],['EG','🇪🇬 Egypt'],['SA','🇸🇦 Saudi Arabia'],
+['AE','🇦🇪 UAE'],['ZA','🇿🇦 South Africa'],['SG','🇸🇬 Singapore'],['HK','🇭🇰 Hong Kong'],['TW','🇹🇼 Taiwan'],
+['PH','🇵🇭 Philippines'],['MY','🇲🇾 Malaysia'],['IR','🇮🇷 Iran'],['KZ','🇰🇿 Kazakhstan'],['BY','🇧🇾 Belarus'],
+['CZ','🇨🇿 Czechia'],['RO','🇷🇴 Romania'],['SE','🇸🇪 Sweden'],['NO','🇳🇴 Norway'],['FI','🇫🇮 Finland'],
+['CH','🇨🇭 Switzerland'],['AT','🇦🇹 Austria'],['BE','🇧🇪 Belgium'],['PT','🇵🇹 Portugal'],['GR','🇬🇷 Greece'],
+['BD','🇧🇩 Bangladesh'],['PK','🇵🇰 Pakistan'],['CL','🇨🇱 Chile'],['CO','🇨🇴 Colombia'],['NG','🇳🇬 Nigeria']
+];
+
+var PRESETS={
+    popular:['US','GB','DE','FR','RU','JP','BR','IN','AU','CA'],
+    eu:['DE','GB','FR','NL','IT','ES','PL','SE','NO','FI','CH','AT','BE','PT','GR','CZ','RO'],
+    asia:['JP','KR','CN','IN','ID','TH','VN','SG','HK','TW','PH','MY','BD','PK'],
+    americas:['US','CA','BR','MX','AR','CL','CO']
+};
+
+var relay,selected=new Set(),results=[],scanning=false,scanAbort=null,sortCol='',sortAsc=true;
+var $=function(i){return document.getElementById(i)};
+function ft(m){$('fMsg').textContent=m}
+function toast(m,t){var e=document.createElement('div');e.className='toast toast-'+(t||'info');e.textContent=m;$('toasts').appendChild(e);setTimeout(function(){e.remove()},3500)}
+function updSel(){$('ccCount').textContent=selected.size+' selected'}
+
+// Relay
+function getRelay(){return $('relayIn').value.trim().replace(/\/+$/,'')}
+async function testRelay(){
+    relay=getRelay();if(!relay){toast('Enter relay URL','warn');return}
+    ft('Testing relay...');
+    try{var r=await fetch(relay+'/health',{cache:'no-store'});var d=await r.json();
+        if(d.status==='ok'){ft('Relay online: '+d.type);toast('Relay OK','ok');$('sTxt').textContent='Relay: '+d.type}
+        else throw new Error('Bad response')
+    }catch(e){ft('Relay failed: '+e.message);toast('Relay failed','err')}
+}
+
+// Countries
+function toggleCountries(){$('ccPanel').classList.toggle('open');$('ccArrow').textContent=$('ccPanel').classList.contains('open')?'▾':'▸'}
+function selAll(){CC.forEach(function(c){selected.add(c[0])});renderChips();updSel()}
+function selNone(){selected.clear();renderChips();updSel()}
+function selPreset(p){selected.clear();PRESETS[p].forEach(function(c){selected.add(c)});renderChips();updSel()}
+function toggleCC(code){if(selected.has(code))selected.delete(code);else selected.add(code);renderChips();updSel()}
+
+function renderChips(){
+    var grid=$('ccGrid');
+    grid.innerHTML=CC.map(function(c){return '<div class="cc-chip'+(selected.has(c[0])?' sel':'')+'" onclick="toggleCC(\''+c[0]+'\')">'+c[1]+'</div>'}).join('');
+}
+
+// Extract page data
+function extractData(html,url){
+    var info={title:'',views:'',extra:'',isYouTube:false};
+
+    // Title
+    var tm=html.match(/<title[^>]*>([^<]*)<\/title>/i);
+    if(tm)info.title=tm[1].trim();
+
+    // YouTube specific
+    if(url.includes('youtube.com')||url.includes('youtu.be')){
+        info.isYouTube=true;
+
+        // ytInitialPlayerResponse
+        var pm=html.match(/ytInitialPlayerResponse\s*=\s*(\{.+?\})\s*;/s);
+        if(pm){
+            try{
+                var pd=JSON.parse(pm[1]);
+                var vd=pd.videoDetails||{};
+                var ps=pd.playabilityStatus||{};
+                info.title=vd.title||info.title;
+                info.views=vd.viewCount||'';
+                info.extra=[
+                    ps.status||'',
+                    ps.reason||'',
+                    vd.isLiveContent?'LIVE':'',
+                    vd.lengthSeconds?Math.round(vd.lengthSeconds/60)+'min':''
+                ].filter(Boolean).join(' | ');
+            }catch(e){}
+        }
+
+        // Fallback: og:title, interactionCount
+        if(!info.views){
+            var vm=html.match(/interactionCount["\s:]+["']?(\d+)/);
+            if(vm)info.views=vm[1];
+        }
+        if(!info.title||info.title==='YouTube'){
+            var om=html.match(/og:title["\s]+content=["']([^"']+)/i);
+            if(om)info.title=om[1];
+        }
+    }
+
+    // Generic: og:title fallback
+    if(!info.title){
+        var og=html.match(/og:title["\s]+content=["']([^"']+)/i);
+        if(og)info.title=og[1];
+    }
+
+    // Generic: look for common blocked/restricted patterns
+    if(!info.extra){
+        if(/geo[- ]?restrict|not available in your|blocked in your/i.test(html))info.extra='GEO-BLOCKED';
+        else if(/access denied|403 forbidden/i.test(html))info.extra='ACCESS DENIED';
+        else if(/captcha|challenge/i.test(html))info.extra='CAPTCHA';
+    }
+
+    return info;
+}
+
+// Format view count
+function fmtViews(v){
+    if(!v)return'-';
+    var n=parseInt(v);if(isNaN(n))return v;
+    if(n>=1e9)return(n/1e9).toFixed(1)+'B';
+    if(n>=1e6)return(n/1e6).toFixed(1)+'M';
+    if(n>=1e3)return(n/1e3).toFixed(1)+'K';
+    return n.toLocaleString();
+}
+
+// Render table
+function renderTable(){
+    var tbody=$('tbody');
+    var sorted=results.slice();
+    if(sortCol){
+        sorted.sort(function(a,b){
+            var va=a[sortCol]||'',vb=b[sortCol]||'';
+            if(sortCol==='views'||sortCol==='latency'||sortCol==='size'||sortCol==='httpCode'){va=parseInt(va)||0;vb=parseInt(vb)||0}
+            else{va=String(va).toLowerCase();vb=String(vb).toLowerCase()}
+            return sortAsc?(va>vb?1:-1):(va<vb?1:-1);
+        });
+    }
+    tbody.innerHTML=sorted.map(function(r){
+        var cls=r.scanning?'scanning':r.status==='OK'?'ok-row':r.status==='BLOCKED'?'block-row':'err-row';
+        var sCls=r.status==='OK'?'status-ok':r.status==='BLOCKED'?'status-block':'status-err';
+        return '<tr class="'+cls+'">'+
+            '<td>'+r.country+'</td>'+
+            '<td>'+(r.exitIp||'-')+'</td>'+
+            '<td class="'+sCls+'">'+(r.scanning?'⏳ Scanning...':r.status)+'</td>'+
+            '<td>'+(r.httpCode||'-')+'</td>'+
+            '<td class="title-cell">'+(r.title||'-')+'</td>'+
+            '<td class="views-cell">'+fmtViews(r.views)+(r.extra?' <span style="color:var(--t3);font-weight:400;font-size:8px">'+r.extra+'</span>':'')+'</td>'+
+            '<td>'+(r.size?Math.round(r.size/1024)+'KB':'-')+'</td>'+
+            '<td>'+(r.latency?r.latency+'ms':'-')+'</td>'+
+            '<td>'+(r.tried||'-')+'</td>'+
+            '</tr>';
+    }).join('');
+    $('tbl').style.display='table';
+    $('emptyMsg').style.display='none';
+    $('scanStat').textContent=results.filter(function(r){return!r.scanning}).length+'/'+results.length+' done | '+results.filter(function(r){return r.status==='OK'}).length+' OK';
+}
+
+function sortBy(col){if(sortCol===col)sortAsc=!sortAsc;else{sortCol=col;sortAsc=true}renderTable()}
+
+// Main scan
+async function scan(){
+    var url=$('urlIn').value.trim();
+    if(!url){toast('Enter a URL','warn');return}
+    if(!/^https?:\/\//i.test(url))url='https://'+url;$('urlIn').value=url;
+    if(selected.size===0){toast('Select at least one country','warn');toggleCountries();return}
+    relay=getRelay();if(!relay){toast('Set relay URL','warn');return}
+
+    scanning=true;scanAbort={stopped:false};
+    results=[];
+    $('scanBtn').disabled=true;$('stopBtn').disabled=false;
+    $('prog').classList.add('show');
+
+    var countries=CC.filter(function(c){return selected.has(c[0])});
+    var done=0,total=countries.length;
+
+    // Pre-populate table with scanning rows
+    countries.forEach(function(c){
+        results.push({country:c[1],code:c[0],scanning:true,status:'',httpCode:'',title:'',views:'',extra:'',size:0,latency:0,exitIp:'',tried:''});
+    });
+    renderTable();
+
+    ft('Scanning '+total+' countries...');
+
+    // Process 3 countries concurrently
+    var queue=countries.slice();
+    var active=0,idx=0;
+
+    async function processOne(ci){
+        var c=queue[ci];if(!c||scanAbort.stopped)return;
+        var code=c[0],name=c[1];
+        var row=results.find(function(r){return r.code===code});
+        var tried=0,totalPx=0;
+
+        try{
+            // 1. Fetch ALL proxies for this country
+            var pxResp=await fetch(PF+'/'+code+'/data.json',{cache:'no-store'});
+            if(!pxResp.ok)throw new Error('No proxies for '+code);
+            var pxData=await pxResp.json();
+            if(!pxData.length)throw new Error('Empty list');
+
+            // Sort: SOCKS5 first, then SOCKS4, then HTTP
+            var sorted=pxData.filter(function(p){return p.ip&&p.port}).sort(function(a,b){
+                var order={socks5:0,socks4:1,https:2,http:3};
+                return(order[(a.protocol||'http').toLowerCase()]||3)-(order[(b.protocol||'http').toLowerCase()]||3);
+            });
+            totalPx=sorted.length;
+            row.tried='0/'+totalPx;
+            renderTable();
+
+            // 2. Try each proxy until one works
+            var foundAlive=false;
+            for(var pi=0;pi<sorted.length;pi++){
+                if(scanAbort.stopped)break;
+                var px=sorted[pi];
+                var proto=(px.protocol||'http').toLowerCase();
+                var addr=proto+'://'+px.ip+':'+px.port;
+                tried++;
+                row.tried=tried+'/'+totalPx;
+                row.extra='Testing proxy '+tried+'/'+totalPx+'...';
+                renderTable();
+
+                // Test this proxy
+                try{
+                    var testResp=await fetch(relay+'/test?host='+px.ip+'&port='+px.port+'&proto='+proto,{cache:'no-store'});
+                    var testData=await testResp.json();
+
+                    if(testData.status==='alive'){
+                        foundAlive=true;
+                        row.exitIp=testData.exitIp||px.ip;
+                        row.extra='Proxy alive! Fetching page...';
+                        renderTable();
+
+                        // 3. Fetch target URL through this proxy
+                        var t0=Date.now();
+                        var fResp=await fetch(relay+'/fetch?url='+encodeURIComponent(url)+'&proxy='+encodeURIComponent(addr),{cache:'no-store'});
+                        var lat=Date.now()-t0;
+                        row.httpCode=fResp.status;
+                        row.latency=lat;
+
+                        if(fResp.ok){
+                            var html=await fResp.text();
+                            row.size=html.length;
+                            var info=extractData(html,url);
+                            row.title=info.title;
+                            row.views=info.views;
+                            row.extra=info.extra;
+                            row.status=info.extra&&/BLOCKED|DENIED/i.test(info.extra)?'BLOCKED':'OK';
+                        } else {
+                            row.status=fResp.status===403?'BLOCKED':'ERROR';
+                            row.extra='HTTP '+fResp.status;
+                        }
+                        break; // Success — stop trying more proxies
+                    }
+                    // Proxy dead, continue to next
+                }catch(e){
+                    // Test failed, continue to next
+                }
+            }
+
+            if(!foundAlive){
+                row.status='ERROR';
+                row.extra='All '+totalPx+' proxies dead';
+            }
+
+        }catch(e){
+            row.status='ERROR';
+            row.extra=e.message;
+        }
+
+        row.tried=tried+'/'+totalPx;
+        row.scanning=false;
+        done++;
+        $('progTxt').textContent=done+'/'+total+' countries scanned';
+        $('progFill').style.width=Math.round(done/total*100)+'%';
+        renderTable();
+    }
+
+    // Run with concurrency limit of 3
+    async function runQueue(){
+        var promises=[];
+        for(var i=0;i<queue.length;i++){
+            if(scanAbort.stopped)break;
+            promises.push(processOne(i));
+            if(promises.length>=3){
+                await Promise.allSettled(promises);
+                promises=[];
+            }
+        }
+        if(promises.length)await Promise.allSettled(promises);
+    }
+
+    await runQueue();
+
+    scanning=false;
+    $('scanBtn').disabled=false;$('stopBtn').disabled=true;
+    $('prog').classList.remove('show');
+    var okCount=results.filter(function(r){return r.status==='OK'}).length;
+    ft('Scan complete: '+okCount+'/'+total+' accessible');
+    toast('Scan done: '+okCount+' OK, '+(total-okCount)+' blocked/error','ok');
+}
+
+function stopScan(){if(scanAbort)scanAbort.stopped=true;scanning=false;$('scanBtn').disabled=false;$('stopBtn').disabled=true;toast('Stopped','warn');ft('Scan stopped')}
+
+function clearResults(){results=[];$('tbody').innerHTML='';$('tbl').style.display='none';$('emptyMsg').style.display='flex';$('scanStat').textContent=''}
+
+function exportCSV(){
+    if(!results.length){toast('No results','warn');return}
+    var csv='Country,Exit IP,Status,HTTP,Title,Views,Extra,Size KB,Latency ms,Tried\n';
+    results.forEach(function(r){
+        csv+=[r.country,r.exitIp||'',r.status,r.httpCode||'','"'+(r.title||'').replace(/"/g,'""')+'"',r.views||'','"'+(r.extra||'').replace(/"/g,'""')+'"',r.size?Math.round(r.size/1024):'',r.latency||'',r.tried||''].join(',')+'\n';
+    });
+    var blob=new Blob([csv],{type:'text/csv'});
+    var a=document.createElement('a');a.href=URL.createObjectURL(blob);
+    a.download='geoanalyzer_'+new Date().toISOString().slice(0,10)+'.csv';a.click();
+    toast('CSV exported','ok');
+}
+
+// Init
+(function(){
+    renderChips();
+    // Default: popular countries
+    selPreset('popular');
+    relay=getRelay();
+})();
+</script>
+</body>
+</html>

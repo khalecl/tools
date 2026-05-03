@@ -775,14 +775,12 @@ async function navigate(){
   var BASE='${url}';
   var baseUrl=new URL(BASE);
   var currentUrl=BASE;
-	    var currentUrl=BASE;
-
-	    // Spoof navigator.userAgent for sites that check it
-	    try{
-	      Object.defineProperty(navigator,'userAgent',{
-	        get:function(){return 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36';}
-	      });
-	    }catch(e){}
+  try{
+    Object.defineProperty(navigator,'userAgent',{
+      get:function(){return 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36';}
+    });
+  }catch(e){}
+  
   // ━━━ URL RESOLUTION ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   function resolve(u){
     if(!u)return u;

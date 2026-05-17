@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scribd / File Host Downloader Launcher</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 700px; margin: 40px auto; padding: 20px; }
+        input { width: 100%; padding: 12px; font-size: 16px; margin: 10px 0; }
+        button { padding: 12px 20px; font-size: 16px; margin: 5px; cursor: pointer; }
+        .success { color: green; }
+    </style>
+</head>
+<body>
+    <h1>📄 Scribd / Similar Sites Downloader Helper</h1>
+    <p>Paste the document link below:</p>
+    
+    <input type="text" id="urlInput" placeholder="https://www.scribd.com/document/632255558/ISO-50001-Exam-2" />
+    
+    <br>
+    <button onclick="openDownloaders()">🔍 Try Online Downloaders</button>
+    <button onclick="manualScribd()">📋 Scribd Manual Tips</button>
+
+    <div id="result"></div>
+
+    <script>
+        function openDownloaders() {
+            const url = encodeURIComponent(document.getElementById('urlInput').value.trim());
+            if (!url) {
+                alert("Please paste a link first!");
+                return;
+            }
+            
+            const downloaders = [
+                `https://scribsave.net/?url=${url}`,
+                `https://docdownloader.com/?url=${url}`,
+                `https://scribd.vdownloaders.com/?url=${url}`,
+                `https://scribd-downloader.co/?url=${url}`
+            ];
+            
+            document.getElementById('result').innerHTML = `
+                <p class="success"><strong>Opening best-known downloaders...</strong></p>
+                <p>Try them one by one until one works.</p>
+            `;
+            
+            downloaders.forEach(link => window.open(link, '_blank'));
+        }
+
+        function manualScribd() {
+            alert("Scribd Manual Method (2026):\n\n" +
+                  "1. Open the Scribd page\n" +
+                  "2. Scroll through the entire document (important!)\n" +
+                  "3. Use browser DevTools (F12) → Network tab → filter 'blob' or 'image'\n" +
+                  "4. Or try the GitHub userscript: AllLiveSupport/Scribd-Downloader-js");
+        }
+    </script>
+</body>
+</html>

@@ -194,9 +194,9 @@ var SITES={
   EG:[['Egypt portal','www.egypt.gov.eg'],['Cabinet','www.cabinet.gov.eg'],['Digital Egypt','digital.gov.eg'],['Tax authority','www.eta.gov.eg']]
 };
 
-var S={relay:DRELAY,rid:'render',rurl:{render:DRELAY,deno:'',cf:''},rkey:'',custom:false,cc:'RU',mode:'secure',proxy:null,alive:[],hist:[],pos:-1,cache:new Map(),gen:0};
+var S={relay:DRELAY,rid:'render',rurl:{render:DRELAY,deno:'https://tunnelx.khalecl.deno.net',cf:'https://tunnelx-relay.khaled-mohamed-rady.workers.dev'},rkey:'',custom:false,cc:'RU',mode:'secure',proxy:null,alive:[],hist:[],pos:-1,cache:new Map(),gen:0};
 try{var sv=JSON.parse(localStorage.getItem('tx')||'{}');if(sv.cc)S.cc=sv.cc;if(sv.mode)S.mode=sv.mode;
-  if(sv.rurl){S.rurl.deno=sv.rurl.deno||'';S.rurl.cf=sv.rurl.cf||''}if(sv.rkey)S.rkey=sv.rkey;if(sv.rid&&(sv.rid==='render'||sv.rurl&&sv.rurl[sv.rid]))S.rid=sv.rid}catch(e){}
+  if(sv.rurl){S.rurl.deno=sv.rurl.deno||S.rurl.deno;S.rurl.cf=sv.rurl.cf||S.rurl.cf}if(sv.rkey)S.rkey=sv.rkey;if(sv.rid&&(sv.rid==='render'||sv.rurl&&sv.rurl[sv.rid]))S.rid=sv.rid}catch(e){}
 S.relay=S.rurl[S.rid];
 function save(){try{localStorage.setItem('tx',JSON.stringify({cc:S.cc,mode:S.mode,rid:S.rid,rurl:{deno:S.rurl.deno,cf:S.rurl.cf},rkey:S.rkey}))}catch(e){}}
 function KQ(){return S.rkey?'&k='+encodeURIComponent(S.rkey):''}

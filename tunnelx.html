@@ -2,382 +2,354 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0f1218">
 <title>TunnelX</title>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
-:root{--bg:#0a0c10;--bg2:#12151c;--bg3:#181c26;--bg4:#1f2430;--ac:#4d8cf5;--ac2:#6ea1ff;--acg:rgba(77,140,245,.1);--ok:#36d399;--ok-d:rgba(54,211,153,.1);--err:#f87272;--err-d:rgba(248,114,114,.1);--warn:#fbbd23;--warn-d:rgba(251,189,35,.1);--t1:#dfe5f0;--t2:#8b95a8;--t3:#5a6275;--brd:#222938;--r:8px;--purple:#a78bfa;--purple-d:rgba(167,139,250,.1)}
-html,body{width:100%;height:100%;font-family:'IBM Plex Sans',system-ui,sans-serif;background:var(--bg);color:var(--t1);overflow:hidden}
-body{display:flex;flex-direction:column}
+:root{
+  --bg:#0f1218;--sf:#171b23;--sf2:#1f2530;--brd:#2a3140;
+  --t1:#e8ecf3;--t2:#a3adbf;--t3:#6d778a;
+  --ac:#4d8cf5;--ok:#34c98e;--err:#ef6b6b;--warn:#f0b43c;
+  --r:14px;--safe-b:env(safe-area-inset-bottom,0px);--safe-t:env(safe-area-inset-top,0px)
+}
+@media (prefers-color-scheme:light){:root{
+  --bg:#f3f5f9;--sf:#ffffff;--sf2:#eef1f6;--brd:#dbe1ea;--t1:#141922;--t2:#4b5567;--t3:#7f899b;--ac:#2f6fe0;--ok:#17a06c;--err:#d64545;--warn:#b7801a}}
+html,body{height:100%;background:var(--bg);color:var(--t1);font:16px/1.45 'IBM Plex Sans',system-ui,sans-serif;-webkit-tap-highlight-color:transparent}
+body{display:flex;flex-direction:column;overflow:hidden;padding-top:var(--safe-t)}
+button{font:inherit;color:inherit;border:none;background:none;cursor:pointer}
+.mono{font-family:'IBM Plex Mono',monospace}
 
-.hdr{display:flex;align-items:center;gap:8px;padding:7px 12px;background:var(--bg2);border-bottom:1px solid var(--brd)}
-.logo{font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:13px;color:var(--ac2);display:flex;align-items:center;gap:5px}
-.hdr-right{margin-left:auto;display:flex;align-items:center;gap:8px;font-size:9px;color:var(--t3)}
-.dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
-.dot.on{background:var(--ok);box-shadow:0 0 5px var(--ok)}.dot.off{background:var(--err)}.dot.wait{background:var(--warn);animation:pls 1s infinite}
-@keyframes pls{50%{opacity:.3}}
+/* Top: status + address */
+.top{background:var(--sf);border-bottom:1px solid var(--brd);padding:10px 12px;display:flex;flex-direction:column;gap:10px}
+.status{display:flex;align-items:center;gap:10px;min-height:44px;padding:0 4px 0 12px;border-radius:var(--r);background:var(--sf2)}
+.dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;background:var(--err)}
+.dot.on{background:var(--ok);box-shadow:0 0 0 4px color-mix(in srgb,var(--ok) 22%,transparent)}
+.dot.wait{background:var(--warn);animation:pls 1s infinite}
+@keyframes pls{50%{opacity:.35}}
+.status-txt{flex:1;min-width:0}
+.status-txt b{display:block;font-size:15px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.status-txt span{display:block;font-size:13px;color:var(--t2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.conn-btn{min-height:40px;padding:0 16px;border-radius:11px;background:var(--ac);color:#fff;font-weight:600;font-size:15px}
+.conn-btn.alt{background:var(--sf);color:var(--t1);border:1px solid var(--brd)}
+.conn-btn:disabled{opacity:.5}
+.addr{display:flex;gap:8px}
+.addr input{flex:1;min-width:0;height:46px;padding:0 14px;border-radius:var(--r);border:1px solid var(--brd);background:var(--bg);color:var(--t1);font-size:16px}
+.addr input:focus{outline:none;border-color:var(--ac)}
+.go{width:56px;height:46px;border-radius:var(--r);background:var(--ac);color:#fff;font-weight:600}
 
-/* CONTROL */
-.ctrl{display:flex;align-items:center;gap:6px;padding:7px 12px;background:var(--bg2);border-bottom:1px solid var(--brd);flex-wrap:wrap}
-select{padding:5px 7px;background:var(--bg3);border:1px solid var(--brd);border-radius:var(--r);color:var(--t1);font-size:10px;font-family:inherit;cursor:pointer}
-select:focus{outline:none;border-color:var(--ac)}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:3px;padding:5px 10px;border:none;border-radius:var(--r);font-family:inherit;font-size:10px;font-weight:600;cursor:pointer;transition:all .15s}
-.btn:active{transform:scale(.97)}.btn:disabled{opacity:.3;pointer-events:none}
-.btn-ac{background:var(--ac);color:#fff}.btn-ac:hover{background:var(--ac2)}
-.btn-ok{background:var(--ok);color:#000}.btn-ok:hover{background:#4de0a8}
-.btn-ghost{background:var(--bg3);color:var(--t2);border:1px solid var(--brd)}.btn-ghost:hover{border-color:var(--ac);color:var(--t1)}
-.pill{padding:2px 6px;border-radius:10px;font-size:8px;font-weight:600;font-family:'IBM Plex Mono',monospace}
-.pill.ok{background:var(--ok-d);color:var(--ok)}.pill.no{background:var(--err-d);color:var(--err)}.pill.wait{background:var(--warn-d);color:var(--warn)}.pill.info{background:var(--acg);color:var(--ac2)}
-.mspin{width:10px;height:10px;border:2px solid var(--brd);border-top-color:var(--ac);border-radius:50%;animation:sp .6s linear infinite;display:none;flex-shrink:0}
-.mspin.show{display:inline-block}
+/* Content */
+.render{flex:1;position:relative;overflow:hidden}
+.render iframe{position:absolute;inset:0;width:100%;height:100%;border:0;background:#fff;display:none}
+.home{position:absolute;inset:0;overflow-y:auto;padding:18px 14px calc(18px + var(--safe-b))}
+.home h2{font-size:13px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--t3);margin:18px 2px 10px}
+.home h2:first-child{margin-top:0}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.card{display:flex;flex-direction:column;align-items:flex-start;gap:2px;padding:14px;border-radius:var(--r);background:var(--sf);border:1px solid var(--brd);text-align:left;min-height:64px}
+.card:active{transform:scale(.98)}
+.card b{font-size:15px;font-weight:600}
+.card span{font-size:13px;color:var(--t2);word-break:break-all}
+.card.sel{border-color:var(--ac);box-shadow:inset 0 0 0 1px var(--ac)}
+.note{font-size:14px;color:var(--t2);background:var(--sf);border:1px solid var(--brd);border-radius:var(--r);padding:14px;line-height:1.55}
+.note b{color:var(--t1)}
+.loading{position:absolute;inset:0;display:none;align-items:center;justify-content:center;flex-direction:column;gap:12px;background:color-mix(in srgb,var(--bg) 88%,transparent);z-index:3;font-size:15px;color:var(--t2)}
+.loading.show{display:flex}
+.spin{width:30px;height:30px;border:3px solid var(--brd);border-top-color:var(--ac);border-radius:50%;animation:sp .7s linear infinite}
 @keyframes sp{to{transform:rotate(360deg)}}
 
-/* MODE SELECTOR */
-.mode-sel{display:flex;border:1px solid var(--brd);border-radius:var(--r);overflow:hidden}
-.mode-btn{padding:5px 10px;font-size:9px;font-weight:600;cursor:pointer;background:var(--bg3);color:var(--t3);border:none;transition:all .15s}
-.mode-btn.active-fast{background:var(--ok-d);color:var(--ok);border-color:var(--ok)}
-.mode-btn.active-secure{background:var(--purple-d);color:var(--purple);border-color:var(--purple)}
-.mode-btn:hover{color:var(--t1)}
+/* Bottom bar */
+.bar{display:flex;justify-content:space-around;background:var(--sf);border-top:1px solid var(--brd);padding:4px 6px calc(4px + var(--safe-b))}
+.bar button{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;min-height:52px;justify-content:center;font-size:12px;color:var(--t2);border-radius:10px}
+.bar button svg{width:22px;height:22px}
+.bar button:active{background:var(--sf2)}
+.bar button:disabled{opacity:.35}
 
-.ctrl-right{display:flex;align-items:center;gap:5px;margin-left:auto}
-.adv-toggle{font-size:9px;color:var(--t3);cursor:pointer;user-select:none;display:flex;align-items:center;gap:2px}
-.adv-toggle:hover{color:var(--t2)}
-
-/* ADV PANEL */
-.adv{max-height:0;overflow:hidden;transition:max-height .3s;background:var(--bg3);border-bottom:1px solid var(--brd)}
-.adv.open{max-height:260px}
-.adv-inner{padding:8px 12px;display:flex;flex-wrap:wrap;gap:8px;align-items:flex-end}
-.adv-field{display:flex;flex-direction:column;gap:2px}
-.adv-field label{font-size:7px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--t3)}
-.adv-field input{padding:4px 6px;background:var(--bg);border:1px solid var(--brd);border-radius:4px;color:var(--t1);font-family:'IBM Plex Mono',monospace;font-size:9px;width:180px}
-.adv-field input:focus{outline:none;border-color:var(--ac)}
-.advsep{width:1px;height:24px;background:var(--brd)}
-.sw{display:flex;align-items:center;gap:4px}
-.sw label{font-size:8px;color:var(--t2);cursor:pointer}
-.tgl{position:relative;width:26px;height:14px;flex-shrink:0}
+/* Sheet */
+.scrim{position:fixed;inset:0;background:rgba(0,0,0,.45);opacity:0;pointer-events:none;transition:opacity .2s;z-index:10}
+.scrim.open{opacity:1;pointer-events:auto}
+.sheet{position:fixed;left:0;right:0;bottom:0;max-height:85vh;overflow-y:auto;background:var(--sf);border-radius:20px 20px 0 0;padding:8px 16px calc(20px + var(--safe-b));transform:translateY(100%);transition:transform .25s;z-index:11}
+.sheet.open{transform:none}
+.grab{width:40px;height:5px;border-radius:3px;background:var(--brd);margin:4px auto 12px}
+.sheet h3{font-size:18px;margin-bottom:14px}
+.row{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:52px;border-bottom:1px solid var(--brd)}
+.row:last-child{border-bottom:0}
+.row .lbl{font-size:15px}.row .lbl small{display:block;color:var(--t3);font-size:13px}
+.seg{display:flex;background:var(--sf2);border-radius:11px;padding:3px}
+.seg button{padding:8px 14px;border-radius:9px;font-size:14px;color:var(--t2)}
+.seg button.on{background:var(--sf);color:var(--t1);font-weight:600;box-shadow:0 1px 3px rgba(0,0,0,.15)}
+.tgl{position:relative;width:50px;height:30px;flex-shrink:0}
 .tgl input{opacity:0;width:0;height:0}
-.tgl .sl{position:absolute;inset:0;background:var(--brd);border-radius:7px;cursor:pointer;transition:.2s}
-.tgl .sl::before{content:'';position:absolute;width:10px;height:10px;left:2px;bottom:2px;background:var(--t3);border-radius:50%;transition:.2s}
-.tgl input:checked+.sl{background:var(--ac)}.tgl input:checked+.sl::before{transform:translateX(12px);background:#fff}
-.tgl input:disabled+.sl{opacity:.3;cursor:not-allowed}
+.tgl i{position:absolute;inset:0;background:var(--brd);border-radius:15px;transition:.2s}
+.tgl i::before{content:'';position:absolute;width:24px;height:24px;left:3px;top:3px;border-radius:50%;background:#fff;transition:.2s}
+.tgl input:checked+i{background:var(--ok)}.tgl input:checked+i::before{transform:translateX(20px)}
+.field{display:flex;flex-direction:column;gap:6px;margin:14px 0}
+.field label{font-size:14px;color:var(--t2)}
+.field input,.field select{height:46px;padding:0 12px;border-radius:12px;border:1px solid var(--brd);background:var(--bg);color:var(--t1);font-size:16px}
+.wide{width:100%;min-height:48px;border-radius:12px;background:var(--sf2);font-weight:600;margin-top:8px}
+.plist{font-size:13px}
+.plist div{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--brd)}
+.plist div.cur{color:var(--ok);font-weight:600}
 
-/* URL + NAV */
-.url-row{display:flex;align-items:center;gap:4px;padding:6px 12px;background:var(--bg);border-bottom:1px solid var(--brd)}
-.nav-btn{width:26px;height:26px;display:flex;align-items:center;justify-content:center;background:var(--bg3);border:1px solid var(--brd);border-radius:5px;color:var(--t2);cursor:pointer;font-size:12px;flex-shrink:0}
-.nav-btn:hover{border-color:var(--ac);color:var(--t1)}
-.url-row input{flex:1;padding:6px 8px;background:var(--bg3);border:1px solid var(--brd);border-radius:var(--r);color:var(--t1);font-family:'IBM Plex Mono',monospace;font-size:11px;min-width:0}
-.url-row input:focus{outline:none;border-color:var(--ac);box-shadow:0 0 0 2px var(--acg)}
-
-/* RENDER */
-.render{flex:1;position:relative;overflow:hidden;background:#0d0f14}
-.render iframe{width:100%;height:100%;border:none;background:#fff}
-.ph{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:var(--t3);padding:20px}
-.ph h2{font-size:15px;color:var(--t2);margin:8px 0 4px;font-weight:500}.ph p{font-size:10px;line-height:1.6;max-width:320px}
-.mode-explain{margin-top:16px;display:flex;gap:12px;text-align:left;font-size:9px;line-height:1.5}
-.mode-card{padding:10px;border-radius:var(--r);border:1px solid var(--brd);flex:1;max-width:200px}
-.mode-card h4{margin-bottom:4px;font-size:10px}
-.mode-card.fast{border-color:rgba(54,211,153,.3);background:rgba(54,211,153,.03)}
-.mode-card.fast h4{color:var(--ok)}
-.mode-card.secure{border-color:rgba(167,139,250,.3);background:rgba(167,139,250,.03)}
-.mode-card.secure h4{color:var(--purple)}
-.ld{position:absolute;inset:0;display:none;align-items:center;justify-content:center;background:rgba(10,12,16,.88);z-index:2}
-.ld.show{display:flex}
-.ld-spin{width:24px;height:24px;border:3px solid var(--brd);border-top-color:var(--ac);border-radius:50%;animation:sp .7s linear infinite;margin:0 auto 6px}
-.ld-msg{font-size:10px;color:var(--t2)}
-
-/* STATUS BAR */
-.ftr{display:flex;align-items:center;gap:6px;padding:4px 12px;background:var(--bg2);border-top:1px solid var(--brd);font-family:'IBM Plex Mono',monospace;font-size:8px;color:var(--t3)}
-.ftr .msg{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.bg-indicator{display:flex;align-items:center;gap:3px}
-.bg-indicator .bar{width:40px;height:4px;background:var(--brd);border-radius:2px;overflow:hidden}
-.bg-indicator .bar-fill{height:100%;background:var(--ac);border-radius:2px;transition:width .3s}
-
-.toast-box{position:fixed;top:40px;right:10px;z-index:50;display:flex;flex-direction:column;gap:3px}
-.toast{padding:5px 9px;border-radius:5px;font-size:9px;font-weight:500;animation:tIn .2s;border:1px solid}
-.toast-ok{background:var(--ok-d);border-color:rgba(54,211,153,.2);color:var(--ok)}
-.toast-err{background:var(--err-d);border-color:rgba(248,114,114,.2);color:var(--err)}
-.toast-warn{background:var(--warn-d);border-color:rgba(251,189,35,.2);color:var(--warn)}
-.toast-info{background:var(--acg);border-color:rgba(77,140,245,.15);color:var(--ac2)}
-@keyframes tIn{from{opacity:0;transform:translateY(-5px)}}
-@media(max-width:600px){.ctrl{gap:4px;padding:5px 8px}.ctrl select{flex:1;min-width:0}.ctrl-right{margin-left:0;width:100%;margin-top:3px;justify-content:space-between}.url-row{gap:3px;padding:5px 8px}.adv-field input{width:130px}.mode-explain{flex-direction:column}}
+.toast-box{position:fixed;left:12px;right:12px;bottom:calc(76px + var(--safe-b));z-index:20;display:flex;flex-direction:column;gap:6px;align-items:center;pointer-events:none}
+.toast{max-width:480px;padding:11px 16px;border-radius:12px;font-size:14px;background:var(--t1);color:var(--bg);animation:tIn .2s}
+.toast.err{background:var(--err);color:#fff}
+@keyframes tIn{from{opacity:0;transform:translateY(8px)}}
+@media(min-width:760px){.top{flex-direction:row;align-items:center}.status{flex:0 0 360px}.addr{flex:1}}
 </style>
 </head>
 <body>
 
-<div class="hdr">
-    <div class="logo"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>TunnelX</div>
-    <div class="hdr-right"><div class="dot off" id="sDot"></div><span id="sTxt">Not connected</span></div>
-</div>
-
-<div class="ctrl">
-    <select id="cSel"><option value="">Choose country...</option></select>
-    <div class="mode-sel">
-        <button class="mode-btn active-fast" id="modeFast" onclick="setMode('fast')">⚡ Fast</button>
-        <button class="mode-btn" id="modeSecure" onclick="setMode('secure')">🔒 Secure</button>
-    </div>
-    <button class="btn btn-ok" onclick="go()" id="goBtn">Connect</button>
-    <div class="mspin" id="goSpin"></div>
-    <div class="ctrl-right">
-        <div class="pill no" id="pPill">No proxy</div>
-        <span style="font-size:8px;color:var(--t3)" id="cacheTag">0 cached</span>
-        <div class="adv-toggle" onclick="toggleAdv()"><span id="advArr">&#9656;</span> Advanced</div>
-    </div>
-</div>
-
-<div class="adv" id="advP">
-<div class="adv-inner">
-    <div class="adv-field"><label>Custom Proxy</label><input type="text" id="cProxy" placeholder="socks5://1.2.3.4:1080"></div>
-    <div class="adv-field"><label>Custom Relay</label><input type="text" id="cRelay" placeholder="https://your-relay.onrender.com"></div>
-    <button class="btn btn-ghost" onclick="applyAdv()">Apply</button>
-    <div class="advsep"></div>
-    <div class="sw"><div class="tgl"><input type="checkbox" id="oImg" checked><span class="sl"></span></div><label for="oImg">Images</label></div>
-    <div class="sw"><div class="tgl"><input type="checkbox" id="oCss" checked><span class="sl"></span></div><label for="oCss">CSS</label></div>
-    <div class="sw"><div class="tgl"><input type="checkbox" id="oVid" disabled><span class="sl"></span></div><label for="oVid" id="vidLbl" style="opacity:.4">Video (custom relay)</label></div>
-    <div class="advsep"></div>
-    <button class="btn btn-ghost" onclick="pgC.clear();updC();toast('Cleared','ok')">Clear Cache</button>
-</div>
-</div>
-
-<div class="url-row">
-    <button class="nav-btn" onclick="navBack()">&#8592;</button>
-    <button class="nav-btn" onclick="navFwd()">&#8594;</button>
-    <button class="nav-btn" onclick="navRel()">&#8635;</button>
-    <span style="font-size:10px;color:var(--t3)" id="lock">&#x1F513;</span>
-    <input type="text" id="urlIn" placeholder="Enter URL..." onkeydown="if(event.key==='Enter')nav()">
-    <button class="btn btn-ac" onclick="nav()">Go</button>
+<div class="top">
+  <div class="status">
+    <div class="dot" id="dot"></div>
+    <div class="status-txt"><b id="stTitle">Not connected</b><span id="stSub">Pick a country below</span></div>
+    <button class="conn-btn" id="connBtn">Connect</button>
+  </div>
+  <form class="addr" id="addrForm">
+    <input id="urlIn" type="url" inputmode="url" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Website address">
+    <button class="go" type="submit">Go</button>
+  </form>
 </div>
 
 <div class="render">
-    <iframe id="frm" sandbox="allow-scripts allow-forms" style="display:none"></iframe>
-    <div class="ph" id="ph">
-        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" opacity=".2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-        <h2>Browse through tunnel</h2>
-        <p>Choose a country, pick a mode, then connect.</p>
-        <div class="mode-explain">
-            <div class="mode-card fast"><h4>⚡ Fast Mode</h4>Uses HTTP/HTTPS proxies. Good for general browsing, news, shopping. Faster but some secure sites may block.</div>
-            <div class="mode-card secure"><h4>🔒 Secure Mode</h4>Uses SOCKS5 proxies. Required for government sites, banking, login pages. Slower but full tunnel.</div>
-        </div>
-    </div>
-    <div class="ld" id="ld"><div><div class="ld-spin"></div><div class="ld-msg" id="ldMsg">Loading...</div></div></div>
+  <iframe id="frm" sandbox="allow-scripts allow-forms"></iframe>
+  <div class="home" id="home">
+    <h2>Country</h2>
+    <div class="grid" id="countryGrid"></div>
+    <h2>Quick sites</h2>
+    <div class="grid" id="siteGrid"></div>
+    <h2>Good to know</h2>
+    <div class="note">Pages are fetched through a free public proxy in the chosen country, so <b>reading</b> works best. Sites that need you to <b>log in</b> or keep a session (for example Gosuslugi accounts) cannot keep cookies in this viewer, and some government portals block proxy and data-centre addresses outright. For those, a VPN with a server in that country is the reliable route.</div>
+  </div>
+  <div class="loading" id="loading"><div class="spin"></div><div id="loadMsg">Loading…</div></div>
 </div>
 
-<div class="ftr">
-    <span class="msg" id="fMsg">Ready</span>
-    <div class="bg-indicator" id="bgInd" style="display:none">
-        <span id="bgTxt">Testing...</span>
-        <div class="bar"><div class="bar-fill" id="bgBar" style="width:0%"></div></div>
-    </div>
+<nav class="bar">
+  <button id="bBack" disabled aria-label="Back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>Back</button>
+  <button id="bFwd" disabled aria-label="Forward"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>Forward</button>
+  <button id="bReload" aria-label="Reload"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 11-3-6.7L21 8M21 3v5h-5"/></svg>Reload</button>
+  <button id="bHome" aria-label="Home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l9-8 9 8v10H3z"/></svg>Home</button>
+  <button id="bMenu" aria-label="Settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 00.3 1.8l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.7 1.7 0 00-2.8 1.2V21a2 2 0 11-4 0v-.1A1.7 1.7 0 009 19.4a1.7 1.7 0 00-1.8.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.7 1.7 0 00-1.2-2.8H3a2 2 0 110-4h.1A1.7 1.7 0 004.6 9a1.7 1.7 0 00-.3-1.8l-.1-.1a2 2 0 112.8-2.8l.1.1a1.7 1.7 0 001.8.3H9a1.7 1.7 0 001-1.5V3a2 2 0 114 0v.1a1.7 1.7 0 001 1.5 1.7 1.7 0 001.8-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.7 1.7 0 00-.3 1.8V9a1.7 1.7 0 001.5 1H21a2 2 0 110 4h-.1a1.7 1.7 0 00-1.5 1z"/></svg>Settings</button>
+</nav>
+
+<div class="scrim" id="scrim"></div>
+<div class="sheet" id="sheet">
+  <div class="grab"></div>
+  <h3>Settings</h3>
+  <div class="row"><div class="lbl">Proxy type<small>Tunnel (SOCKS5) carries everything; Web (HTTP) has more servers</small></div>
+    <div class="seg" id="modeSeg"><button data-m="secure">Tunnel</button><button data-m="fast">Web</button></div></div>
+  <div class="row"><div class="lbl">Images</div><label class="tgl"><input type="checkbox" id="oImg" checked><i></i></label></div>
+  <div class="row"><div class="lbl">Styles (CSS)</div><label class="tgl"><input type="checkbox" id="oCss" checked><i></i></label></div>
+  <div class="row"><div class="lbl">Video<small>Heavy; off saves data</small></div><label class="tgl"><input type="checkbox" id="oVid"><i></i></label></div>
+  <div class="field"><label>Other country</label><select id="cSel"></select></div>
+  <div class="field"><label>Custom proxy (protocol://host:port)</label><input id="cProxy" placeholder="socks5://1.2.3.4:1080" autocapitalize="off"></div>
+  <div class="field"><label>Custom relay</label><input id="cRelay" placeholder="https://your-relay.onrender.com" autocapitalize="off"></div>
+  <button class="wide" id="applyAdv">Apply custom proxy / relay</button>
+  <h3 style="margin-top:22px">Working proxies</h3>
+  <div class="plist" id="plist"><div><span>None yet</span></div></div>
+  <button class="wide" id="clearCache">Clear page cache</button>
 </div>
 
 <div class="toast-box" id="toasts"></div>
 
 <script>
+(function(){
+'use strict';
 var DRELAY='https://tunnelx-relay.onrender.com';
 var PF='https://cdn.jsdelivr.net/gh/proxifly/free-proxy-list@main/proxies/countries';
-var CFB=function(u){return'https://api.allorigins.win/raw?url='+encodeURIComponent(u)};
+var PIN=[['RU','🇷🇺','Russia'],['EG','🇪🇬','Egypt']];
+var CC=[['RU','Russia'],['EG','Egypt'],['SA','Saudi Arabia'],['AE','UAE'],['TR','Turkey'],['KZ','Kazakhstan'],['BY','Belarus'],['UA','Ukraine'],['IR','Iran'],['PK','Pakistan'],['IN','India'],['CN','China'],['US','USA'],['GB','UK'],['DE','Germany'],['FR','France'],['NL','Netherlands'],['IT','Italy'],['ES','Spain'],['PL','Poland'],['CA','Canada'],['BR','Brazil'],['JP','Japan'],['KR','S. Korea'],['SG','Singapore'],['HK','Hong Kong'],['ID','Indonesia'],['TH','Thailand'],['VN','Vietnam'],['MX','Mexico'],['ZA','South Africa'],['NG','Nigeria']];
+var SITES={
+  RU:[['Gosuslugi','gosuslugi.ru'],['Tax service','nalog.gov.ru'],['Kremlin','kremlin.ru'],['Government','government.ru']],
+  EG:[['Egypt portal','www.egypt.gov.eg'],['Cabinet','www.cabinet.gov.eg'],['Digital Egypt','digital.gov.eg'],['Tax authority','www.eta.gov.eg']]
+};
 
-var CC=[['RU','\u{1F1F7}\u{1F1FA} Russia'],['US','\u{1F1FA}\u{1F1F8} USA'],['DE','\u{1F1E9}\u{1F1EA} Germany'],['GB','\u{1F1EC}\u{1F1E7} UK'],['FR','\u{1F1EB}\u{1F1F7} France'],['NL','\u{1F1F3}\u{1F1F1} Netherlands'],['CA','\u{1F1E8}\u{1F1E6} Canada'],['BR','\u{1F1E7}\u{1F1F7} Brazil'],['IN','\u{1F1EE}\u{1F1F3} India'],['JP','\u{1F1EF}\u{1F1F5} Japan'],['KR','\u{1F1F0}\u{1F1F7} S.Korea'],['CN','\u{1F1E8}\u{1F1F3} China'],['AU','\u{1F1E6}\u{1F1FA} Australia'],['IT','\u{1F1EE}\u{1F1F9} Italy'],['ES','\u{1F1EA}\u{1F1F8} Spain'],['PL','\u{1F1F5}\u{1F1F1} Poland'],['UA','\u{1F1FA}\u{1F1E6} Ukraine'],['TR','\u{1F1F9}\u{1F1F7} Turkey'],['ID','\u{1F1EE}\u{1F1E9} Indonesia'],['TH','\u{1F1F9}\u{1F1ED} Thailand'],['VN','\u{1F1FB}\u{1F1F3} Vietnam'],['MX','\u{1F1F2}\u{1F1FD} Mexico'],['AR','\u{1F1E6}\u{1F1F7} Argentina'],['EG','\u{1F1EA}\u{1F1EC} Egypt'],['SA','\u{1F1F8}\u{1F1E6} Saudi Arabia'],['AE','\u{1F1E6}\u{1F1EA} UAE'],['ZA','\u{1F1FF}\u{1F1E6} South Africa'],['SG','\u{1F1F8}\u{1F1EC} Singapore'],['HK','\u{1F1ED}\u{1F1F0} Hong Kong'],['TW','\u{1F1F9}\u{1F1FC} Taiwan'],['PH','\u{1F1F5}\u{1F1ED} Philippines'],['MY','\u{1F1F2}\u{1F1FE} Malaysia'],['IR','\u{1F1EE}\u{1F1F7} Iran'],['KZ','\u{1F1F0}\u{1F1FF} Kazakhstan'],['BY','\u{1F1E7}\u{1F1FE} Belarus'],['CZ','\u{1F1E8}\u{1F1FF} Czechia'],['RO','\u{1F1F7}\u{1F1F4} Romania'],['SE','\u{1F1F8}\u{1F1EA} Sweden'],['NO','\u{1F1F3}\u{1F1F4} Norway'],['FI','\u{1F1EB}\u{1F1EE} Finland'],['CH','\u{1F1E8}\u{1F1ED} Switzerland'],['AT','\u{1F1E6}\u{1F1F9} Austria'],['BE','\u{1F1E7}\u{1F1EA} Belgium'],['PT','\u{1F1F5}\u{1F1F9} Portugal'],['GR','\u{1F1EC}\u{1F1F7} Greece'],['BD','\u{1F1E7}\u{1F1E9} Bangladesh'],['PK','\u{1F1F5}\u{1F1F0} Pakistan'],['CL','\u{1F1E8}\u{1F1F1} Chile'],['CO','\u{1F1E8}\u{1F1F4} Colombia'],['NG','\u{1F1F3}\u{1F1EC} Nigeria']];
-
-// State
-var relay=DRELAY,aProxy=null,alive=[],allPx=[],bgAb=null,pgC=new Map(),mode='fast',isCustom=false,curCC='';
-var hist=[],hPos=-1;
+var S={relay:DRELAY,custom:false,cc:'RU',mode:'secure',proxy:null,alive:[],hist:[],pos:-1,cache:new Map(),gen:0};
+try{var sv=JSON.parse(localStorage.getItem('tx')||'{}');if(sv.cc)S.cc=sv.cc;if(sv.mode)S.mode=sv.mode}catch(e){}
+function save(){try{localStorage.setItem('tx',JSON.stringify({cc:S.cc,mode:S.mode}))}catch(e){}}
 
 var $=function(i){return document.getElementById(i)};
-function sd(s,t){$('sDot').className='dot '+s;$('sTxt').textContent=t}
-function ft(m){$('fMsg').textContent=m}
-function sp(s,t){var p=$('pPill');p.className='pill '+s;p.textContent=t}
-function toast(m,t){var e=document.createElement('div');e.className='toast toast-'+(t||'info');e.textContent=m;$('toasts').appendChild(e);setTimeout(function(){e.remove()},3500)}
-function showL(m){$('ldMsg').textContent=m;$('ld').classList.add('show')}
-function hideL(){$('ld').classList.remove('show')}
-function updC(){$('cacheTag').textContent=pgC.size+' cached'}
+function ccName(c){var f=CC.find(function(x){return x[0]===c});return f?f[1]:c}
+function status(state,title,sub){$('dot').className='dot '+state;$('stTitle').textContent=title;$('stSub').textContent=sub||''}
+function toast(m,err){var e=document.createElement('div');e.className='toast'+(err?' err':'');e.textContent=m;$('toasts').appendChild(e);setTimeout(function(){e.remove()},3200)}
+function loading(on,m){$('loading').classList.toggle('show',on);if(m)$('loadMsg').textContent=m}
+function pxLabel(p){return p.protocol.toUpperCase()+' '+p.host+':'+p.port+(p.latency?' · '+p.latency+' ms':'')}
 
-// Mode
-function setMode(m){
-    mode=m;
-    $('modeFast').className='mode-btn'+(m==='fast'?' active-fast':'');
-    $('modeSecure').className='mode-btn'+(m==='secure'?' active-secure':'');
-    // Reset connection on mode change
-    if(aProxy){aProxy=null;alive=[];sd('off','Mode changed');sp('no','Reconnect needed');ft('Mode changed to '+(m==='fast'?'Fast (HTTP)':'Secure (SOCKS5)')+' \u2014 click Connect')}
+/* ---------- home ---------- */
+function renderHome(){
+  var g=$('countryGrid');g.innerHTML='';
+  var pins=PIN.slice();if(!PIN.some(function(p){return p[0]===S.cc}))pins.push([S.cc,'🌐',ccName(S.cc)]);
+  pins.forEach(function(p){var b=document.createElement('button');b.className='card'+(p[0]===S.cc?' sel':'');
+    var t=document.createElement('b');t.textContent=p[1]+' '+p[2];var s=document.createElement('span');
+    s.textContent=p[0]===S.cc?(S.proxy?'Connected':'Selected'):'Tap to select';b.append(t,s);
+    b.onclick=function(){selectCountry(p[0])};g.appendChild(b)});
+  var sg=$('siteGrid');sg.innerHTML='';
+  (SITES[S.cc]||[]).forEach(function(s){var b=document.createElement('button');b.className='card';
+    var t=document.createElement('b');t.textContent=s[0];var u=document.createElement('span');u.textContent=s[1];b.append(t,u);
+    b.onclick=function(){$('urlIn').value=s[1];open(s[1],true)};sg.appendChild(b)});
+  if(!SITES[S.cc]){var n=document.createElement('div');n.className='note';n.textContent='Type an address above.';sg.appendChild(n)}
+  $('cSel').value=S.cc;
+  [].forEach.call($('modeSeg').children,function(b){b.classList.toggle('on',b.dataset.m===S.mode)});
 }
+function selectCountry(c){if(c===S.cc&&S.proxy)return;S.cc=c;save();disconnect('Ready to connect',ccName(c));renderHome()}
+function disconnect(t,sub){S.gen++;S.proxy=null;S.alive=[];S.cache.clear();status('',t||'Not connected',sub||'');$('connBtn').textContent='Connect';$('connBtn').className='conn-btn';renderPlist()}
 
-// Advanced
-function toggleAdv(){$('advP').classList.toggle('open');$('advArr').innerHTML=$('advP').classList.contains('open')?'&#9662;':'&#9656;'}
-function applyAdv(){
-    var cp=$('cProxy').value.trim(),cr=$('cRelay').value.trim();
-    if(cr){relay=cr.replace(/\/+$/,'');isCustom=true;$('oVid').disabled=false;$('vidLbl').style.opacity='1';toast('Relay: '+relay,'ok')}
-    if(cp){var m=cp.match(/^(socks[45]?|https?):\/\/([^:]+):(\d+)$/i);
-        if(m){pgC.clear();updC();aProxy={protocol:m[1].toLowerCase(),host:m[2],port:+m[3],address:cp,latency:null};alive=[aProxy];
-            sd('on','Custom proxy');sp('ok',aProxy.protocol.toUpperCase()+' '+aProxy.host+':'+aProxy.port);toast('Custom proxy active','ok')}
-        else toast('Format: protocol://host:port','err')}
+/* ---------- connect ---------- */
+async function wakeRelay(gen){
+  for(var i=0;i<8;i++){
+    if(gen!==S.gen)return false;
+    try{var r=await fetch(S.relay+'/health',{cache:'no-store'});if(r.ok)return true}catch(e){}
+    status('wait','Waking relay…','Free server sleeps when idle, up to a minute');
+    await new Promise(function(r){setTimeout(r,6000)});
+  }
+  return false;
 }
-
-// Background progress
-function bgShow(txt,pct){$('bgInd').style.display='flex';$('bgTxt').textContent=txt;$('bgBar').style.width=pct+'%'}
-function bgHide(){$('bgInd').style.display='none'}
-
-// Connect
-async function go(){
-    var code=$('cSel').value;
-    if(!code){toast('Pick a country','warn');return}
-    if(code!==curCC){pgC.clear();updC();stopBg()}
-    curCC=code;
-    var name=(CC.find(function(c){return c[0]===code})||['','?'])[1];
-    $('goBtn').disabled=true;$('goSpin').classList.add('show');
-    sd('wait','Connecting to '+name+'...');sp('wait','Searching...');ft('Fetching proxy list...');
-
-    aProxy=null;alive=[];allPx=[];
-
-    try{
-        var resp=await fetch(PF+'/'+code+'/data.json');
-        if(!resp.ok)throw new Error(resp.status===404?'No proxies for '+name:'HTTP '+resp.status);
-        var data=await resp.json();if(!data.length)throw new Error('Empty');
-
-        // Filter by mode
-        var wantSocks=mode==='secure';
-        allPx=data.map(function(e){var pr=(e.protocol||'http').toLowerCase();return{protocol:pr,host:e.ip,port:e.port,address:pr+'://'+e.ip+':'+e.port,latency:null,status:'untested'}})
-            .filter(function(p){return p.host&&p.port});
-
-        var filtered=allPx.filter(function(p){
-            if(wantSocks)return p.protocol==='socks5'||p.protocol==='socks4';
-            return p.protocol==='http'||p.protocol==='https';
-        });
-
-        // If mode filter gives nothing, use all
-        if(filtered.length===0){
-            toast('No '+mode+' proxies \u2014 using all types','warn');
-            filtered=allPx;
-        }
-
-        ft('Found '+filtered.length+' '+(wantSocks?'SOCKS':'HTTP')+' proxies \u2014 finding first working...');
-
-        // Phase 1: Hook to first alive (small batches of 3)
-        var hooked=false;
-        for(var i=0;i<Math.min(filtered.length,30)&&!hooked;i+=3){
-            var batch=filtered.slice(i,i+3);
-            await Promise.allSettled(batch.map(async function(p){
-                try{var r=await fetch(relay+'/test?host='+p.host+'&port='+p.port+'&proto='+p.protocol,{cache:'no-store'});
-                    var d=await r.json();p.latency=d.latency;p.status=d.status;p.exitIp=d.exitIp;
-                    if(d.status==='alive'){alive.push(p);
-                        if(!hooked){hooked=true;aProxy=p;
-                            sd('on','Connected via '+name);
-                            sp('ok',p.protocol.toUpperCase()+' '+p.host+':'+p.port+' ('+p.latency+'ms)');
-                            ft('Connected! Testing more proxies in background...');
-                            toast('Connected to '+name+'!','ok')}}}
-                catch(e){p.status='dead'}}));
-        }
-
-        if(!hooked)throw new Error('No working '+(wantSocks?'SOCKS':'HTTP')+' proxies found');
-
-        $('goBtn').disabled=false;$('goSpin').classList.remove('show');
-
-        // Phase 2: Background test rest
-        var remaining=filtered.filter(function(p){return p.status==='untested'});
-        startBg(remaining,name);
-
-    }catch(e){sd('off','Failed');sp('no','No proxy');ft(e.message);toast(e.message,'err');aProxy=null;
-        $('goBtn').disabled=false;$('goSpin').classList.remove('show')}
+async function testProxy(p){
+  try{var r=await fetch(S.relay+'/test?host='+encodeURIComponent(p.host)+'&port='+p.port+'&proto='+p.protocol,{cache:'no-store'});
+    var d=await r.json();p.latency=d.latency;p.exitIp=d.exitIp;p.ok=d.status==='alive'}catch(e){p.ok=false}
+  return p;
 }
-
-function stopBg(){if(bgAb)bgAb.stopped=true;bgHide()}
-
-async function startBg(rem,cn){
-    bgAb={stopped:false};var done=0,total=rem.length;
-    bgShow('0/'+total+' tested',0);
-    var prevBest=aProxy?aProxy.latency:99999;
-
-    for(var i=0;i<rem.length;i+=8){
-        if(bgAb.stopped)return;
-        var batch=rem.slice(i,i+8);
-        await Promise.allSettled(batch.map(async function(p){
-            if(bgAb.stopped)return;
-            try{var r=await fetch(relay+'/test?host='+p.host+'&port='+p.port+'&proto='+p.protocol,{cache:'no-store'});
-                var d=await r.json();p.latency=d.latency;p.status=d.status;p.exitIp=d.exitIp;
-                if(d.status==='alive')alive.push(p)}
-            catch(e){p.status='dead'}
-            done++}));
-
-        var pct=Math.round(done/total*100);
-        bgShow(alive.length+' alive / '+done+' tested',pct);
-
-        // Auto-upgrade to fastest
-        alive.sort(function(a,b){return(a.latency||99999)-(b.latency||99999)});
-        if(alive[0]&&alive[0].latency<prevBest){
-            aProxy=alive[0];prevBest=aProxy.latency;
-            sp('ok',aProxy.protocol.toUpperCase()+' '+aProxy.host+':'+aProxy.port+' ('+aProxy.latency+'ms)');
-            toast('Faster proxy found: '+aProxy.latency+'ms','info');
-        }
+async function connect(){
+  if(S.proxy){S.custom=false;disconnect('Disconnected',ccName(S.cc));renderHome();return}
+  var gen=++S.gen,name=ccName(S.cc);
+  $('connBtn').disabled=true;status('wait','Connecting to '+name+'…','Checking relay');
+  try{
+    if(!await wakeRelay(gen))throw new Error('Relay not responding — try again shortly');
+    status('wait','Connecting to '+name+'…','Downloading proxy list');
+    var r=await fetch(PF+'/'+S.cc+'/data.json',{cache:'no-store'});
+    if(!r.ok)throw new Error(r.status===404?'No public proxies listed for '+name:'Proxy list error '+r.status);
+    var all=(await r.json()).map(function(e){var pr=(e.protocol||'http').toLowerCase();return{protocol:pr,host:e.ip,port:+e.port,address:pr+'://'+e.ip+':'+e.port}}).filter(function(p){return p.host&&p.port});
+    var socks=S.mode==='secure';
+    var list=all.filter(function(p){return socks?/^socks/.test(p.protocol):/^https?$/.test(p.protocol)});
+    if(!list.length)throw new Error('No '+(socks?'Tunnel (SOCKS)':'Web (HTTP)')+' proxies for '+name+' — switch type in Settings');
+    var tested=0;
+    for(var i=0;i<list.length;i+=6){
+      if(gen!==S.gen)return;
+      var batch=list.slice(i,i+6);
+      await Promise.all(batch.map(testProxy));
+      tested+=batch.length;
+      batch.forEach(function(p){if(p.ok)S.alive.push(p)});
+      S.alive.sort(function(a,b){return(a.latency||1e9)-(b.latency||1e9)});
+      if(S.alive.length&&!S.proxy){S.proxy=S.alive[0];toast('Connected to '+name)}
+      if(S.proxy){S.proxy=S.alive[0];status('on',name,pxLabel(S.proxy)+(S.proxy.exitIp?' · exit '+S.proxy.exitIp:''));
+        $('connBtn').disabled=false;$('connBtn').textContent='Disconnect';$('connBtn').className='conn-btn alt'}
+      else status('wait','Connecting to '+name+'…','Tested '+tested+' of '+list.length);
+      renderPlist();
+      if(S.alive.length>=5)break; // enough spares
     }
-    bgShow(alive.length+' alive \u2714',100);
-    ft(alive.length+' proxies ready for '+cn);
-    setTimeout(bgHide,3000);
+    if(!S.proxy)throw new Error('None of '+list.length+' proxies in '+name+' answered');
+    renderHome();
+  }catch(e){if(gen===S.gen){disconnect('Connection failed',e.message);toast(e.message,true)}}
+  $('connBtn').disabled=false;
+}
+function renderPlist(){var l=$('plist');l.innerHTML='';
+  if(!S.alive.length){var d=document.createElement('div');d.textContent='None yet';l.appendChild(d);return}
+  S.alive.forEach(function(p){var d=document.createElement('div');if(p===S.proxy)d.className='cur';
+    var a=document.createElement('span');a.className='mono';a.textContent=p.protocol+' '+p.host+':'+p.port;
+    var b=document.createElement('span');b.textContent=p.latency?p.latency+' ms':'';d.append(a,b);
+    d.onclick=function(){S.proxy=p;S.cache.clear();renderPlist();status('on',ccName(S.cc),pxLabel(p))};l.appendChild(d)})}
+
+/* ---------- browse ---------- */
+function norm(u){u=(u||'').trim();if(!u)return'';if(!/^https?:\/\//i.test(u))u='https://'+u;try{return new URL(u).href}catch(e){return''}}
+async function fetchVia(url){
+  // Try current proxy, then up to two spares; drop proxies that fail.
+  var tries=S.alive.slice(0,3);if(S.proxy&&tries.indexOf(S.proxy)<0)tries.unshift(S.proxy);
+  for(var i=0;i<tries.length;i++){
+    var p=tries[i];loading(true,'Loading via '+p.host+'…');
+    try{var r=await fetch(S.relay+'/fetch?url='+encodeURIComponent(url)+'&proxy='+encodeURIComponent(p.address),{cache:'no-store'});
+      if(r.ok){var t=await r.text();if(t&&t.length>40){if(p!==S.proxy){S.proxy=p;status('on',ccName(S.cc),pxLabel(p));renderPlist()}return{html:t,p:p}}}}catch(e){}
+    if(!S.custom){S.alive=S.alive.filter(function(x){return x!==p})}
+  }
+  if(!S.alive.length&&!S.custom){S.proxy=null;status('','Proxies dropped','Tap Connect to find new ones')}
+  else if(S.alive[0])S.proxy=S.alive[0];
+  renderPlist();
+  throw new Error('Page did not load through '+ccName(S.cc));
+}
+async function open(raw,push){
+  var url=norm(raw);if(!url){toast('Enter a valid address',true);return}
+  if(!S.proxy){toast('Connect first',true);return}
+  $('urlIn').value=url;
+  var key=url+'|'+S.proxy.address;
+  try{
+    var html;
+    if(S.cache.has(key))html=S.cache.get(key);
+    else{var res=await fetchVia(url);html=rewrite(res.html,url,res.p);
+      if(S.cache.size>=25)S.cache.delete(S.cache.keys().next().value);S.cache.set(url+'|'+res.p.address,html)}
+    if(push!==false){S.hist=S.hist.slice(0,S.pos+1);S.hist.push(url);S.pos=S.hist.length-1}
+    $('frm').srcdoc=html;$('frm').style.display='block';$('home').style.display='none';
+  }catch(e){toast(e.message,true)}
+  loading(false);navBtns();
+}
+function navBtns(){$('bBack').disabled=S.pos<1;$('bFwd').disabled=S.pos>=S.hist.length-1}
+function goHome(){$('frm').style.display='none';$('frm').srcdoc='';$('home').style.display='block';renderHome()}
+
+function rewrite(html,url,p){
+  var R=S.relay,P=encodeURIComponent(p.address),base=new URL(url);
+  function abs(s){try{return new URL(s,base).href}catch(e){return null}}
+  function rf(s){if(!s||/^(data:|blob:|javascript:|#|mailto:|tel:)/i.test(s))return s;var a=abs(s);return a?R+'/fetch?url='+encodeURIComponent(a)+'&proxy='+P:s}
+  // In-page runtime: subrequests go through relay; links and GET forms come back to TunnelX.
+  var cfg=JSON.stringify({R:R,P:P,B:url});
+  var rt='<script>(function(C){var B=new URL(C.B);function f(u){if(!u||/^(data:|blob:|javascript:)/i.test(u))return u;try{var a=new URL(u,B).href;if(a.indexOf(C.R)===0)return u;return C.R+"/fetch?url="+encodeURIComponent(a)+"&proxy="+C.P}catch(e){return u}}'
+   +'var F=window.fetch;window.fetch=function(i,o){if(typeof i==="string")i=f(i);else if(i&&i.url)i=new Request(f(i.url),i);return F.call(this,i,o)};'
+   +'var X=XMLHttpRequest.prototype.open;XMLHttpRequest.prototype.open=function(m,u){arguments[1]=f(String(u));return X.apply(this,arguments)};'
+   +'["HTMLScriptElement","HTMLImageElement"].forEach(function(c){var pr=window[c]&&window[c].prototype;var d=pr&&Object.getOwnPropertyDescriptor(pr,"src");if(d&&d.set)Object.defineProperty(pr,"src",{set:function(v){d.set.call(this,f(v))},get:d.get,configurable:true})});'
+   +'function go(u){parent.postMessage({tx:"nav",url:u},"*")}'
+   +'document.addEventListener("click",function(e){var a=e.target.closest&&e.target.closest("a[href]");if(!a)return;var h=a.getAttribute("href");if(!h||h.charAt(0)==="#"||/^(javascript|mailto|tel):/i.test(h))return;e.preventDefault();try{go(new URL(h,B).href)}catch(x){}},true);'
+   +'document.addEventListener("submit",function(e){var fm=e.target;e.preventDefault();if((fm.method||"get").toLowerCase()!=="get"){parent.postMessage({tx:"post"},"*");return}try{var u=new URL(fm.getAttribute("action")||C.B,B);new FormData(fm).forEach(function(v,k){if(typeof v==="string")u.searchParams.append(k,v)});go(u.href)}catch(x){}},true);'
+   +'})('+cfg+')<\/script>';
+  var head=/<head[^>]*>/i;
+  var inject='<base href="'+url.replace(/"/g,'&quot;')+'">'+rt;
+  html=head.test(html)?html.replace(head,function(m){return m+inject}):inject+html;
+  html=html.replace(/(<script\b[^>]*?\ssrc\s*=\s*)(["'])([^"']*)\2/gi,function(m,a,q,s){return a+q+rf(s)+q});
+  if($('oImg').checked){
+    html=html.replace(/(<img\b[^>]*?\ssrc\s*=\s*)(["'])([^"']*)\2/gi,function(m,a,q,s){return a+q+rf(s)+q});
+    html=html.replace(/\ssrcset\s*=\s*(["'])[^"']*\1/gi,'');
+  }else html=html.replace(/<img\b[^>]*>/gi,'');
+  if($('oCss').checked){
+    html=html.replace(/(<link\b[^>]*?\shref\s*=\s*)(["'])([^"']*)\2/gi,function(m,a,q,s){return a+q+rf(s)+q});
+    html=html.replace(/(<style\b[^>]*>)([\s\S]*?)(<\/style>)/gi,function(m,a,css,c){
+      return a+css.replace(/url\(\s*(['"]?)([^)'"]+)\1\s*\)/gi,function(mm,q,s){return /^data:/i.test(s)?mm:'url('+q+rf(s)+q+')'})+c});
+  }else html=html.replace(/<link\b[^>]*rel\s*=\s*["']?stylesheet[^>]*>/gi,'');
+  if(!$('oVid').checked){html=html.replace(/<video\b[\s\S]*?<\/video>/gi,'');html=html.replace(/<iframe\b[^>]*(youtube|vimeo|rutube|dailymotion|tiktok)[^>]*>[\s\S]*?<\/iframe>/gi,'')}
+  return html;
 }
 
-// Navigate
-async function nav(){
-    var url=$('urlIn').value.trim();if(!url)return;
-    if(!/^https?:\/\//i.test(url))url='https://'+url;$('urlIn').value=url;
-    if(!aProxy){toast('Connect first','warn');return}
-    var ck=url+'|'+aProxy.address;
-    $('ph').style.display='none';$('lock').innerHTML=url.startsWith('https')?'&#x1F512;':'&#x1F513;';
+window.addEventListener('message',function(e){
+  if(e.source!==$('frm').contentWindow||!e.data)return;
+  if(e.data.tx==='nav'&&typeof e.data.url==='string'&&/^https?:/i.test(e.data.url))open(e.data.url,true);
+  if(e.data.tx==='post')toast('This form sends data (login or submit), which this viewer cannot carry',true);
+});
 
-    if(pgC.has(ck)){var c=pgC.get(ck);$('frm').srcdoc=c.html;$('frm').style.display='block';
-        ft('Cached ('+Math.round((Date.now()-c.ts)/1000)+'s)');toast('From cache','ok');
-        hist=hist.slice(0,hPos+1);hist.push(url);hPos=hist.length-1;return}
+/* ---------- sheet ---------- */
+function sheet(on){$('sheet').classList.toggle('open',on);$('scrim').classList.toggle('open',on)}
 
-    showL('Loading via '+aProxy.host+'...');ft('Fetching...');
-    try{
-        var pp='&proxy='+encodeURIComponent(aProxy.address),html=null;
-        try{var r=await fetch(relay+'/fetch?url='+encodeURIComponent(url)+pp,{cache:'no-store'});if(r.ok)html=await r.text()}catch(e){}
-        if(!html){try{var r2=await fetch(CFB(url),{cache:'no-store'});if(r2.ok)html=await r2.text()}catch(e){}}
-        if(!html)throw new Error('Failed to load');
-        html=proc(html,url);
-        if(pgC.size>=30)pgC.delete(pgC.keys().next().value);
-        pgC.set(ck,{html:html,ts:Date.now()});updC();
-        $('frm').srcdoc=html;$('frm').style.display='block';
-        hist=hist.slice(0,hPos+1);hist.push(url);hPos=hist.length-1;
-        ft('Loaded');toast('Loaded','ok');
-    }catch(e){ft(e.message);toast(e.message,'err')}
-    hideL();
-}
+/* ---------- wire ---------- */
+var sel=$('cSel');CC.forEach(function(c){var o=document.createElement('option');o.value=c[0];o.textContent=c[1];sel.appendChild(o)});
+sel.onchange=function(){selectCountry(sel.value);sheet(false)};
+$('modeSeg').onclick=function(e){var m=e.target.dataset&&e.target.dataset.m;if(!m||m===S.mode)return;S.mode=m;save();renderHome();if(S.proxy){disconnect('Proxy type changed','Tap Connect')}};
+$('connBtn').onclick=connect;
+$('addrForm').onsubmit=function(e){e.preventDefault();$('urlIn').blur();open($('urlIn').value,true)};
+$('bBack').onclick=function(){if(S.pos>0){S.pos--;open(S.hist[S.pos],false)}};
+$('bFwd').onclick=function(){if(S.pos<S.hist.length-1){S.pos++;open(S.hist[S.pos],false)}};
+$('bReload').onclick=function(){var u=S.hist[S.pos];if(!u||!S.proxy)return;S.cache.delete(u+'|'+S.proxy.address);open(u,false)};
+$('bHome').onclick=goHome;
+$('bMenu').onclick=function(){sheet(true)};
+$('scrim').onclick=function(){sheet(false)};
+$('clearCache').onclick=function(){S.cache.clear();toast('Cache cleared')};
+$('applyAdv').onclick=function(){
+  var cr=$('cRelay').value.trim(),cp=$('cProxy').value.trim();
+  if(cr){if(!/^https:\/\//i.test(cr)){toast('Relay must start with https://',true);return}S.relay=cr.replace(/\/+$/,'');toast('Relay set')}
+  if(cp){var m=cp.match(/^(socks[45]?|https?):\/\/([^:\/]+):(\d+)$/i);
+    if(!m){toast('Use protocol://host:port',true);return}
+    S.gen++;S.cache.clear();S.custom=true;S.proxy={protocol:m[1].toLowerCase(),host:m[2],port:+m[3],address:cp};S.alive=[S.proxy];
+    status('on','Custom proxy',pxLabel(S.proxy));$('connBtn').textContent='Disconnect';$('connBtn').className='conn-btn alt';renderPlist()}
+  sheet(false);
+};
 
-function navBack(){if(hPos>0){hPos--;$('urlIn').value=hist[hPos];nav()}}
-function navFwd(){if(hPos<hist.length-1){hPos++;$('urlIn').value=hist[hPos];nav()}}
-function navRel(){if(hist.length>0){pgC.delete(hist[hPos]+'|'+(aProxy?aProxy.address:''));nav()}}
-
-function proc(html,url){
-    var base='<base href="'+url+'">';
-    if(html.indexOf('<head>')!==-1)html=html.replace('<head>','<head>'+base);else html=base+html;
-    var R=relay,P=encodeURIComponent(aProxy.address);
-    // Runtime interceptor
-    var intr='<script>(function(){var R="'+R+'",P="'+P+'",B=new URL("'+url+'");function f(u){if(!u||u.indexOf("data:")===0||u.indexOf("blob:")===0||u.indexOf("javascript:")===0)return u;try{var s=u;if(u.indexOf("//")===0)s=B.protocol+u;else if(u.indexOf("/")===0)s=B.protocol+"//"+B.host+u;else if(!/^https?:\\/\\//i.test(u))s=B.protocol+"//"+B.host+B.pathname.replace(/\\/[^/]*$/,"/")+u;return R+"/fetch?url="+encodeURIComponent(s)+"&proxy="+P}catch(e){return u}}var F=window.fetch;window.fetch=function(i,o){if(typeof i==="string")i=f(i);return F.call(this,i,o)};var X=XMLHttpRequest.prototype.open;XMLHttpRequest.prototype.open=function(m,u){arguments[1]=f(u);return X.apply(this,arguments)};["HTMLScriptElement","HTMLImageElement"].forEach(function(c){var p=window[c]&&window[c].prototype;if(!p)return;var d=Object.getOwnPropertyDescriptor(p,"src");if(d&&d.set)Object.defineProperty(p,"src",{set:function(v){d.set.call(this,f(v))},get:d.get,configurable:true})});var ld=Object.getOwnPropertyDescriptor(HTMLLinkElement.prototype,"href");if(ld&&ld.set)Object.defineProperty(HTMLLinkElement.prototype,"href",{set:function(v){ld.set.call(this,f(v))},get:ld.get,configurable:true})})()<\/script>';
-    html=html.replace('<head>','<head>'+intr);
-    // Resolver
-    function rf(s){if(!s||s.indexOf('data:')===0)return s;var r=s;try{var b=new URL(url);if(s.indexOf('//')===0)r=b.protocol+s;else if(s.indexOf('/')===0)r=b.protocol+'//'+b.host+s;else if(!/^https?:\/\//i.test(s))r=b.protocol+'//'+b.host+b.pathname.replace(/\/[^/]*$/,'/')+s}catch(e){}return R+'/fetch?url='+encodeURIComponent(r)+'&proxy='+P}
-    // Scripts always
-    html=html.replace(/(<script\s[^>]*?src\s*=\s*)(["'])([^"']*?)\2/gi,function(m,pre,q,src){return pre+q+rf(src)+q});
-    // Images
-    var oI=$('oImg').checked;
-    if(oI)html=html.replace(/(<img\s[^>]*?src\s*=\s*)(["'])([^"']*?)\2/gi,function(m,pre,q,src){return pre+q+rf(src)+q});
-    else{html=html.replace(/<img\s[^>]*>/gi,'');html=html.replace(/(background(?:-image)?\s*:[^;]*?url\s*\([^)]*\))/gi,'background:none')}
-    // CSS
-    var oC=$('oCss').checked;
-    if(oC){html=html.replace(/(<link\s[^>]*?href\s*=\s*)(["'])([^"']*?)\2/gi,function(m,pre,q,h){return pre+q+rf(h)+q});html=html.replace(/url\(\s*(['"]?)([^)'"]+)\1\s*\)/gi,function(m,q,src){return src.indexOf('data:')===0?m:'url('+q+rf(src)+q+')'})}
-    else html=html.replace(/<link\s[^>]*rel\s*=\s*["']stylesheet["'][^>]*>/gi,'');
-    // Video
-    var oV=$('oVid').checked&&isCustom;
-    if(!oV){html=html.replace(/<video\s[^>]*>[\s\S]*?<\/video>/gi,'');html=html.replace(/<iframe\s[^>]*(?:youtube|vimeo|dailymotion|tiktok|rutube)[^>]*>[\s\S]*?<\/iframe>/gi,'')}
-    return html;
-}
-
-// Init
-(function(){
-    var sel=$('cSel');
-    CC.forEach(function(c){var o=document.createElement('option');o.value=c[0];o.textContent=c[1];sel.appendChild(o)});
-    sel.addEventListener('change',function(){if(sel.value!==curCC){pgC.clear();updC();stopBg();aProxy=null;alive=[];
-        sd('off','Not connected');sp('no','No proxy');ft('Country changed \u2014 click Connect')}});
-    fetch(relay+'/health',{cache:'no-store'}).then(function(r){return r.json()}).then(function(d){
-        if(d.status==='ok')ft('Relay online \u2014 choose a country & mode')}).catch(function(){ft('Relay sleeping \u2014 wakes on first request')});
+renderHome();
+status('','Not connected',ccName(S.cc)+' selected · tap Connect');
+fetch(S.relay+'/health',{cache:'no-store'}).catch(function(){});  // start waking the relay early
 })();
 </script>
 </body>

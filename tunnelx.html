@@ -95,7 +95,25 @@ button{font:inherit;color:inherit;border:none;background:none;cursor:pointer}
 .toast{max-width:480px;padding:11px 16px;border-radius:12px;font-size:14px;background:var(--t1);color:var(--bg);animation:tIn .2s}
 .toast.err{background:var(--err);color:#fff}
 @keyframes tIn{from{opacity:0;transform:translateY(8px)}}
-@media(min-width:760px){.top{flex-direction:row;align-items:center}.status{flex:0 0 360px}.addr{flex:1}}
+.log{font:12px/1.55 'IBM Plex Mono',monospace;background:var(--bg);border:1px solid var(--brd);border-radius:12px;padding:8px 10px;height:260px;overflow-y:auto}
+.log div{white-space:pre-wrap;word-break:break-word;color:var(--t2)}
+.log .t{color:var(--t3)}.log .ok{color:var(--ok)}.log .err{color:var(--err)}.log .warn{color:var(--warn)}.log .step{color:var(--t1);font-weight:600}
+.sec{display:flex;align-items:center;justify-content:space-between;margin:4px 0 10px}
+.sec h3{margin:0}.sec button{font-size:13px;color:var(--ac);padding:6px 8px}
+/* Desktop: browser on the left, control sidebar on the right */
+@media(min-width:900px){
+ body{display:grid;grid-template-columns:minmax(0,1fr) 400px;grid-template-rows:auto auto minmax(0,1fr)}
+ .top{grid-column:1;grid-row:1;flex-direction:row;align-items:center}.status{flex:0 0 380px}.addr{flex:1}
+ .bar{grid-column:1;grid-row:2;justify-content:flex-start;gap:4px;border-top:0;border-bottom:1px solid var(--brd);padding:6px 10px}
+ .bar button{flex:0 0 auto;flex-direction:row;gap:6px;min-height:36px;padding:0 12px;font-size:14px}
+ .bar button svg{width:18px;height:18px}
+ #bMenu{display:none}
+ .render{grid-column:1;grid-row:3}
+ .sheet{grid-column:2;grid-row:1/4;position:static;transform:none;max-height:none;min-height:0;border-radius:0;border-left:1px solid var(--brd);padding:16px;z-index:auto}
+ .grab,.scrim{display:none}
+ .log{height:38vh}
+ .toast-box{left:auto;right:416px;bottom:20px;align-items:flex-end}
+}
 </style>
 </head>
 <body>
@@ -130,13 +148,15 @@ button{font:inherit;color:inherit;border:none;background:none;cursor:pointer}
   <button id="bFwd" disabled aria-label="Forward"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>Forward</button>
   <button id="bReload" aria-label="Reload"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 11-3-6.7L21 8M21 3v5h-5"/></svg>Reload</button>
   <button id="bHome" aria-label="Home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l9-8 9 8v10H3z"/></svg>Home</button>
-  <button id="bMenu" aria-label="Settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 00.3 1.8l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.7 1.7 0 00-2.8 1.2V21a2 2 0 11-4 0v-.1A1.7 1.7 0 009 19.4a1.7 1.7 0 00-1.8.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.7 1.7 0 00-1.2-2.8H3a2 2 0 110-4h.1A1.7 1.7 0 004.6 9a1.7 1.7 0 00-.3-1.8l-.1-.1a2 2 0 112.8-2.8l.1.1a1.7 1.7 0 001.8.3H9a1.7 1.7 0 001-1.5V3a2 2 0 114 0v.1a1.7 1.7 0 001 1.5 1.7 1.7 0 001.8-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.7 1.7 0 00-.3 1.8V9a1.7 1.7 0 001.5 1H21a2 2 0 110 4h-.1a1.7 1.7 0 00-1.5 1z"/></svg>Settings</button>
+  <button id="bMenu" aria-label="Settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 00.3 1.8l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.7 1.7 0 00-2.8 1.2V21a2 2 0 11-4 0v-.1A1.7 1.7 0 009 19.4a1.7 1.7 0 00-1.8.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.7 1.7 0 00-1.2-2.8H3a2 2 0 110-4h.1A1.7 1.7 0 004.6 9a1.7 1.7 0 00-.3-1.8l-.1-.1a2 2 0 112.8-2.8l.1.1a1.7 1.7 0 001.8.3H9a1.7 1.7 0 001-1.5V3a2 2 0 114 0v.1a1.7 1.7 0 001 1.5 1.7 1.7 0 001.8-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.7 1.7 0 00-.3 1.8V9a1.7 1.7 0 001.5 1H21a2 2 0 110 4h-.1a1.7 1.7 0 00-1.5 1z"/></svg>Log</button>
 </nav>
 
 <div class="scrim" id="scrim"></div>
 <div class="sheet" id="sheet">
   <div class="grab"></div>
-  <h3>Settings</h3>
+  <div class="sec"><h3>Activity log</h3><button id="clearLog">Clear</button></div>
+  <div class="log" id="log"></div>
+  <h3 style="margin-top:22px">Settings</h3>
   <div class="row"><div class="lbl">Proxy type<small>Tunnel (SOCKS5) carries everything; Web (HTTP) has more servers</small></div>
     <div class="seg" id="modeSeg"><button data-m="secure">Tunnel</button><button data-m="fast">Web</button></div></div>
   <div class="row"><div class="lbl">Images</div><label class="tgl"><input type="checkbox" id="oImg" checked><i></i></label></div>
@@ -172,7 +192,10 @@ function save(){try{localStorage.setItem('tx',JSON.stringify({cc:S.cc,mode:S.mod
 var $=function(i){return document.getElementById(i)};
 function ccName(c){var f=CC.find(function(x){return x[0]===c});return f?f[1]:c}
 function status(state,title,sub){$('dot').className='dot '+state;$('stTitle').textContent=title;$('stSub').textContent=sub||''}
-function toast(m,err){var e=document.createElement('div');e.className='toast'+(err?' err':'');e.textContent=m;$('toasts').appendChild(e);setTimeout(function(){e.remove()},3200)}
+function log(m,c){var l=$('log');if(!l)return;var d=document.createElement('div');if(c)d.className=c;
+  var t=document.createElement('span');t.className='t';t.textContent=new Date().toTimeString().slice(0,8)+'  ';d.append(t,document.createTextNode(m));
+  l.appendChild(d);while(l.children.length>500)l.firstChild.remove();l.scrollTop=l.scrollHeight}
+function toast(m,err){log(m,err?'err':'');var e=document.createElement('div');e.className='toast'+(err?' err':'');e.textContent=m;$('toasts').appendChild(e);setTimeout(function(){e.remove()},3200)}
 function loading(on,m){$('loading').classList.toggle('show',on);if(m)$('loadMsg').textContent=m}
 function pxLabel(p){return p.protocol.toUpperCase()+' '+p.host+':'+p.port+(p.latency?' · '+p.latency+' ms':'')}
 
@@ -193,13 +216,14 @@ function renderHome(){
   [].forEach.call($('modeSeg').children,function(b){b.classList.toggle('on',b.dataset.m===S.mode)});
 }
 function selectCountry(c){if(c===S.cc&&S.proxy)return;S.cc=c;save();disconnect('Ready to connect',ccName(c));renderHome()}
-function disconnect(t,sub){S.gen++;S.proxy=null;S.alive=[];S.cache.clear();status('',t||'Not connected',sub||'');$('connBtn').textContent='Connect';$('connBtn').className='conn-btn';renderPlist()}
+function disconnect(t,sub){S.gen++;S.busy=false;log('— '+(t||'Disconnected')+(sub?': '+sub:''),'warn');S.proxy=null;S.alive=[];S.cache.clear();status('',t||'Not connected',sub||'');$('connBtn').textContent='Connect';$('connBtn').className='conn-btn';renderPlist()}
 
 /* ---------- connect ---------- */
 async function wakeRelay(gen){
   for(var i=0;i<8;i++){
     if(gen!==S.gen)return false;
-    try{var r=await fetch(S.relay+'/health',{cache:'no-store'});if(r.ok)return true}catch(e){}
+    var t0=Date.now();log('Relay check '+(i+1)+'/8: '+S.relay+'/health');
+    try{var r=await fetch(S.relay+'/health',{cache:'no-store'});if(r.ok){log('Relay online ('+(Date.now()-t0)+' ms)','ok');return true}log('Relay answered HTTP '+r.status,'warn')}catch(e){log('Relay not reachable yet (asleep?) — waiting 6 s','warn')}
     status('wait','Waking relay…','Free server sleeps when idle, up to a minute');
     await new Promise(function(r){setTimeout(r,6000)});
   }
@@ -207,13 +231,15 @@ async function wakeRelay(gen){
 }
 async function testProxy(p){
   try{var r=await fetch(S.relay+'/test?host='+encodeURIComponent(p.host)+'&port='+p.port+'&proto='+p.protocol,{cache:'no-store'});
-    var d=await r.json();p.latency=d.latency;p.exitIp=d.exitIp;p.ok=d.status==='alive'}catch(e){p.ok=false}
+    var d=await r.json();p.latency=d.latency;p.exitIp=d.exitIp;p.ok=d.status==='alive';p.why=d.error||d.status}catch(e){p.ok=false;p.why='relay error'}
   return p;
 }
 async function connect(){
+  if(S.busy){disconnect('Stopped by you',ccName(S.cc));renderHome();return}
   if(S.proxy){S.custom=false;disconnect('Disconnected',ccName(S.cc));renderHome();return}
-  var gen=++S.gen,name=ccName(S.cc);
-  $('connBtn').disabled=true;status('wait','Connecting to '+name+'…','Checking relay');
+  var gen=++S.gen,name=ccName(S.cc);S.busy=true;
+  log('▶ Connect to '+name+' — type '+(S.mode==='secure'?'Tunnel (SOCKS)':'Web (HTTP)'),'step');
+  $('connBtn').textContent='Stop';$('connBtn').className='conn-btn alt';status('wait','Connecting to '+name+'…','Checking relay');
   try{
     if(!await wakeRelay(gen))throw new Error('Relay not responding — try again shortly');
     status('wait','Connecting to '+name+'…','Downloading proxy list');
@@ -222,6 +248,7 @@ async function connect(){
     var all=(await r.json()).map(function(e){var pr=(e.protocol||'http').toLowerCase();return{protocol:pr,host:e.ip,port:+e.port,address:pr+'://'+e.ip+':'+e.port}}).filter(function(p){return p.host&&p.port});
     var socks=S.mode==='secure';
     var list=all.filter(function(p){return socks?/^socks/.test(p.protocol):/^https?$/.test(p.protocol)});
+    log('Proxy list: '+all.length+' total, '+list.length+' of the chosen type');
     if(!list.length)throw new Error('No '+(socks?'Tunnel (SOCKS)':'Web (HTTP)')+' proxies for '+name+' — switch type in Settings');
     var tested=0;
     for(var i=0;i<list.length;i+=6){
@@ -229,19 +256,19 @@ async function connect(){
       var batch=list.slice(i,i+6);
       await Promise.all(batch.map(testProxy));
       tested+=batch.length;
-      batch.forEach(function(p){if(p.ok)S.alive.push(p)});
+      batch.forEach(function(p){if(p.ok){S.alive.push(p);log('✓ '+p.address+'  '+p.latency+' ms'+(p.exitIp?'  exit IP '+p.exitIp:''),'ok')}else log('✗ '+p.address+'  '+(p.why||'dead'))});
       S.alive.sort(function(a,b){return(a.latency||1e9)-(b.latency||1e9)});
-      if(S.alive.length&&!S.proxy){S.proxy=S.alive[0];toast('Connected to '+name)}
+      if(S.alive.length&&!S.proxy){S.proxy=S.alive[0];S.busy=false;toast('Connected to '+name+' via '+S.proxy.host)}
       if(S.proxy){S.proxy=S.alive[0];status('on',name,pxLabel(S.proxy)+(S.proxy.exitIp?' · exit '+S.proxy.exitIp:''));
         $('connBtn').disabled=false;$('connBtn').textContent='Disconnect';$('connBtn').className='conn-btn alt'}
       else status('wait','Connecting to '+name+'…','Tested '+tested+' of '+list.length);
       renderPlist();
-      if(S.alive.length>=5)break; // enough spares
+      if(S.alive.length>=5){log('Have 5 working proxies — stopped testing ('+tested+'/'+list.length+' checked)');break}
     }
     if(!S.proxy)throw new Error('None of '+list.length+' proxies in '+name+' answered');
+    S.busy=false;log('Ready. Active: '+S.proxy.address+' · spares: '+(S.alive.length-1),'step');
     renderHome();
   }catch(e){if(gen===S.gen){disconnect('Connection failed',e.message);toast(e.message,true)}}
-  $('connBtn').disabled=false;
 }
 function renderPlist(){var l=$('plist');l.innerHTML='';
   if(!S.alive.length){var d=document.createElement('div');d.textContent='None yet';l.appendChild(d);return}
@@ -256,10 +283,12 @@ async function fetchVia(url){
   // Try current proxy, then up to two spares; drop proxies that fail.
   var tries=S.alive.slice(0,3);if(S.proxy&&tries.indexOf(S.proxy)<0)tries.unshift(S.proxy);
   for(var i=0;i<tries.length;i++){
-    var p=tries[i];loading(true,'Loading via '+p.host+'…');
+    var p=tries[i],t0=Date.now();loading(true,'Loading via '+p.host+'…');log('GET '+url+'  via '+p.address);
     try{var r=await fetch(S.relay+'/fetch?url='+encodeURIComponent(url)+'&proxy='+encodeURIComponent(p.address),{cache:'no-store'});
-      if(r.ok){var t=await r.text();if(t&&t.length>40){if(p!==S.proxy){S.proxy=p;status('on',ccName(S.cc),pxLabel(p));renderPlist()}return{html:t,p:p}}}}catch(e){}
-    if(!S.custom){S.alive=S.alive.filter(function(x){return x!==p})}
+      if(!r.ok)log('  relay returned HTTP '+r.status,'err');
+      if(r.ok){var t=await r.text();log('  '+r.status+' · '+Math.round(t.length/1024)+' KB · '+(Date.now()-t0)+' ms',t.length>40?'ok':'warn');if(t&&t.length>40){if(p!==S.proxy){S.proxy=p;status('on',ccName(S.cc),pxLabel(p));renderPlist()}return{html:t,p:p}}}
+    }catch(e){log('  network error: '+e.message,'err')}
+    if(!S.custom){S.alive=S.alive.filter(function(x){return x!==p});log('  dropped '+p.host+', trying next','warn')}
   }
   if(!S.alive.length&&!S.custom){S.proxy=null;status('','Proxies dropped','Tap Connect to find new ones')}
   else if(S.alive[0])S.proxy=S.alive[0];
@@ -273,7 +302,7 @@ async function open(raw,push){
   var key=url+'|'+S.proxy.address;
   try{
     var html;
-    if(S.cache.has(key))html=S.cache.get(key);
+    if(S.cache.has(key)){html=S.cache.get(key);log('From cache: '+url)}
     else{var res=await fetchVia(url);html=rewrite(res.html,url,res.p);
       if(S.cache.size>=25)S.cache.delete(S.cache.keys().next().value);S.cache.set(url+'|'+res.p.address,html)}
     if(push!==false){S.hist=S.hist.slice(0,S.pos+1);S.hist.push(url);S.pos=S.hist.length-1}
@@ -327,7 +356,7 @@ function sheet(on){$('sheet').classList.toggle('open',on);$('scrim').classList.t
 /* ---------- wire ---------- */
 var sel=$('cSel');CC.forEach(function(c){var o=document.createElement('option');o.value=c[0];o.textContent=c[1];sel.appendChild(o)});
 sel.onchange=function(){selectCountry(sel.value);sheet(false)};
-$('modeSeg').onclick=function(e){var m=e.target.dataset&&e.target.dataset.m;if(!m||m===S.mode)return;S.mode=m;save();renderHome();if(S.proxy){disconnect('Proxy type changed','Tap Connect')}};
+$('modeSeg').onclick=function(e){var m=e.target.dataset&&e.target.dataset.m;if(!m||m===S.mode)return;S.mode=m;save();renderHome();log('Proxy type → '+(m==='secure'?'Tunnel (SOCKS)':'Web (HTTP)'));if(S.proxy){disconnect('Proxy type changed','Tap Connect')}};
 $('connBtn').onclick=connect;
 $('addrForm').onsubmit=function(e){e.preventDefault();$('urlIn').blur();open($('urlIn').value,true)};
 $('bBack').onclick=function(){if(S.pos>0){S.pos--;open(S.hist[S.pos],false)}};
@@ -336,10 +365,11 @@ $('bReload').onclick=function(){var u=S.hist[S.pos];if(!u||!S.proxy)return;S.cac
 $('bHome').onclick=goHome;
 $('bMenu').onclick=function(){sheet(true)};
 $('scrim').onclick=function(){sheet(false)};
+$('clearLog').onclick=function(){$('log').innerHTML=''};
 $('clearCache').onclick=function(){S.cache.clear();toast('Cache cleared')};
 $('applyAdv').onclick=function(){
   var cr=$('cRelay').value.trim(),cp=$('cProxy').value.trim();
-  if(cr){if(!/^https:\/\//i.test(cr)){toast('Relay must start with https://',true);return}S.relay=cr.replace(/\/+$/,'');toast('Relay set')}
+  if(cr){if(!/^https:\/\//i.test(cr)){toast('Relay must start with https://',true);return}S.relay=cr.replace(/\/+$/,'');toast('Relay set: '+S.relay)}
   if(cp){var m=cp.match(/^(socks[45]?|https?):\/\/([^:\/]+):(\d+)$/i);
     if(!m){toast('Use protocol://host:port',true);return}
     S.gen++;S.cache.clear();S.custom=true;S.proxy={protocol:m[1].toLowerCase(),host:m[2],port:+m[3],address:cp};S.alive=[S.proxy];
@@ -347,6 +377,7 @@ $('applyAdv').onclick=function(){
   sheet(false);
 };
 
+log('TunnelX ready. Relay: '+S.relay);
 renderHome();
 status('','Not connected',ccName(S.cc)+' selected · tap Connect');
 fetch(S.relay+'/health',{cache:'no-store'}).catch(function(){});  // start waking the relay early

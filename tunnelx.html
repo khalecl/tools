@@ -164,8 +164,13 @@ button{font:inherit;color:inherit;border:none;background:none;cursor:pointer}
   <div class="row"><div class="lbl">Video<small>Heavy; off saves data</small></div><label class="tgl"><input type="checkbox" id="oVid"><i></i></label></div>
   <div class="field"><label>Other country</label><select id="cSel"></select></div>
   <div class="field"><label>Custom proxy (protocol://host:port)</label><input id="cProxy" placeholder="socks5://1.2.3.4:1080" autocapitalize="off"></div>
-  <div class="field"><label>Custom relay</label><input id="cRelay" placeholder="https://your-relay.onrender.com" autocapitalize="off"></div>
-  <button class="wide" id="applyAdv">Apply custom proxy / relay</button>
+  <button class="wide" id="applyAdv">Use custom proxy</button>
+  <h3 style="margin-top:22px">Relay server</h3>
+  <div class="seg" id="relSeg" style="margin-bottom:6px"><button data-r="render">Render</button><button data-r="deno">Deno</button><button data-r="cf">Cloudflare</button></div>
+  <div class="field"><label>Deno relay address</label><input id="relDeno" placeholder="https://your-project.deno.dev" autocapitalize="off"></div>
+  <div class="field"><label>Cloudflare relay address</label><input id="relCf" placeholder="https://tunnelx-relay.you.workers.dev" autocapitalize="off"></div>
+  <div class="field"><label>Relay key (only if you set KEY)</label><input id="relKey" type="password" autocapitalize="off"></div>
+  <button class="wide" id="relSave">Save and test all relays</button>
   <h3 style="margin-top:22px">Working proxies</h3>
   <div class="plist" id="plist"><div><span>None yet</span></div></div>
   <button class="wide" id="clearCache">Clear page cache</button>
@@ -177,7 +182,11 @@ button{font:inherit;color:inherit;border:none;background:none;cursor:pointer}
 (function(){
 'use strict';
 var DRELAY='https://tunnelx-relay.onrender.com';
-var PF='https://cdn.jsdelivr.net/gh/proxifly/free-proxy-list@main/proxies/countries';
+var SOURCES=[
+  ['Proxifly',function(cc){return'https://cdn.jsdelivr.net/gh/proxifly/free-proxy-list@main/proxies/countries/'+cc+'/data.json'}],
+  ['ProxyScrape',function(cc){return'https://cdn.jsdelivr.net/gh/proxyscrape/free-proxy-list@main/proxies/countries/'+cc.toLowerCase()+'/data.json'}]
+];
+var RNAME={render:'Render',deno:'Deno',cf:'Cloudflare'};
 var PIN=[['RU','🇷🇺','Russia'],['EG','🇪🇬','Egypt']];
 var CC=[['RU','Russia'],['EG','Egypt'],['SA','Saudi Arabia'],['AE','UAE'],['TR','Turkey'],['KZ','Kazakhstan'],['BY','Belarus'],['UA','Ukraine'],['IR','Iran'],['PK','Pakistan'],['IN','India'],['CN','China'],['US','USA'],['GB','UK'],['DE','Germany'],['FR','France'],['NL','Netherlands'],['IT','Italy'],['ES','Spain'],['PL','Poland'],['CA','Canada'],['BR','Brazil'],['JP','Japan'],['KR','S. Korea'],['SG','Singapore'],['HK','Hong Kong'],['ID','Indonesia'],['TH','Thailand'],['VN','Vietnam'],['MX','Mexico'],['ZA','South Africa'],['NG','Nigeria']];
 var SITES={
@@ -185,9 +194,20 @@ var SITES={
   EG:[['Egypt portal','www.egypt.gov.eg'],['Cabinet','www.cabinet.gov.eg'],['Digital Egypt','digital.gov.eg'],['Tax authority','www.eta.gov.eg']]
 };
 
-var S={relay:DRELAY,custom:false,cc:'RU',mode:'secure',proxy:null,alive:[],hist:[],pos:-1,cache:new Map(),gen:0};
-try{var sv=JSON.parse(localStorage.getItem('tx')||'{}');if(sv.cc)S.cc=sv.cc;if(sv.mode)S.mode=sv.mode}catch(e){}
-function save(){try{localStorage.setItem('tx',JSON.stringify({cc:S.cc,mode:S.mode}))}catch(e){}}
+var S={relay:DRELAY,rid:'render',rurl:{render:DRELAY,deno:'',cf:''},rkey:'',custom:false,cc:'RU',mode:'secure',proxy:null,alive:[],hist:[],pos:-1,cache:new Map(),gen:0};
+try{var sv=JSON.parse(localStorage.getItem('tx')||'{}');if(sv.cc)S.cc=sv.cc;if(sv.mode)S.mode=sv.mode;
+  if(sv.rurl){S.rurl.deno=sv.rurl.deno||'';S.rurl.cf=sv.rurl.cf||''}if(sv.rkey)S.rkey=sv.rkey;if(sv.rid&&(sv.rid==='render'||sv.rurl&&sv.rurl[sv.rid]))S.rid=sv.rid}catch(e){}
+S.relay=S.rurl[S.rid];
+function save(){try{localStorage.setItem('tx',JSON.stringify({cc:S.cc,mode:S.mode,rid:S.rid,rurl:{deno:S.rurl.deno,cf:S.rurl.cf},rkey:S.rkey}))}catch(e){}}
+function KQ(){return S.rkey?'&k='+encodeURIComponent(S.rkey):''}
+function useRelay(id){if(!S.rurl[id]){toast('Add the '+RNAME[id]+' address first',true);return false}
+  S.rid=id;S.relay=S.rurl[id];save();renderRelay();log('Relay → '+RNAME[id]+' ('+S.relay+')','step');if(S.proxy)disconnect('Relay changed','Tap Connect');return true}
+function renderRelay(){[].forEach.call($('relSeg').children,function(b){b.classList.toggle('on',b.dataset.r===S.rid)})}
+async function pingRelays(){
+  for(var id in S.rurl){var u=S.rurl[id];if(!u)continue;var t0=Date.now();
+    try{var r=await fetch(u+'/health',{cache:'no-store'});var d=await r.json();log(RNAME[id]+': online, '+(Date.now()-t0)+' ms, '+(d.type||'?')+' ['+(d.features||[]).join(', ')+']','ok')}
+    catch(e){log(RNAME[id]+': not reachable ('+(Date.now()-t0)+' ms)','err')}}
+}
 
 var $=function(i){return document.getElementById(i)};
 function ccName(c){var f=CC.find(function(x){return x[0]===c});return f?f[1]:c}
@@ -224,13 +244,13 @@ async function wakeRelay(gen){
     if(gen!==S.gen)return false;
     var t0=Date.now();log('Relay check '+(i+1)+'/8: '+S.relay+'/health');
     try{var r=await fetch(S.relay+'/health',{cache:'no-store'});if(r.ok){log('Relay online ('+(Date.now()-t0)+' ms)','ok');return true}log('Relay answered HTTP '+r.status,'warn')}catch(e){log('Relay not reachable yet (asleep?) — waiting 6 s','warn')}
-    status('wait','Waking relay…','Free server sleeps when idle, up to a minute');
+    status('wait','Waking relay…',S.rid==='render'?'Free server sleeps when idle, up to a minute':'Retrying '+RNAME[S.rid]);
     await new Promise(function(r){setTimeout(r,6000)});
   }
   return false;
 }
 async function testProxy(p){
-  try{var r=await fetch(S.relay+'/test?host='+encodeURIComponent(p.host)+'&port='+p.port+'&proto='+p.protocol,{cache:'no-store'});
+  try{var r=await fetch(S.relay+'/test?host='+encodeURIComponent(p.host)+'&port='+p.port+'&proto='+p.protocol+KQ(),{cache:'no-store'});
     var d=await r.json();p.latency=d.latency;p.exitIp=d.exitIp;p.ok=d.status==='alive';p.why=d.error||d.status}catch(e){p.ok=false;p.why='relay error'}
   return p;
 }
@@ -243,9 +263,12 @@ async function connect(){
   try{
     if(!await wakeRelay(gen))throw new Error('Relay not responding — try again shortly');
     status('wait','Connecting to '+name+'…','Downloading proxy list');
-    var r=await fetch(PF+'/'+S.cc+'/data.json',{cache:'no-store'});
-    if(!r.ok)throw new Error(r.status===404?'No public proxies listed for '+name:'Proxy list error '+r.status);
-    var all=(await r.json()).map(function(e){var pr=(e.protocol||'http').toLowerCase();return{protocol:pr,host:e.ip,port:+e.port,address:pr+'://'+e.ip+':'+e.port}}).filter(function(p){return p.host&&p.port});
+    var seen={},all=[];
+    var lists=await Promise.all(SOURCES.map(function(src){return fetch(src[1](S.cc),{cache:'no-store'}).then(function(r){return r.ok?r.json():[]}).catch(function(){return[]})}));
+    lists.forEach(function(arr,i){var added=0;(Array.isArray(arr)?arr:[]).forEach(function(e){var pr=(e.protocol||'http').toLowerCase();if(!e.ip||!e.port)return;
+      var a=pr+'://'+e.ip+':'+e.port;if(seen[a])return;seen[a]=1;added++;all.push({protocol:pr,host:e.ip,port:+e.port,address:a,src:SOURCES[i][0]})});
+      log(SOURCES[i][0]+': '+added+' new proxies')});
+    if(!all.length)throw new Error('No public proxies listed for '+name+' right now');
     var socks=S.mode==='secure';
     var list=all.filter(function(p){return socks?/^socks/.test(p.protocol):/^https?$/.test(p.protocol)});
     log('Proxy list: '+all.length+' total, '+list.length+' of the chosen type');
@@ -256,7 +279,7 @@ async function connect(){
       var batch=list.slice(i,i+6);
       await Promise.all(batch.map(testProxy));
       tested+=batch.length;
-      batch.forEach(function(p){if(p.ok){S.alive.push(p);log('✓ '+p.address+'  '+p.latency+' ms'+(p.exitIp?'  exit IP '+p.exitIp:''),'ok')}else log('✗ '+p.address+'  '+(p.why||'dead'))});
+      batch.forEach(function(p){if(p.ok){S.alive.push(p);log('✓ '+p.address+'  ['+p.src+']  '+p.latency+' ms'+(p.exitIp?'  exit IP '+p.exitIp:''),'ok')}else log('✗ '+p.address+'  ['+p.src+']  '+(p.why||'dead'))});
       S.alive.sort(function(a,b){return(a.latency||1e9)-(b.latency||1e9)});
       if(S.alive.length&&!S.proxy){S.proxy=S.alive[0];S.busy=false;toast('Connected to '+name+' via '+S.proxy.host)}
       if(S.proxy){S.proxy=S.alive[0];status('on',name,pxLabel(S.proxy)+(S.proxy.exitIp?' · exit '+S.proxy.exitIp:''));
@@ -284,9 +307,9 @@ async function fetchVia(url){
   var tries=S.alive.slice(0,3);if(S.proxy&&tries.indexOf(S.proxy)<0)tries.unshift(S.proxy);
   for(var i=0;i<tries.length;i++){
     var p=tries[i],t0=Date.now();loading(true,'Loading via '+p.host+'…');log('GET '+url+'  via '+p.address);
-    try{var r=await fetch(S.relay+'/fetch?url='+encodeURIComponent(url)+'&proxy='+encodeURIComponent(p.address),{cache:'no-store'});
+    try{var r=await fetch(S.relay+'/fetch?url='+encodeURIComponent(url)+'&proxy='+encodeURIComponent(p.address)+KQ(),{cache:'no-store'});
       if(!r.ok)log('  relay returned HTTP '+r.status,'err');
-      if(r.ok){var t=await r.text();log('  '+r.status+' · '+Math.round(t.length/1024)+' KB · '+(Date.now()-t0)+' ms',t.length>40?'ok':'warn');if(t&&t.length>40){if(p!==S.proxy){S.proxy=p;status('on',ccName(S.cc),pxLabel(p));renderPlist()}return{html:t,p:p}}}
+      if(r.ok){var t=await r.text();log('  '+r.status+' · '+Math.round(t.length/1024)+' KB · '+(Date.now()-t0)+' ms',t.length>40?'ok':'warn');if(t&&t.length>40){if(p!==S.proxy){S.proxy=p;status('on',ccName(S.cc),pxLabel(p));renderPlist()}var fu=r.headers.get('x-final-url');if(fu&&fu!==url)log('  redirected to '+fu);return{html:t,p:p,url:fu||url}}}
     }catch(e){log('  network error: '+e.message,'err')}
     if(!S.custom){S.alive=S.alive.filter(function(x){return x!==p});log('  dropped '+p.host+', trying next','warn')}
   }
@@ -303,7 +326,7 @@ async function open(raw,push){
   try{
     var html;
     if(S.cache.has(key)){html=S.cache.get(key);log('From cache: '+url)}
-    else{var res=await fetchVia(url);html=rewrite(res.html,url,res.p);
+    else{var res=await fetchVia(url);html=rewrite(res.html,res.url,res.p);
       if(S.cache.size>=25)S.cache.delete(S.cache.keys().next().value);S.cache.set(url+'|'+res.p.address,html)}
     if(push!==false){S.hist=S.hist.slice(0,S.pos+1);S.hist.push(url);S.pos=S.hist.length-1}
     $('frm').srcdoc=html;$('frm').style.display='block';$('home').style.display='none';
@@ -314,7 +337,7 @@ function navBtns(){$('bBack').disabled=S.pos<1;$('bFwd').disabled=S.pos>=S.hist.
 function goHome(){$('frm').style.display='none';$('frm').srcdoc='';$('home').style.display='block';renderHome()}
 
 function rewrite(html,url,p){
-  var R=S.relay,P=encodeURIComponent(p.address),base=new URL(url);
+  var R=S.relay,P=encodeURIComponent(p.address)+KQ(),base=new URL(url);
   function abs(s){try{return new URL(s,base).href}catch(e){return null}}
   function rf(s){if(!s||/^(data:|blob:|javascript:|#|mailto:|tel:)/i.test(s))return s;var a=abs(s);return a?R+'/fetch?url='+encodeURIComponent(a)+'&proxy='+P:s}
   // In-page runtime: subrequests go through relay; links and GET forms come back to TunnelX.
@@ -368,8 +391,7 @@ $('scrim').onclick=function(){sheet(false)};
 $('clearLog').onclick=function(){$('log').innerHTML=''};
 $('clearCache').onclick=function(){S.cache.clear();toast('Cache cleared')};
 $('applyAdv').onclick=function(){
-  var cr=$('cRelay').value.trim(),cp=$('cProxy').value.trim();
-  if(cr){if(!/^https:\/\//i.test(cr)){toast('Relay must start with https://',true);return}S.relay=cr.replace(/\/+$/,'');toast('Relay set: '+S.relay)}
+  var cp=$('cProxy').value.trim();
   if(cp){var m=cp.match(/^(socks[45]?|https?):\/\/([^:\/]+):(\d+)$/i);
     if(!m){toast('Use protocol://host:port',true);return}
     S.gen++;S.cache.clear();S.custom=true;S.proxy={protocol:m[1].toLowerCase(),host:m[2],port:+m[3],address:cp};S.alive=[S.proxy];
@@ -377,10 +399,18 @@ $('applyAdv').onclick=function(){
   sheet(false);
 };
 
-log('TunnelX ready. Relay: '+S.relay);
+$('relDeno').value=S.rurl.deno;$('relCf').value=S.rurl.cf;$('relKey').value=S.rkey;renderRelay();
+$('relSeg').onclick=function(e){var id=e.target.dataset&&e.target.dataset.r;if(id&&id!==S.rid)useRelay(id)};
+$('relSave').onclick=function(){
+  function clean(v){v=v.trim().replace(/\/+$/,'');return v&&!/^https:\/\//i.test(v)?null:v}
+  var d=clean($('relDeno').value),c=clean($('relCf').value);
+  if(d===null||c===null){toast('Relay addresses must start with https://',true);return}
+  S.rurl.deno=d;S.rurl.cf=c;S.rkey=$('relKey').value.trim();if(!S.rurl[S.rid])S.rid='render';S.relay=S.rurl[S.rid];save();renderRelay();
+  log('Relays saved. Testing…','step');pingRelays()};
+log('TunnelX ready. Relay: '+RNAME[S.rid]+' ('+S.relay+')');
+pingRelays();
 renderHome();
 status('','Not connected',ccName(S.cc)+' selected · tap Connect');
-fetch(S.relay+'/health',{cache:'no-store'}).catch(function(){});  // start waking the relay early
 })();
 </script>
 </body>

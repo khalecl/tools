@@ -206,7 +206,7 @@ function renderRelay(){[].forEach.call($('relSeg').children,function(b){b.classL
 async function pingRelays(){
   for(var id in S.rurl){var u=S.rurl[id];if(!u)continue;var t0=Date.now();
     try{var r=await fetch(u+'/health',{cache:'no-store'});var d=await r.json();log(RNAME[id]+': online, '+(Date.now()-t0)+' ms, '+(d.type||'?')+' ['+(d.features||[]).join(', ')+']','ok')}
-    catch(e){log(RNAME[id]+': not reachable ('+(Date.now()-t0)+' ms)','err')}}
+    catch(e){log(RNAME[id]+': not reachable ('+(Date.now()-t0)+' ms) — '+u+'/health — '+(e&&e.message||e)+(Date.now()-t0<50?' · blocked before reaching the server: check the address, ad-blocker or network':''),'err')}}
 }
 
 var $=function(i){return document.getElementById(i)};

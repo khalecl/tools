@@ -203,11 +203,12 @@ function KQ(){return S.rkey?'&k='+encodeURIComponent(S.rkey):''}
 function useRelay(id){if(!S.rurl[id]){toast('Add the '+RNAME[id]+' address first',true);return false}
   S.rid=id;S.relay=S.rurl[id];save();renderRelay();log('Relay → '+RNAME[id]+' ('+S.relay+')','step');if(S.proxy)disconnect('Relay changed','Tap Connect');return true}
 function renderRelay(){[].forEach.call($('relSeg').children,function(b){b.classList.toggle('on',b.dataset.r===S.rid)})}
-async function pingRelays(){
+var pinging=false;
+async function pingRelays(){if(pinging)return;pinging=true;try{
   for(var id in S.rurl){var u=S.rurl[id];if(!u)continue;var t0=Date.now();
     try{var r=await fetch(u+'/health',{cache:'no-store'});var d=await r.json();log(RNAME[id]+': online, '+(Date.now()-t0)+' ms, '+(d.type||'?')+' ['+(d.features||[]).join(', ')+']','ok')}
     catch(e){log(RNAME[id]+': not reachable ('+(Date.now()-t0)+' ms) — '+u+'/health — '+(e&&e.message||e)+(Date.now()-t0<50?' · blocked before reaching the server: check the address, ad-blocker or network':''),'err')}}
-}
+}finally{pinging=false}}
 
 var $=function(i){return document.getElementById(i)};
 function ccName(c){var f=CC.find(function(x){return x[0]===c});return f?f[1]:c}
@@ -217,6 +218,7 @@ function log(m,c){var l=$('log');if(!l)return;var d=document.createElement('div'
   l.appendChild(d);while(l.children.length>500)l.firstChild.remove();l.scrollTop=l.scrollHeight}
 function toast(m,err){log(m,err?'err':'');var e=document.createElement('div');e.className='toast'+(err?' err':'');e.textContent=m;$('toasts').appendChild(e);setTimeout(function(){e.remove()},3200)}
 function loading(on,m){$('loading').classList.toggle('show',on);if(m)$('loadMsg').textContent=m}
+function exitTxt(p){if(!p.exitIp)return'';var a=String(p.exitIp).split(/,\s*/);return a.length>1?'exit '+a[a.length-1]+' (transparent proxy: site also sees relay)':'exit '+a[0]}
 function pxLabel(p){return p.protocol.toUpperCase()+' '+p.host+':'+p.port+(p.latency?' · '+p.latency+' ms':'')}
 
 /* ---------- home ---------- */
@@ -272,17 +274,19 @@ async function connect(){
     var socks=S.mode==='secure';
     var list=all.filter(function(p){return socks?/^socks/.test(p.protocol):/^https?$/.test(p.protocol)});
     log('Proxy list: '+all.length+' total, '+list.length+' of the chosen type');
-    if(!list.length)throw new Error('No '+(socks?'Tunnel (SOCKS)':'Web (HTTP)')+' proxies for '+name+' — switch type in Settings');
+    if(list.length<5){var other=all.filter(function(p){return list.indexOf(p)<0});
+      if(other.length){log('Only '+list.length+' of the chosen type — also trying '+other.length+' of the other type','warn');list=list.concat(other)}}
+    if(!list.length)throw new Error('No public proxies for '+name+' right now');
     var tested=0;
     for(var i=0;i<list.length;i+=6){
       if(gen!==S.gen)return;
       var batch=list.slice(i,i+6);
       await Promise.all(batch.map(testProxy));
       tested+=batch.length;
-      batch.forEach(function(p){if(p.ok){S.alive.push(p);log('✓ '+p.address+'  ['+p.src+']  '+p.latency+' ms'+(p.exitIp?'  exit IP '+p.exitIp:''),'ok')}else log('✗ '+p.address+'  ['+p.src+']  '+(p.why||'dead'))});
+      batch.forEach(function(p){if(p.ok){S.alive.push(p);log('✓ '+p.address+'  ['+p.src+']  '+p.latency+' ms'+(p.exitIp?'  '+exitTxt(p):''),'ok')}else log('✗ '+p.address+'  ['+p.src+']  '+(p.why||'dead'))});
       S.alive.sort(function(a,b){return(a.latency||1e9)-(b.latency||1e9)});
       if(S.alive.length&&!S.proxy){S.proxy=S.alive[0];S.busy=false;toast('Connected to '+name+' via '+S.proxy.host)}
-      if(S.proxy){S.proxy=S.alive[0];status('on',name,pxLabel(S.proxy)+(S.proxy.exitIp?' · exit '+S.proxy.exitIp:''));
+      if(S.proxy){S.proxy=S.alive[0];status('on',name,pxLabel(S.proxy)+(S.proxy.exitIp?' · '+exitTxt(S.proxy):''));
         $('connBtn').disabled=false;$('connBtn').textContent='Disconnect';$('connBtn').className='conn-btn alt'}
       else status('wait','Connecting to '+name+'…','Tested '+tested+' of '+list.length);
       renderPlist();
@@ -308,7 +312,7 @@ async function fetchVia(url){
   for(var i=0;i<tries.length;i++){
     var p=tries[i],t0=Date.now();loading(true,'Loading via '+p.host+'…');log('GET '+url+'  via '+p.address);
     try{var r=await fetch(S.relay+'/fetch?url='+encodeURIComponent(url)+'&proxy='+encodeURIComponent(p.address)+KQ(),{cache:'no-store'});
-      if(!r.ok)log('  relay returned HTTP '+r.status,'err');
+      if(!r.ok){var why='';try{why=(await r.clone().json()).error||''}catch(x){}log('  relay returned HTTP '+r.status+(why?' — '+why:''),'err')}
       if(r.ok){var t=await r.text();log('  '+r.status+' · '+Math.round(t.length/1024)+' KB · '+(Date.now()-t0)+' ms',t.length>40?'ok':'warn');if(t&&t.length>40){if(p!==S.proxy){S.proxy=p;status('on',ccName(S.cc),pxLabel(p));renderPlist()}var fu=r.headers.get('x-final-url');if(fu&&fu!==url)log('  redirected to '+fu);return{html:t,p:p,url:fu||url}}}
     }catch(e){log('  network error: '+e.message,'err')}
     if(!S.custom){S.alive=S.alive.filter(function(x){return x!==p});log('  dropped '+p.host+', trying next','warn')}

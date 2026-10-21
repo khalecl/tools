@@ -264,7 +264,7 @@ async function wakeRelay(gen){
 }
 async function testProxy(p){
   try{var r=await fetch(S.relay+'/test?host='+encodeURIComponent(p.host)+'&port='+p.port+'&proto='+p.protocol+KQ(),{cache:'no-store'});
-    var d=await r.json();p.latency=d.latency;p.exitIp=d.exitIp;p.ok=d.status==='alive';p.why=d.error||d.status}catch(e){p.ok=false;p.why='relay error'}
+    var d=await r.json();p.latency=d.latency;p.exitIp=/^[0-9a-f.:,\s]+$/i.test(String(d.exitIp||''))?d.exitIp:'';p.ok=d.status==='alive';p.why=d.error||d.status}catch(e){p.ok=false;p.why='relay error'}
   return p;
 }
 async function connect(){
@@ -287,6 +287,7 @@ async function connect(){
     if(ccs.length>1){var by={};all.forEach(function(p){(by[p.cc]=by[p.cc]||[]).push(p)});all=[];
       for(var k=0;Object.keys(by).some(function(c){return by[c].length});k++)Object.keys(by).forEach(function(c){if(by[c].length)all.push(by[c].shift())})}
     if(!all.length)throw new Error('No public proxies listed for '+name+' right now');
+    if(S.rid==='cf'){var nTls=all.length;all=all.filter(function(p){return p.protocol!=='https'});nTls-=all.length;if(nTls)log('Skipped '+nTls+' https:// proxies (they only work through the Render relay)','warn')}
     var socks=S.mode==='secure';
     var list=all.filter(function(p){return socks?/^socks/.test(p.protocol):/^https?$/.test(p.protocol)});
     log('Proxy list: '+all.length+' total, '+list.length+' of the chosen type');
@@ -298,6 +299,7 @@ async function connect(){
       if(gen!==S.gen)return;
       var batch=list.slice(i,i+12);
       await Promise.all(batch.map(testProxy));
+      if(gen!==S.gen)return;
       tested+=batch.length;
       batch.forEach(function(p){if(p.ok){S.alive.push(p);log('✓ '+p.address+'  ['+p.src+']  '+p.latency+' ms'+(p.exitIp?'  '+exitTxt(p):''),'ok')}else log('✗ '+p.address+'  ['+p.src+']  '+(p.why||'dead'))});
       S.alive.sort(function(a,b){return(a.latency||1e9)-(b.latency||1e9)});
@@ -344,16 +346,26 @@ function renderPlist(){var l=$('plist');l.innerHTML='';
 
 /* ---------- browse ---------- */
 function norm(u){u=(u||'').trim();if(!u)return'';if(!/^https?:\/\//i.test(u))u='https://'+u;try{return new URL(u).href}catch(e){return''}}
+function fetchOne(url,p,ctl){
+  var t0=Date.now();log('GET '+url+'  via '+p.address);
+  return fetch(S.relay+'/fetch?url='+encodeURIComponent(url)+'&proxy='+encodeURIComponent(p.address)+KQ(),{cache:'no-store',signal:ctl.signal}).then(async function(r){
+    if(!r.ok){var why='';try{why=String((await r.clone().json()).error||'').replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').slice(0,120)}catch(x){}throw new Error('HTTP '+r.status+(why?' — '+why:''))}
+    var t=await r.text();if(!t||t.length<=40)throw new Error('empty page');
+    log('  ✓ '+p.host+' · '+Math.round(t.length/1024)+' KB · '+(Date.now()-t0)+' ms','ok');
+    return{html:t,p:p,url:r.headers.get('x-final-url')||url};
+  }).catch(function(e){if(e.name!=='AbortError'){log('  ✗ '+p.host+': '+e.message,'err');if(!S.custom)S.alive=S.alive.filter(function(x){return x!==p})}throw e});
+}
 async function fetchVia(url){
-  // Try current proxy, then up to two spares; drop proxies that fail.
-  var tries=S.alive.slice(0,3);if(S.proxy&&tries.indexOf(S.proxy)<0)tries.unshift(S.proxy);
-  for(var i=0;i<tries.length;i++){
-    var p=tries[i],t0=Date.now();loading(true,'Loading via '+p.host+'…');log('GET '+url+'  via '+p.address);
-    try{var r=await fetch(S.relay+'/fetch?url='+encodeURIComponent(url)+'&proxy='+encodeURIComponent(p.address)+KQ(),{cache:'no-store'});
-      if(!r.ok){var why='';try{why=(await r.clone().json()).error||''}catch(x){}log('  relay returned HTTP '+r.status+(why?' — '+why:''),'err')}
-      if(r.ok){var t=await r.text();log('  '+r.status+' · '+Math.round(t.length/1024)+' KB · '+(Date.now()-t0)+' ms',t.length>40?'ok':'warn');if(t&&t.length>40){if(p!==S.proxy){S.proxy=p;status('on',ccName(S.cc),pxLabel(p));renderPlist()}var fu=r.headers.get('x-final-url');if(fu&&fu!==url)log('  redirected to '+fu);return{html:t,p:p,url:fu||url}}}
-    }catch(e){log('  network error: '+e.message,'err')}
-    if(!S.custom){S.alive=S.alive.filter(function(x){return x!==p});log('  dropped '+p.host+', trying next','warn')}
+  // Race the 3 fastest proxies; first good page wins, the rest are cancelled. Repeat with the next 3.
+  for(var round=0;round<4;round++){
+    var tries=S.alive.slice(0,3);if(S.proxy&&S.alive.indexOf(S.proxy)>=0&&tries.indexOf(S.proxy)<0)tries[tries.length?tries.length-1:0]=S.proxy;
+    if(!tries.length)break;
+    loading(true,'Loading via '+tries.length+' proxies…');
+    var ctl=new AbortController();
+    try{var res=await Promise.any(tries.map(function(p){return fetchOne(url,p,ctl)}));ctl.abort();
+      if(res.p!==S.proxy){S.proxy=res.p;status('on',ccName(S.cc),pxLabel(res.p))}renderPlist();
+      if(res.url!==url)log('  redirected to '+res.url);return res}
+    catch(e){log('  all '+tries.length+' failed — trying the next ones','warn')}
   }
   if(!S.alive.length&&!S.custom){S.proxy=null;status('','Proxies dropped','Tap Connect to find new ones')}
   else if(S.alive[0])S.proxy=S.alive[0];
@@ -385,6 +397,12 @@ function rewrite(html,url,p){
   function rf(s){if(!s||/^(data:|blob:|javascript:|#|mailto:|tel:)/i.test(s))return s;var a=abs(s);return a?R+'/fetch?url='+encodeURIComponent(a)+'&proxy='+P:s}
   // In-page runtime: subrequests go through relay; links and GET forms come back to TunnelX.
   var cfg=JSON.stringify({R:R,P:P,B:url});
+  var shim='<script>(function(){function M(){var d={};return{getItem:function(k){return k in d?d[k]:null},setItem:function(k,v){d[k]=String(v)},removeItem:function(k){delete d[k]},clear:function(){d={}},key:function(i){return Object.keys(d)[i]||null},get length(){return Object.keys(d).length}}}'
+   +'["localStorage","sessionStorage"].forEach(function(n){try{window[n].length}catch(e){try{Object.defineProperty(window,n,{value:M(),configurable:true})}catch(x){}}});'
+   +'try{document.cookie}catch(e){var jar={};try{Object.defineProperty(document,"cookie",{configurable:true,get:function(){return Object.keys(jar).map(function(k){return k+"="+jar[k]}).join("; ")},set:function(v){var kv=String(v).split(";")[0],i=kv.indexOf("=");if(i>0)jar[kv.slice(0,i).trim()]=kv.slice(i+1)}})}catch(x){}}'
+   +'["pushState","replaceState"].forEach(function(n){var o=history[n];history[n]=function(){try{return o.apply(history,arguments)}catch(e){try{return o.call(history,arguments[0],arguments[1])}catch(x){}}}});'
+   +'try{if(navigator.serviceWorker)Object.defineProperty(navigator,"serviceWorker",{value:undefined,configurable:true})}catch(e){}'
+   +'})()<\/script>';
   var rt='<script>(function(C){var B=new URL(C.B);function f(u){if(!u||/^(data:|blob:|javascript:)/i.test(u))return u;try{var a=new URL(u,B).href;if(a.indexOf(C.R)===0)return u;return C.R+"/fetch?url="+encodeURIComponent(a)+"&proxy="+C.P}catch(e){return u}}'
    +'var F=window.fetch;window.fetch=function(i,o){if(typeof i==="string")i=f(i);else if(i&&i.url)i=new Request(f(i.url),i);return F.call(this,i,o)};'
    +'var X=XMLHttpRequest.prototype.open;XMLHttpRequest.prototype.open=function(m,u){arguments[1]=f(String(u));return X.apply(this,arguments)};'
@@ -394,7 +412,7 @@ function rewrite(html,url,p){
    +'document.addEventListener("submit",function(e){var fm=e.target;e.preventDefault();if((fm.method||"get").toLowerCase()!=="get"){parent.postMessage({tx:"post"},"*");return}try{var u=new URL(fm.getAttribute("action")||C.B,B);new FormData(fm).forEach(function(v,k){if(typeof v==="string")u.searchParams.append(k,v)});go(u.href)}catch(x){}},true);'
    +'})('+cfg+')<\/script>';
   var head=/<head[^>]*>/i;
-  var inject='<base href="'+url.replace(/"/g,'&quot;')+'">'+rt;
+  var inject='<base href="'+url.replace(/"/g,'&quot;')+'">'+shim+rt;
   html=head.test(html)?html.replace(head,function(m){return m+inject}):inject+html;
   html=html.replace(/(<script\b[^>]*?\ssrc\s*=\s*)(["'])([^"']*)\2/gi,function(m,a,q,s){return a+q+rf(s)+q});
   if($('oImg').checked){

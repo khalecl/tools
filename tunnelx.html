@@ -166,7 +166,7 @@ button{font:inherit;color:inherit;border:none;background:none;cursor:pointer}
   <div class="field"><label>Custom proxy (protocol://host:port)</label><input id="cProxy" placeholder="socks5://1.2.3.4:1080" autocapitalize="off"></div>
   <button class="wide" id="applyAdv">Use custom proxy</button>
   <h3 style="margin-top:22px">Relay server</h3>
-  <div class="seg" id="relSeg" style="margin-bottom:6px"><button data-r="render">Render</button><button data-r="deno">Deno</button><button data-r="cf">Cloudflare</button></div>
+  <div class="seg" id="relSeg" style="margin-bottom:6px"><button data-r="render">Render</button><button data-r="deno">Deno</button><button data-r="cf" title="Health check only: cannot load HTTPS through proxies">Cloudflare (limited)</button></div>
   <div class="field"><label>Deno relay address</label><input id="relDeno" placeholder="https://your-project.deno.dev" autocapitalize="off"></div>
   <div class="field"><label>Cloudflare relay address</label><input id="relCf" placeholder="https://tunnelx-relay.you.workers.dev" autocapitalize="off"></div>
   <div class="field"><label>Relay key (only if you set KEY)</label><input id="relKey" type="password" autocapitalize="off"></div>
@@ -262,59 +262,97 @@ async function wakeRelay(gen){
   }
   return false;
 }
+/* ---------- proxy pool: downloaded once, verified on real HTTPS, remembered for hours ---------- */
+var LIST_TTL=3*3600e3,GOOD_TTL=3*3600e3,BAD_TTL=6*3600e3,VERIFY_URL='https://www.gstatic.com/generate_204';  // Google, not behind Cloudflare: works on every relay
+// Cloudflare's own ranges: listed as "proxies" by mistake and unreachable from Workers
+var CF_NETS=[['173.245.48.0',20],['103.21.244.0',22],['103.22.200.0',22],['103.31.4.0',22],['141.101.64.0',18],['108.162.192.0',18],['190.93.240.0',20],['188.114.96.0',20],['197.234.240.0',22],['198.41.128.0',17],['162.158.0.0',15],['104.16.0.0',13],['104.24.0.0',14],['172.64.0.0',13],['131.0.72.0',22]];
+function ip2n(ip){var p=String(ip).split('.');return p.length===4?((+p[0]<<24)>>>0)+(+p[1]<<16)+(+p[2]<<8)+(+p[3]):-1}
+function isCfIp(ip){var n=ip2n(ip);if(n<0)return false;return CF_NETS.some(function(c){var m=c[1]?(~0<<(32-c[1]))>>>0:0;return((n&m)>>>0)===((ip2n(c[0])&m)>>>0)})}
+var POOL={};try{POOL=JSON.parse(localStorage.getItem('txpool')||'{}')}catch(e){POOL={}}
+function savePool(){try{localStorage.setItem('txpool',JSON.stringify(POOL))}catch(e){try{POOL={};localStorage.removeItem('txpool')}catch(x){}}}
+function poolFor(cc){return POOL[cc]||(POOL[cc]={t:0,list:[],good:{},bad:{}})}
+async function getList(cc,force){
+  var pl=poolFor(cc);
+  if(!force&&pl.list.length&&Date.now()-pl.t<LIST_TTL){log(ccName(cc)+': using saved list ('+pl.list.length+' proxies, '+Math.round((Date.now()-pl.t)/60000)+' min old)');return pl.list}
+  var seen={},out=[],cf=0;
+  var lists=await Promise.all(SOURCES.map(function(src){return fetch(src[1](cc),{cache:'no-store'}).then(function(r){return r.ok?r.json():[]}).catch(function(){return[]})}));
+  lists.forEach(function(arr,i){(Array.isArray(arr)?arr:[]).forEach(function(e){var pr=(e.protocol||'http').toLowerCase();if(!e.ip||!e.port)return;
+    if(isCfIp(e.ip)){cf++;return}var a=pr+'://'+e.ip+':'+e.port;if(seen[a])return;seen[a]=1;out.push({protocol:pr,host:e.ip,port:+e.port,address:a,src:SOURCES[i][0],cc:cc})})});
+  log(ccName(cc)+': downloaded '+out.length+' proxies'+(cf?' (removed '+cf+' fake Cloudflare addresses)':''));
+  if(out.length){pl.list=out;pl.t=Date.now();savePool()}
+  return pl.list;
+}
+// A proxy passes only if it really loads an HTTPS page through the current relay.
 async function testProxy(p){
-  try{var r=await fetch(S.relay+'/test?host='+encodeURIComponent(p.host)+'&port='+p.port+'&proto='+p.protocol+KQ(),{cache:'no-store'});
-    var d=await r.json();p.latency=d.latency;p.exitIp=/^[0-9a-f.:,\s]+$/i.test(String(d.exitIp||''))?d.exitIp:'';p.ok=d.status==='alive';p.why=d.error||d.status}catch(e){p.ok=false;p.why='relay error'}
+  var ctl=new AbortController(),tm=setTimeout(function(){ctl.abort()},12000),t0=Date.now();
+  try{var r=await fetch(S.relay+'/fetch?url='+encodeURIComponent(VERIFY_URL)+'&proxy='+encodeURIComponent(p.address)+KQ(),{cache:'no-store',signal:ctl.signal});
+    if(r.ok)await r.text();p.ok=r.ok&&(r.headers.get('X-Upstream-Status')||String(r.status))==='204';p.latency=Date.now()-t0;
+    if(!p.ok){var why='';if(!r.ok){try{why=(await r.json()).error||''}catch(x){}}p.why=why?String(why).replace(/<[^>]*>/g,' ').slice(0,80):'HTTP '+r.status}}
+  catch(e){p.ok=false;p.why=e.name==='AbortError'?'too slow (12 s)':'relay error'}
+  clearTimeout(tm);
+  var pl=poolFor(p.cc||S.cc),k=S.rid+'|'+p.address;
+  if(p.ok){pl.good[k]={lat:p.latency,ts:Date.now()};delete pl.bad[k]}else{pl.bad[k]=Date.now();delete pl.good[k]}
   return p;
+}
+function orderCandidates(cc,list,socks){
+  var pl=poolFor(cc),now=Date.now(),good=[],fresh=[],skipped=0;
+  list.forEach(function(p){var k=S.rid+'|'+p.address;
+    if(S.rid==='cf'&&p.protocol==='https')return;
+    if(socks?!/^socks/.test(p.protocol):!/^https?$/.test(p.protocol))return;
+    var g=pl.good[k];if(g&&now-g.ts<GOOD_TTL){p.latency=g.lat;good.push(p);return}
+    if(pl.bad[k]&&now-pl.bad[k]<BAD_TTL){skipped++;return}
+    fresh.push(p)});
+  good.sort(function(a,b){return a.latency-b.latency});
+  return{good:good,fresh:fresh,skipped:skipped};
 }
 async function connect(){
   if(S.busy){disconnect('Stopped by you',ccName(S.cc));renderHome();return}
   if(S.proxy){S.custom=false;disconnect('Disconnected',ccName(S.cc));renderHome();return}
   if(S.fam)return connectFamily();
-  var gen=++S.gen,name=ccName(S.cc);S.busy=true;
-  log('▶ Connect to '+name+' — type '+(S.mode==='secure'?'Tunnel (SOCKS)':'Web (HTTP)'),'step');
+  // Cloudflare Workers cannot start TLS after talking to a proxy (confirmed with /diag), so HTTPS through proxies never works there.
+  if(S.rid==='cf'){log('Cloudflare relay cannot load HTTPS pages through proxies — switching to Render','warn');toast('Using Render relay (Cloudflare cannot do HTTPS via proxies)');useRelay('render')}
+  var gen=++S.gen,name=ccName(S.cc),socks=S.mode==='secure';S.busy=true;
+  log('▶ Connect to '+name+' — '+(socks?'Tunnel (SOCKS)':'Web (HTTP)')+' via '+RNAME[S.rid],'step');
   $('connBtn').textContent='Stop';$('connBtn').className='conn-btn alt';status('wait','Connecting to '+name+'…','Checking relay');
   try{
     if(!await wakeRelay(gen))throw new Error('Relay not responding — try again shortly');
-    status('wait','Connecting to '+name+'…','Downloading proxy list');
-    var seen={},all=[];
-    var ccs=S.cc==='ANY'?FASTEST:[S.cc],jobs=[];
-    ccs.forEach(function(cc){SOURCES.forEach(function(src){jobs.push(fetch(src[1](cc),{cache:'no-store'}).then(function(r){return r.ok?r.json():[]}).catch(function(){return[]}).then(function(arr){return{arr:arr,src:src[0],cc:cc}}))})});
-    (await Promise.all(jobs)).forEach(function(j){var added=0;(Array.isArray(j.arr)?j.arr:[]).forEach(function(e){var pr=(e.protocol||'http').toLowerCase();if(!e.ip||!e.port)return;
-      var a=pr+'://'+e.ip+':'+e.port;if(seen[a])return;seen[a]=1;added++;all.push({protocol:pr,host:e.ip,port:+e.port,address:a,src:j.src+(ccs.length>1?' '+j.cc:''),cc:j.cc})});
-      if(added)log(j.src+(ccs.length>1?' ['+ccName(j.cc)+']':'')+': '+added+' new proxies')});
-    // Fastest first: interleave countries so early batches sample everywhere
-    if(ccs.length>1){var by={};all.forEach(function(p){(by[p.cc]=by[p.cc]||[]).push(p)});all=[];
-      for(var k=0;Object.keys(by).some(function(c){return by[c].length});k++)Object.keys(by).forEach(function(c){if(by[c].length)all.push(by[c].shift())})}
-    if(!all.length)throw new Error('No public proxies listed for '+name+' right now');
-    if(S.rid==='cf'){var nTls=all.length;all=all.filter(function(p){return p.protocol!=='https'});nTls-=all.length;if(nTls)log('Skipped '+nTls+' https:// proxies (they only work through the Render relay)','warn')}
-    var socks=S.mode==='secure';
-    var list=all.filter(function(p){return socks?/^socks/.test(p.protocol):/^https?$/.test(p.protocol)});
-    log('Proxy list: '+all.length+' total, '+list.length+' of the chosen type');
-    if(list.length<5){var other=all.filter(function(p){return list.indexOf(p)<0});
-      if(other.length){log('Only '+list.length+' of the chosen type — also trying '+other.length+' of the other type','warn');list=list.concat(other)}}
-    if(!list.length)throw new Error('No public proxies for '+name+' right now');
-    var tested=0;
-    for(var i=0;i<list.length;i+=12){
-      if(gen!==S.gen)return;
-      var batch=list.slice(i,i+12);
-      await Promise.all(batch.map(testProxy));
+    var ccs=S.cc==='ANY'?FASTEST:[S.cc],good=[],fresh=[],skipped=0;
+    status('wait','Connecting to '+name+'…','Loading proxy list');
+    var lists=await Promise.all(ccs.map(function(c){return getList(c)}));if(gen!==S.gen)return;
+    lists.forEach(function(l,i){var o=orderCandidates(ccs[i],l,socks);good=good.concat(o.good);fresh=fresh.concat(o.fresh);skipped+=o.skipped});
+    if(!good.length&&!fresh.length){var o2=ccs.map(function(c,i){return orderCandidates(c,lists[i],!socks)});
+      o2.forEach(function(o){good=good.concat(o.good);fresh=fresh.concat(o.fresh)});if(good.length||fresh.length)log('None of the chosen type — using the other type','warn')}
+    good.sort(function(a,b){return a.latency-b.latency});
+    log('Candidates: '+good.length+' known-good, '+fresh.length+' untested, '+skipped+' skipped (failed in the last 6 h)');
+    if(!good.length&&!fresh.length)throw new Error('No usable proxies for '+name+' right now. Try the other proxy type or relay.');
+    // Known-good first (re-checked in one quick batch), then untested in parallel batches.
+    var queue=good.concat(fresh),tested=0,B=16;
+    for(var i=0;i<queue.length&&tested<400;i+=B){
+      var batch=queue.slice(i,i+B);
+      await Promise.all(batch.map(testProxy));savePool();
       if(gen!==S.gen)return;
       tested+=batch.length;
-      batch.forEach(function(p){if(p.ok){S.alive.push(p);log('✓ '+p.address+'  ['+p.src+']  '+p.latency+' ms'+(p.exitIp?'  '+exitTxt(p):''),'ok')}else log('✗ '+p.address+'  ['+p.src+']  '+(p.why||'dead'))});
-      S.alive.sort(function(a,b){return(a.latency||1e9)-(b.latency||1e9)});
-      if(S.alive.length&&!S.proxy){S.proxy=S.alive[0];S.busy=false;toast('Connected to '+name+' via '+S.proxy.host)}
-      if(S.proxy){S.proxy=S.alive[0];status('on',name,pxLabel(S.proxy)+(S.proxy.exitIp?' · '+exitTxt(S.proxy):''));
-        $('connBtn').disabled=false;$('connBtn').textContent='Disconnect';$('connBtn').className='conn-btn alt'}
-      else status('wait','Connecting to '+name+'…','Tested '+tested+' of '+list.length);
-      renderPlist();
-      if(S.alive.length>=8){log('Have 8 working proxies — stopped testing ('+tested+'/'+list.length+' checked)');break}
+      batch.forEach(function(p){if(p.ok){if(S.alive.indexOf(p)<0)S.alive.push(p);log('✓ '+p.address+(ccs.length>1?' ['+ccName(p.cc)+']':'')+'  '+p.latency+' ms (HTTPS ok)','ok')}});
+      var bad=batch.filter(function(p){return!p.ok}).length;if(bad)log('✗ '+bad+' of '+batch.length+' failed the HTTPS check');
+      S.alive.sort(function(a,b){return a.latency-b.latency});
+      if(S.alive.length){S.proxy=S.alive[0];S.busy=false;status('on',name,pxLabel(S.proxy));$('connBtn').textContent='Disconnect';$('connBtn').className='conn-btn alt';renderPlist()}
+      else status('wait','Connecting to '+name+'…','Checked '+tested+' of '+queue.length+' — real HTTPS test');
+      if(S.alive.length>=5)break;
     }
-    if(!S.proxy)throw new Error('None of '+list.length+' proxies in '+name+' answered');
-    S.busy=false;log('Ready. Active: '+S.proxy.address+' · spares: '+(S.alive.length-1),'step');
+    if(!S.proxy)throw new Error('None of '+tested+' proxies could load an HTTPS page via '+RNAME[S.rid]+'.'+(S.rid==='cf'?' Try the Render relay.':' Try another country or the other proxy type.'));
+    S.busy=false;toast('Connected to '+name);log('Ready. Active: '+S.proxy.address+' · spares: '+(S.alive.length-1)+' · saved for next time','step');
     renderHome();
   }catch(e){if(gen===S.gen){disconnect('Connection failed',e.message);toast(e.message,true)}}
 }
+// While connected and idle, quietly re-check the spares every 10 minutes so dead ones are dropped before you need them.
+setInterval(async function(){
+  if(!S.proxy||S.proxy.family||S.custom||S.busy||document.hidden)return;
+  var gen=S.gen,spares=S.alive.slice(0,5);await Promise.all(spares.map(testProxy));savePool();if(gen!==S.gen)return;
+  var before=S.alive.length;S.alive=S.alive.filter(function(p){return p.ok}).sort(function(a,b){return a.latency-b.latency});
+  if(S.alive.length!==before)log('Background check: dropped '+(before-S.alive.length)+' dead spare(s)','warn');
+  if(S.alive.indexOf(S.proxy)<0)S.proxy=S.alive[0]||null;
+  if(!S.proxy)status('','Proxies dropped','Tap Connect to find new ones');renderPlist();
+},600000);
 // Family PC: this device's own traffic leaves through the Tailscale exit node, so no relay or public proxy is used.
 async function whereAmI(){
   var apis=[['https://ipwho.is/',function(d){return{ip:d.ip,cc:d.country_code,country:d.country}}],

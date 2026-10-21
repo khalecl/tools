@@ -187,18 +187,23 @@ var SOURCES=[
   ['ProxyScrape',function(cc){return'https://cdn.jsdelivr.net/gh/proxyscrape/free-proxy-list@main/proxies/countries/'+cc.toLowerCase()+'/data.json'}]
 ];
 var RNAME={render:'Render',deno:'Deno',cf:'Cloudflare'};
-var PIN=[['RU','🇷🇺','Russia'],['EG','🇪🇬','Egypt']];
+var PIN=[['ANY','⚡','Fastest anywhere'],['RU','🇷🇺','Russia'],['EG','🇪🇬','Egypt'],['AE','🇦🇪','UAE'],['TR','🇹🇷','Turkey'],['DE','🇩🇪','Germany'],['NL','🇳🇱','Netherlands'],['GB','🇬🇧','UK'],['FR','🇫🇷','France'],['US','🇺🇸','USA'],['SG','🇸🇬','Singapore'],['IN','🇮🇳','India']];
+// Countries searched together for "Fastest anywhere" (big, well-connected proxy pools).
+var FASTEST=['DE','NL','FR','GB','US','SG','AE','TR','PL'];
+// Family PCs: Tailscale exit nodes set up with family-exit-node.bat. node = the NODENAME in that file.
+var FAM=[{id:'fam-eg',cc:'EG',flag:'🇪🇬',name:"Egypt · Dad's PC",node:'egypt-dad'},{id:'fam-ru',cc:'RU',flag:'🇷🇺',name:'Russia · Home PC',node:'russia-home'}];
+function famById(id){for(var i=0;i<FAM.length;i++)if(FAM[i].id===id)return FAM[i];return null}
 var CC=[['RU','Russia'],['EG','Egypt'],['SA','Saudi Arabia'],['AE','UAE'],['TR','Turkey'],['KZ','Kazakhstan'],['BY','Belarus'],['UA','Ukraine'],['IR','Iran'],['PK','Pakistan'],['IN','India'],['CN','China'],['US','USA'],['GB','UK'],['DE','Germany'],['FR','France'],['NL','Netherlands'],['IT','Italy'],['ES','Spain'],['PL','Poland'],['CA','Canada'],['BR','Brazil'],['JP','Japan'],['KR','S. Korea'],['SG','Singapore'],['HK','Hong Kong'],['ID','Indonesia'],['TH','Thailand'],['VN','Vietnam'],['MX','Mexico'],['ZA','South Africa'],['NG','Nigeria']];
 var SITES={
   RU:[['Gosuslugi','gosuslugi.ru'],['Tax service','nalog.gov.ru'],['Kremlin','kremlin.ru'],['Government','government.ru']],
   EG:[['Egypt portal','www.egypt.gov.eg'],['Cabinet','www.cabinet.gov.eg'],['Digital Egypt','digital.gov.eg'],['Tax authority','www.eta.gov.eg']]
 };
 
-var S={relay:DRELAY,rid:'render',rurl:{render:DRELAY,deno:'https://tunnelx.khalecl.deno.net',cf:'https://tunnelx-relay.khaled-mohamed-rady.workers.dev'},rkey:'',custom:false,cc:'RU',mode:'secure',proxy:null,alive:[],hist:[],pos:-1,cache:new Map(),gen:0};
-try{var sv=JSON.parse(localStorage.getItem('tx')||'{}');if(sv.cc)S.cc=sv.cc;if(sv.mode)S.mode=sv.mode;
+var S={relay:DRELAY,rid:'render',rurl:{render:DRELAY,deno:'https://tunnelx.khalecl.deno.net',cf:'https://tunnelx-relay.khaled-mohamed-rady.workers.dev'},rkey:'',custom:false,cc:'RU',mode:'secure',proxy:null,alive:[],hist:[],pos:-1,cache:new Map(),gen:0,fam:null};
+try{var sv=JSON.parse(localStorage.getItem('tx')||'{}');if(sv.cc)S.cc=sv.cc;if(sv.fam)S.fam=famById(sv.fam);if(sv.mode)S.mode=sv.mode;
   if(sv.rurl){S.rurl.deno=sv.rurl.deno||S.rurl.deno;S.rurl.cf=sv.rurl.cf||S.rurl.cf}if(sv.rkey)S.rkey=sv.rkey;if(sv.rid&&(sv.rid==='render'||sv.rurl&&sv.rurl[sv.rid]))S.rid=sv.rid}catch(e){}
 S.relay=S.rurl[S.rid];
-function save(){try{localStorage.setItem('tx',JSON.stringify({cc:S.cc,mode:S.mode,rid:S.rid,rurl:{deno:S.rurl.deno,cf:S.rurl.cf},rkey:S.rkey}))}catch(e){}}
+function save(){try{localStorage.setItem('tx',JSON.stringify({fam:S.fam?S.fam.id:null,cc:S.cc,mode:S.mode,rid:S.rid,rurl:{deno:S.rurl.deno,cf:S.rurl.cf},rkey:S.rkey}))}catch(e){}}
 function KQ(){return S.rkey?'&k='+encodeURIComponent(S.rkey):''}
 function useRelay(id){if(!S.rurl[id]){toast('Add the '+RNAME[id]+' address first',true);return false}
   S.rid=id;S.relay=S.rurl[id];save();renderRelay();log('Relay → '+RNAME[id]+' ('+S.relay+')','step');if(S.proxy)disconnect('Relay changed','Tap Connect');return true}
@@ -211,7 +216,7 @@ async function pingRelays(){if(pinging)return;pinging=true;try{
 }finally{pinging=false}}
 
 var $=function(i){return document.getElementById(i)};
-function ccName(c){var f=CC.find(function(x){return x[0]===c});return f?f[1]:c}
+function ccName(c){if(c==='ANY')return'Fastest anywhere';var f=CC.find(function(x){return x[0]===c});return f?f[1]:c}
 function status(state,title,sub){$('dot').className='dot '+state;$('stTitle').textContent=title;$('stSub').textContent=sub||''}
 function log(m,c){var l=$('log');if(!l)return;var d=document.createElement('div');if(c)d.className=c;
   var t=document.createElement('span');t.className='t';t.textContent=new Date().toTimeString().slice(0,8)+'  ';d.append(t,document.createTextNode(m));
@@ -219,15 +224,19 @@ function log(m,c){var l=$('log');if(!l)return;var d=document.createElement('div'
 function toast(m,err){log(m,err?'err':'');var e=document.createElement('div');e.className='toast'+(err?' err':'');e.textContent=m;$('toasts').appendChild(e);setTimeout(function(){e.remove()},3200)}
 function loading(on,m){$('loading').classList.toggle('show',on);if(m)$('loadMsg').textContent=m}
 function exitTxt(p){if(!p.exitIp)return'';var a=String(p.exitIp).split(/,\s*/);return a.length>1?'exit '+a[a.length-1]+' (transparent proxy: site also sees relay)':'exit '+a[0]}
-function pxLabel(p){return p.protocol.toUpperCase()+' '+p.host+':'+p.port+(p.latency?' · '+p.latency+' ms':'')}
+function pxLabel(p){return (S.cc==='ANY'&&p.cc?ccName(p.cc)+' · ':'')+p.protocol.toUpperCase()+' '+p.host+':'+p.port+(p.latency?' · '+p.latency+' ms':'')}
 
 /* ---------- home ---------- */
 function renderHome(){
   var g=$('countryGrid');g.innerHTML='';
-  var pins=PIN.slice();if(!PIN.some(function(p){return p[0]===S.cc}))pins.push([S.cc,'🌐',ccName(S.cc)]);
-  pins.forEach(function(p){var b=document.createElement('button');b.className='card'+(p[0]===S.cc?' sel':'');
+  var pins=PIN.slice();if(!PIN.some(function(p){return p[0]===S.cc}))pins.splice(1,0,[S.cc,'🌐',ccName(S.cc)]);
+  FAM.forEach(function(f){var b=document.createElement('button');var on=S.fam===f;b.className='card'+(on?' sel':'');
+    var t=document.createElement('b');t.textContent='🏠 '+f.flag+' '+f.name;var s=document.createElement('span');
+    s.textContent=on?(S.proxy?'Connected · private':'Selected'):'Family PC · private';b.append(t,s);
+    b.onclick=function(){selectFamily(f)};g.appendChild(b)});
+  pins.forEach(function(p){var b=document.createElement('button');b.className='card'+(!S.fam&&p[0]===S.cc?' sel':'');
     var t=document.createElement('b');t.textContent=p[1]+' '+p[2];var s=document.createElement('span');
-    s.textContent=p[0]===S.cc?(S.proxy?'Connected':'Selected'):'Tap to select';b.append(t,s);
+    s.textContent=!S.fam&&p[0]===S.cc?(S.proxy?'Connected':'Selected'):'Public proxy';b.append(t,s);
     b.onclick=function(){selectCountry(p[0])};g.appendChild(b)});
   var sg=$('siteGrid');sg.innerHTML='';
   (SITES[S.cc]||[]).forEach(function(s){var b=document.createElement('button');b.className='card';
@@ -237,7 +246,9 @@ function renderHome(){
   $('cSel').value=S.cc;
   [].forEach.call($('modeSeg').children,function(b){b.classList.toggle('on',b.dataset.m===S.mode)});
 }
-function selectCountry(c){if(c===S.cc&&S.proxy)return;S.cc=c;save();disconnect('Ready to connect',ccName(c));renderHome()}
+function selectFamily(f){if(S.fam===f&&S.proxy)return;S.fam=f;S.cc=f.cc;save();disconnect('Ready to connect',f.name);renderHome();
+  status('','Not connected',f.name+' · turn on exit node "'+f.node+'" in Tailscale, then tap Connect')}
+function selectCountry(c){if(!S.fam&&c===S.cc&&S.proxy)return;S.fam=null;S.cc=c;save();disconnect('Ready to connect',ccName(c));renderHome()}
 function disconnect(t,sub){S.gen++;S.busy=false;log('— '+(t||'Disconnected')+(sub?': '+sub:''),'warn');S.proxy=null;S.alive=[];S.cache.clear();status('',t||'Not connected',sub||'');$('connBtn').textContent='Connect';$('connBtn').className='conn-btn';renderPlist()}
 
 /* ---------- connect ---------- */
@@ -259,6 +270,7 @@ async function testProxy(p){
 async function connect(){
   if(S.busy){disconnect('Stopped by you',ccName(S.cc));renderHome();return}
   if(S.proxy){S.custom=false;disconnect('Disconnected',ccName(S.cc));renderHome();return}
+  if(S.fam)return connectFamily();
   var gen=++S.gen,name=ccName(S.cc);S.busy=true;
   log('▶ Connect to '+name+' — type '+(S.mode==='secure'?'Tunnel (SOCKS)':'Web (HTTP)'),'step');
   $('connBtn').textContent='Stop';$('connBtn').className='conn-btn alt';status('wait','Connecting to '+name+'…','Checking relay');
@@ -266,10 +278,14 @@ async function connect(){
     if(!await wakeRelay(gen))throw new Error('Relay not responding — try again shortly');
     status('wait','Connecting to '+name+'…','Downloading proxy list');
     var seen={},all=[];
-    var lists=await Promise.all(SOURCES.map(function(src){return fetch(src[1](S.cc),{cache:'no-store'}).then(function(r){return r.ok?r.json():[]}).catch(function(){return[]})}));
-    lists.forEach(function(arr,i){var added=0;(Array.isArray(arr)?arr:[]).forEach(function(e){var pr=(e.protocol||'http').toLowerCase();if(!e.ip||!e.port)return;
-      var a=pr+'://'+e.ip+':'+e.port;if(seen[a])return;seen[a]=1;added++;all.push({protocol:pr,host:e.ip,port:+e.port,address:a,src:SOURCES[i][0]})});
-      log(SOURCES[i][0]+': '+added+' new proxies')});
+    var ccs=S.cc==='ANY'?FASTEST:[S.cc],jobs=[];
+    ccs.forEach(function(cc){SOURCES.forEach(function(src){jobs.push(fetch(src[1](cc),{cache:'no-store'}).then(function(r){return r.ok?r.json():[]}).catch(function(){return[]}).then(function(arr){return{arr:arr,src:src[0],cc:cc}}))})});
+    (await Promise.all(jobs)).forEach(function(j){var added=0;(Array.isArray(j.arr)?j.arr:[]).forEach(function(e){var pr=(e.protocol||'http').toLowerCase();if(!e.ip||!e.port)return;
+      var a=pr+'://'+e.ip+':'+e.port;if(seen[a])return;seen[a]=1;added++;all.push({protocol:pr,host:e.ip,port:+e.port,address:a,src:j.src+(ccs.length>1?' '+j.cc:''),cc:j.cc})});
+      if(added)log(j.src+(ccs.length>1?' ['+ccName(j.cc)+']':'')+': '+added+' new proxies')});
+    // Fastest first: interleave countries so early batches sample everywhere
+    if(ccs.length>1){var by={};all.forEach(function(p){(by[p.cc]=by[p.cc]||[]).push(p)});all=[];
+      for(var k=0;Object.keys(by).some(function(c){return by[c].length});k++)Object.keys(by).forEach(function(c){if(by[c].length)all.push(by[c].shift())})}
     if(!all.length)throw new Error('No public proxies listed for '+name+' right now');
     var socks=S.mode==='secure';
     var list=all.filter(function(p){return socks?/^socks/.test(p.protocol):/^https?$/.test(p.protocol)});
@@ -278,9 +294,9 @@ async function connect(){
       if(other.length){log('Only '+list.length+' of the chosen type — also trying '+other.length+' of the other type','warn');list=list.concat(other)}}
     if(!list.length)throw new Error('No public proxies for '+name+' right now');
     var tested=0;
-    for(var i=0;i<list.length;i+=6){
+    for(var i=0;i<list.length;i+=12){
       if(gen!==S.gen)return;
-      var batch=list.slice(i,i+6);
+      var batch=list.slice(i,i+12);
       await Promise.all(batch.map(testProxy));
       tested+=batch.length;
       batch.forEach(function(p){if(p.ok){S.alive.push(p);log('✓ '+p.address+'  ['+p.src+']  '+p.latency+' ms'+(p.exitIp?'  '+exitTxt(p):''),'ok')}else log('✗ '+p.address+'  ['+p.src+']  '+(p.why||'dead'))});
@@ -290,12 +306,34 @@ async function connect(){
         $('connBtn').disabled=false;$('connBtn').textContent='Disconnect';$('connBtn').className='conn-btn alt'}
       else status('wait','Connecting to '+name+'…','Tested '+tested+' of '+list.length);
       renderPlist();
-      if(S.alive.length>=5){log('Have 5 working proxies — stopped testing ('+tested+'/'+list.length+' checked)');break}
+      if(S.alive.length>=8){log('Have 8 working proxies — stopped testing ('+tested+'/'+list.length+' checked)');break}
     }
     if(!S.proxy)throw new Error('None of '+list.length+' proxies in '+name+' answered');
     S.busy=false;log('Ready. Active: '+S.proxy.address+' · spares: '+(S.alive.length-1),'step');
     renderHome();
   }catch(e){if(gen===S.gen){disconnect('Connection failed',e.message);toast(e.message,true)}}
+}
+// Family PC: this device's own traffic leaves through the Tailscale exit node, so no relay or public proxy is used.
+async function whereAmI(){
+  var apis=[['https://ipwho.is/',function(d){return{ip:d.ip,cc:d.country_code,country:d.country}}],
+            ['https://api.country.is/',function(d){return{ip:d.ip,cc:d.country,country:d.country}}]];
+  for(var i=0;i<apis.length;i++){try{var r=await fetch(apis[i][0],{cache:'no-store'});if(r.ok){var x=apis[i][1](await r.json());if(x.cc)return x}}catch(e){}}
+  return null;
+}
+async function connectFamily(){
+  var f=S.fam,gen=++S.gen;S.busy=true;
+  log('▶ Connect to '+f.name+' (Tailscale exit node "'+f.node+'")','step');
+  $('connBtn').textContent='Stop';$('connBtn').className='conn-btn alt';status('wait','Checking '+f.name+'…','Looking up where this device appears');
+  try{
+    var w=await whereAmI();if(gen!==S.gen)return;
+    if(!w)throw new Error('Could not check your location. Is the internet on?');
+    log('This device appears as '+w.ip+' ('+w.country+')');
+    if(String(w.cc).toUpperCase()!==f.cc)throw new Error('You appear in '+w.country+', not '+ccName(f.cc)+'. In the Tailscale app choose Exit node → '+f.node+', then tap Connect.');
+    S.proxy={family:true,protocol:'tailscale',host:f.node,port:0,address:'tailscale://'+f.node,exitIp:w.ip};S.alive=[S.proxy];S.busy=false;
+    status('on',f.name,'Private · exit '+w.ip+' · pages open in a new tab');
+    $('connBtn').textContent='Disconnect';$('connBtn').className='conn-btn alt';
+    toast('Connected through '+f.name);log('Ready. Pages open directly in a new tab (all traffic goes via '+f.node+').','ok');renderPlist();renderHome();
+  }catch(e){if(gen===S.gen){disconnect('Not connected',e.message);toast(e.message,true)}}
 }
 function renderPlist(){var l=$('plist');l.innerHTML='';
   if(!S.alive.length){var d=document.createElement('div');d.textContent='None yet';l.appendChild(d);return}
@@ -326,6 +364,7 @@ async function open(raw,push){
   var url=norm(raw);if(!url){toast('Enter a valid address',true);return}
   if(!S.proxy){toast('Connect first',true);return}
   $('urlIn').value=url;
+  if(S.proxy.family){log('Open '+url+' directly (via '+S.proxy.host+')');var w=window.open(url,'_blank','noopener');if(!w)location.href=url;return}
   var key=url+'|'+S.proxy.address;
   try{
     var html;
@@ -381,7 +420,7 @@ window.addEventListener('message',function(e){
 function sheet(on){$('sheet').classList.toggle('open',on);$('scrim').classList.toggle('open',on)}
 
 /* ---------- wire ---------- */
-var sel=$('cSel');CC.forEach(function(c){var o=document.createElement('option');o.value=c[0];o.textContent=c[1];sel.appendChild(o)});
+var sel=$('cSel');(function(){var o=document.createElement('option');o.value='ANY';o.textContent='⚡ Fastest anywhere';sel.appendChild(o)})();CC.forEach(function(c){var o=document.createElement('option');o.value=c[0];o.textContent=c[1];sel.appendChild(o)});
 sel.onchange=function(){selectCountry(sel.value);sheet(false)};
 $('modeSeg').onclick=function(e){var m=e.target.dataset&&e.target.dataset.m;if(!m||m===S.mode)return;S.mode=m;save();renderHome();log('Proxy type → '+(m==='secure'?'Tunnel (SOCKS)':'Web (HTTP)'));if(S.proxy){disconnect('Proxy type changed','Tap Connect')}};
 $('connBtn').onclick=connect;
@@ -398,7 +437,7 @@ $('applyAdv').onclick=function(){
   var cp=$('cProxy').value.trim();
   if(cp){var m=cp.match(/^(socks[45]?|https?):\/\/([^:\/]+):(\d+)$/i);
     if(!m){toast('Use protocol://host:port',true);return}
-    S.gen++;S.cache.clear();S.custom=true;S.proxy={protocol:m[1].toLowerCase(),host:m[2],port:+m[3],address:cp};S.alive=[S.proxy];
+    S.gen++;S.cache.clear();S.custom=true;S.fam=null;S.proxy={protocol:m[1].toLowerCase(),host:m[2],port:+m[3],address:cp};S.alive=[S.proxy];
     status('on','Custom proxy',pxLabel(S.proxy));$('connBtn').textContent='Disconnect';$('connBtn').className='conn-btn alt';renderPlist()}
   sheet(false);
 };
@@ -414,7 +453,7 @@ $('relSave').onclick=function(){
 log('TunnelX ready. Relay: '+RNAME[S.rid]+' ('+S.relay+')');
 pingRelays();
 renderHome();
-status('','Not connected',ccName(S.cc)+' selected · tap Connect');
+status('','Not connected',(S.fam?S.fam.name:ccName(S.cc))+' selected · tap Connect');
 })();
 </script>
 </body>
